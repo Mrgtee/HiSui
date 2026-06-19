@@ -29,7 +29,7 @@ const TESTNET_POOL_ADDRESS = '0x67f43a36dfef87e91586bc77ec9947fb0da127e867f64778
 const MIN_SQRT_PRICE = '4295048016';
 const MAX_SQRT_PRICE = '79226673515401279992447579055'; 
 
-export const buildPTB = async (actions: Action[], senderAddress: string): Promise<Transaction> => {
+export const buildPTB = async (actions: Action[], senderAddress: string, network: 'mainnet' | 'testnet' = 'mainnet'): Promise<Transaction> => {
   const tx = new Transaction();
   tx.setSender(senderAddress);
 

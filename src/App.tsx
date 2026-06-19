@@ -22,7 +22,7 @@ import {
   getZkProof,
 } from './services/zkLogin';
 import type { ZkLoginSession } from './services/zkLogin';
-import { getCurrentEpoch, suiClient } from './services/suiClient';
+import { getCurrentEpoch, getSuiClient } from './services/suiClient';
 import { parseUserIntent } from './services/intentParser';
 import type { ParsedIntent } from './services/intentParser';
 import { buildPTB } from './services/ptbBuilder';
@@ -43,6 +43,9 @@ interface ChatMessage {
 function App() {
   const currentAccount = useCurrentAccount();
   const { mutateAsync: signAndExecuteTxb } = useSignAndExecuteTransaction();
+
+  // Network Switcher State
+  const [network, setNetwork] = useState<'mainnet' | 'testnet'>('mainnet');
 
   // zkLogin States
   const [jwt, setJwt] = useState<string | null>(null);
@@ -129,15 +132,20 @@ function App() {
   const fetchBalances = useCallback(async () => {
     if (!activeWalletAddress) return;
     try {
+      const client = getSuiClient(network);
       // Fetch SUI
-      const suiBal = await suiClient.getBalance({
+      const suiBal = await client.getBalance({
         owner: activeWalletAddress,
         coinType: '0x2::sui::SUI',
       });
-      // Fetch USDC
-      const usdcBal = await suiClient.getBalance({
+      // Fetch USDC based on active network config
+      const usdcTokenAddress = network === 'mainnet'
+        ? '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC'
+        : '0x0eedc3857f39f5e44b5786ebcd790317902ffca9960f44fcea5b7589cfc7a784::usdc::USDC';
+
+      const usdcBal = await client.getBalance({
         owner: activeWalletAddress,
-        coinType: '0x26b3bc67befc214058ca78ea9a2690298d731a2d4309485ec3d40198063c4abc::usdc::USDC',
+        coinType: usdcTokenAddress,
       });
 
       setBalance({
@@ -147,7 +155,7 @@ function App() {
     } catch (err) {
       console.warn('Failed to fetch wallet balance:', err);
     }
-  }, [activeWalletAddress]);
+  }, [activeWalletAddress, network]);
 
   useEffect(() => {
     fetchBalances();
@@ -165,7 +173,7 @@ function App() {
         setIsZkLoading(false);
         return;
       }
-      const epoch = await getCurrentEpoch();
+      const epoch = await getCurrentEpoch(network);
       const redirectUri = window.location.origin;
       
       const { nonce } = setupZkLoginSession(epoch);
@@ -228,10 +236,10 @@ function App() {
       
       // 2. Build PTB and Run Guardian Simulation
       setIsSimulating(true);
-      const tx = await buildPTB(parsedIntent.actions, activeWalletAddress);
+      const tx = await buildPTB(parsedIntent.actions, activeWalletAddress, network);
       setExecutionTx(tx);
       
-      const report = await runGuardianChecks(tx);
+      const report = await runGuardianChecks(tx, network);
       setActiveReport(report);
 
       if (!report.success) {
@@ -272,13 +280,14 @@ function App() {
       if (zkAddress && zkProof && zkSession && jwt) {
         // Execute using zkLogin Session Key
         const keypair = Ed25519Keypair.fromSecretKey(zkSession.ephemeralPrivateKey);
+        const client = getSuiClient(network);
         
         // Build transaction bytes
-        const txBytes = await executionTx.build({ client: suiClient });
+        const txBytes = await executionTx.build({ client });
         
         // Sign transaction with ephemeral keypair
         const { signature: userSignature } = await executionTx.sign({
-          client: suiClient,
+          client,
           signer: keypair,
         });
 
@@ -293,7 +302,7 @@ function App() {
         });
 
         // Submit the transaction
-        const response = await suiClient.executeTransactionBlock({
+        const response = await client.executeTransactionBlock({
           transactionBlock: txBytes,
           signature: zkSignature,
         });
@@ -346,11 +355,16 @@ function App() {
             <Sparkles className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-1">
+            <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
               HiSui
-              <span className="text-[10px] bg-purple-600/20 text-purple-400 border border-purple-600/30 px-2 py-0.5 rounded-full font-normal">
-                Testnet
-              </span>
+              <select
+                value={network}
+                onChange={(e) => setNetwork(e.target.value as 'mainnet' | 'testnet')}
+                className="bg-purple-600/20 text-purple-400 border border-purple-600/30 text-[10px] font-semibold px-2 py-0.5 rounded-full focus:outline-none cursor-pointer hover:bg-purple-600/30 transition-colors"
+              >
+                <option value="mainnet" className="bg-zinc-950 text-zinc-100">Mainnet</option>
+                <option value="testnet" className="bg-zinc-950 text-zinc-100">Testnet</option>
+              </select>
             </h1>
             <p className="text-xs text-zinc-500">AI Web3 Intent Engine & Guardian</p>
           </div>
@@ -485,7 +499,7 @@ function App() {
                     <div className="mt-3 bg-emerald-500/5 border border-emerald-500/20 p-3 rounded-xl flex flex-col gap-1.5">
                       <span className="text-xs font-semibold text-emerald-400">Transaction Confirmed:</span>
                       <a
-                        href={`https://suiscan.xyz/testnet/tx/${msg.txDigest}`}
+                        href={`https://suiscan.xyz/${network}/tx/${msg.txDigest}`}
                         target="_blank"
                         rel="noreferrer"
                         className="text-xs text-purple-400 underline break-all font-mono"

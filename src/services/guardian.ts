@@ -1,5 +1,5 @@
 import { Transaction } from '@mysten/sui/transactions';
-import { suiClient } from './suiClient';
+import { getSuiClient } from './suiClient';
 
 export interface GuardianReport {
   success: boolean;
@@ -23,6 +23,7 @@ const PYTH_SUI_FEED_ID = 'e62dd6b59b08bc1680e57c33b4d96a01f64859a0fcf67f0f09b521
 
 export const runGuardianChecks = async (
   tx: Transaction,
+  network: 'mainnet' | 'testnet' = 'mainnet',
   slippageTolerancePercent = 2.0
 ): Promise<GuardianReport> => {
   const warnings: GuardianReport['warnings'] = [];
@@ -33,14 +34,17 @@ export const runGuardianChecks = async (
   let oraclePrice: number | undefined;
   let oracleAge: number | undefined;
 
+  const client = getSuiClient(network);
+
   try {
     // 1. Build the transaction to fetch bytes for dry-run
-    const txBytes = await tx.build({ client: suiClient });
+    const txBytes = await tx.build({ client });
 
     // 2. Perform on-chain dry-run via Sui RPC
-    const dryRunResult = await suiClient.dryRunTransactionBlock({
+    const dryRunResult = await client.dryRunTransactionBlock({
       transactionBlock: txBytes,
     });
+
 
     if (dryRunResult.effects.status.status === 'failure') {
       errorMsg = dryRunResult.effects.status.error || 'Transaction simulation failed';
