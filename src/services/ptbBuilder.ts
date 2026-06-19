@@ -96,9 +96,9 @@ export const buildPTB = async (
       const decimalsA = poolAny.coinTypeA === config.TOKENS.SUI ? 9 : 6;
       const decimalsB = poolAny.coinTypeB === config.TOKENS.SUI ? 9 : 6;
 
-      // 2. Perform preswap quote
+      // 2. Perform preswap quote to validate liquidity and pool state
       const amountIn = new BN(amountVal);
-      const preswapResult = await sdk.Swap.preswap({
+      await sdk.Swap.preswap({
         pool: poolAny,
         currentSqrtPrice: poolAny.current_sqrt_price,
         coinTypeA: poolAny.coinTypeA,
@@ -109,12 +109,6 @@ export const buildPTB = async (
         byAmountIn: true,
         amount: amountIn.toString(),
       });
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const preswapResultAny = preswapResult as any;
-
-      // 3. Adjust for slippage (1% default) manually
-      const amountLimit = Math.floor(parseInt(preswapResultAny.amountOut || '0', 10) * 0.99);
 
       // Split the input coin from gas if swapping SUI
       let inputCoinObj;
