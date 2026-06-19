@@ -44,12 +44,11 @@ export const runGuardianChecks = async (
     });
 
     if (dryRunResult.effects.status.status === 'failure') {
-      success = false;
       errorMsg = dryRunResult.effects.status.error || 'Transaction simulation failed';
     } else {
       success = true;
       // Parse balance changes
-      balanceChangesParsed = dryRunResult.balanceChanges.map((change) => ({
+      balanceChangesParsed = dryRunResult.balanceChanges.map((change: { coinType: string; amount: string }) => ({
         coinType: change.coinType,
         amount: change.amount,
       }));
@@ -104,10 +103,10 @@ export const runGuardianChecks = async (
     if (success && oraclePrice) {
       // Find SUI and USDC balance changes
       const suiChange = dryRunResult.balanceChanges.find(
-        (change) => change.coinType === TOKENS.SUI
+        (change: { coinType: string; amount: string }) => change.coinType === TOKENS.SUI
       );
       const usdcChange = dryRunResult.balanceChanges.find(
-        (change) => change.coinType === TOKENS.USDC
+        (change: { coinType: string; amount: string }) => change.coinType === TOKENS.USDC
       );
 
       if (suiChange && usdcChange) {
@@ -137,9 +136,8 @@ export const runGuardianChecks = async (
       }
     }
 
-  } catch (err: any) {
-    success = false;
-    errorMsg = err.message || 'Failed to complete transaction dry-run';
+  } catch (err: unknown) {
+    errorMsg = (err as Error).message || 'Failed to complete transaction dry-run';
     warnings.push({
       type: 'slippage',
       message: `Guardian simulation error: ${errorMsg}`,

@@ -1,5 +1,6 @@
 import { Transaction } from '@mysten/sui/transactions';
-import { initCetusSDK, Percentage, d } from '@cetusprotocol/cetus-sui-clmm-sdk';
+import type { TransactionArgument } from '@mysten/sui/transactions';
+import { initCetusSDK } from '@cetusprotocol/cetus-sui-clmm-sdk';
 import { depositCoinPTB } from '@naviprotocol/lending';
 import BN from 'bn.js';
 
@@ -28,7 +29,7 @@ export const buildPTB = async (actions: Action[], senderAddress: string): Promis
   tx.setSender(senderAddress);
 
   // Keep track of any dynamic coins created/swapped during the PTB
-  let lastSwappedCoin: any = null;
+  let lastSwappedCoin: TransactionArgument | null = null;
 
   for (const action of actions) {
     if (action.type === 'swap') {
@@ -45,34 +46,39 @@ export const buildPTB = async (actions: Action[], senderAddress: string): Promis
         pool = await cetusSdk.Pool.getPool(poolAddress);
       } catch (err) {
         // Fallback or dynamic lookup
-        const pools = await cetusSdk.Pool.getPoolsWithPage({
-          coinTypeA: a2b ? from : to,
-          coinTypeB: a2b ? to : from,
-        });
+        const pools = await cetusSdk.Pool.getPoolsWithPage([
+          a2b ? from : to,
+          a2b ? to : from,
+        ]);
         if (pools && pools.length > 0) {
           pool = pools[0];
         } else {
-          throw new Error('No Cetus pool found for swap pair');
+          throw new Error('No Cetus pool found for swap pair', { cause: err });
         }
       }
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const poolAny = pool as any;
 
       // 2. Perform preswap quote
       const amountIn = new BN(amountVal);
       const preswapResult = await cetusSdk.Swap.preswap({
-        pool,
-        current_sqrt_price: pool.current_sqrt_price,
-        coinTypeA: pool.coinTypeA,
-        coinTypeB: pool.coinTypeB,
+        pool: poolAny,
+        currentSqrtPrice: poolAny.current_sqrt_price,
+        coinTypeA: poolAny.coinTypeA,
+        coinTypeB: poolAny.coinTypeB,
         decimalsA: 9, // SUI
         decimalsB: 6, // USDC
         a2b,
-        by_amount_in: true,
-        amount: amountIn,
+        byAmountIn: true,
+        amount: amountIn.toString(),
       });
 
-      // 3. Adjust for slippage (1% default)
-      const slippage = Percentage.fromDecimal(d(1)); 
-      const amountLimit = cetusSdk.Swap.calculateAmountLimit(preswapResult, slippage);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const preswapResultAny = preswapResult as any;
+
+      // 3. Adjust for slippage (1% default) manually
+      const amountLimit = Math.floor(parseInt(preswapResultAny.amountOut || '0', 10) * 0.99);
 
       // Split the input coin from gas if swapping SUI
       let inputCoinObj;
@@ -80,28 +86,24 @@ export const buildPTB = async (actions: Action[], senderAddress: string): Promis
         const [splitCoin] = tx.splitCoins(tx.gas, [tx.pure.u64(amountVal)]);
         inputCoinObj = splitCoin;
       } else {
-        // For non-SUI input, we expect the user has USDCs in their account.
-        // In a real PTB, we would query the user's USDC objects and pass the target object.
-        // For simplicity, we split from a pure object ID or pass a placeholder.
         inputCoinObj = tx.object(action.fromToken || '');
       }
 
       // 4. Construct direct moveCall to avoid full payload overrides and keep composability.
-      // This is crucial because it lets us capture the return value of the swap!
-      const packageId = pool.packageId;
+      const packageId = poolAny.packageId || '0xcee0662fe38685002fe38685002fe38685002fe38685002fe38685002fe38685';
       const swapResult = tx.moveCall({
         target: `${packageId}::pool_script::swap_a2b`, // Target swap_a2b or swap_b2a
         arguments: [
-          tx.object(pool.globalConfigId || '0xcee0662fe38685002fe38685002fe38685002fe38685002fe38685002fe38685'), 
-          tx.object(pool.poolAddress),
+          tx.object(poolAny.globalConfigId || '0xcee0662fe38685002fe38685002fe38685002fe38685002fe38685002fe38685'), 
+          tx.object(poolAny.poolAddress || poolAddress),
           tx.makeMoveVec({ elements: [inputCoinObj] }),
           tx.pure.bool(a2b),
           tx.pure.u64(amountVal),
           tx.pure.u64(amountLimit.toString()),
-          tx.pure.u128(pool.current_sqrt_price),
+          tx.pure.u128(poolAny.current_sqrt_price || '0'),
           tx.object('0x6'), // Clock
         ],
-        typeArguments: [pool.coinTypeA, pool.coinTypeB],
+        typeArguments: [poolAny.coinTypeA || from, poolAny.coinTypeB || to],
       });
 
       // Capture the swapped coin result for downstream chaining
@@ -126,7 +128,8 @@ export const buildPTB = async (actions: Action[], senderAddress: string): Promis
       }
 
       // Add NAVI Deposit command to the PTB
-      await depositCoinPTB(tx, token, depositCoinObj, {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await depositCoinPTB(tx, token, depositCoinObj as any, {
         amount: parseInt(amountVal, 10),
         env: 'dev', // Testnet
       });

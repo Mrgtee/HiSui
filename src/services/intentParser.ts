@@ -72,6 +72,6 @@ export const parseUserIntent = async (query: string): Promise<ParsedIntent> => {
     return JSON.parse(responseText) as ParsedIntent;
   } catch (err) {
     console.error('Failed to parse Gemini response:', responseText, err);
-    throw new Error('AI returned an invalid JSON response structure. Please try again.');
+    throw new Error('AI returned an invalid JSON response structure. Please try again.', { cause: err });
   }
 };

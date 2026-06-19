@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ConnectButton, useCurrentAccount, useSignAndExecuteTransaction } from '@mysten/dapp-kit';
 import { 
   Bot, 
@@ -9,7 +9,6 @@ import {
   AlertTriangle, 
   Loader2, 
   LogOut, 
-  RefreshCw, 
   ArrowRight,
   TrendingUp,
   Coins
@@ -21,14 +20,17 @@ import {
   getStoredSession, 
   deriveZkAddress, 
   getZkProof,
-  ZkLoginSession 
 } from './services/zkLogin';
+import type { ZkLoginSession } from './services/zkLogin';
 import { getCurrentEpoch, suiClient } from './services/suiClient';
-import { parseUserIntent, ParsedIntent } from './services/intentParser';
+import { parseUserIntent } from './services/intentParser';
+import type { ParsedIntent } from './services/intentParser';
 import { buildPTB } from './services/ptbBuilder';
-import { runGuardianChecks, GuardianReport } from './services/guardian';
+import { runGuardianChecks } from './services/guardian';
+import type { GuardianReport } from './services/guardian';
 import { getZkLoginSignature } from '@mysten/sui/zklogin';
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
+import { Transaction } from '@mysten/sui/transactions';
 
 interface ChatMessage {
   sender: 'user' | 'bot';
@@ -45,6 +47,7 @@ function App() {
   // zkLogin States
   const [jwt, setJwt] = useState<string | null>(null);
   const [zkAddress, setZkAddress] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [zkProof, setZkProof] = useState<any | null>(null);
   const [zkSession, setZkSession] = useState<ZkLoginSession | null>(null);
   const [isZkLoading, setIsZkLoading] = useState(false);
@@ -62,7 +65,7 @@ function App() {
   const [activeIntent, setActiveIntent] = useState<ParsedIntent | null>(null);
   const [activeReport, setActiveReport] = useState<GuardianReport | null>(null);
   const [isSimulating, setIsSimulating] = useState(false);
-  const [executionTx, setExecutionTx] = useState<any>(null);
+  const [executionTx, setExecutionTx] = useState<Transaction | null>(null);
   const [isExecuting, setIsExecuting] = useState(false);
 
   const activeWalletAddress = currentAccount?.address || zkAddress;
@@ -123,7 +126,7 @@ function App() {
   }, []);
 
   // Fetch balances
-  const fetchBalances = async () => {
+  const fetchBalances = useCallback(async () => {
     if (!activeWalletAddress) return;
     try {
       // Fetch SUI
@@ -144,13 +147,13 @@ function App() {
     } catch (err) {
       console.warn('Failed to fetch wallet balance:', err);
     }
-  };
+  }, [activeWalletAddress]);
 
   useEffect(() => {
     fetchBalances();
     const interval = setInterval(fetchBalances, 10000);
     return () => clearInterval(interval);
-  }, [activeWalletAddress]);
+  }, [fetchBalances]);
 
   // Google Sign-In Trigger
   const handleGoogleLogin = async () => {
@@ -163,7 +166,6 @@ function App() {
         return;
       }
       const epoch = await getCurrentEpoch();
-      const salt = getOrGenerateSalt();
       const redirectUri = window.location.origin;
       
       const { nonce } = setupZkLoginSession(epoch);
@@ -243,13 +245,13 @@ function App() {
         ]);
       }
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setMessages((prev) => [
         ...prev,
         {
           sender: 'bot',
-          text: `Failed to compile intent: ${err.message || 'Unknown error'}`,
+          text: `Failed to compile intent: ${(err as Error).message || 'Unknown error'}`,
           error: true,
         },
       ]);
@@ -320,13 +322,13 @@ function App() {
       setExecutionTx(null);
       fetchBalances();
 
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
       setMessages((prev) => [
         ...prev,
         {
           sender: 'bot',
-          text: `Execution failed: ${err.message || 'User rejected or network error'}`,
+          text: `Execution failed: ${(err as Error).message || 'User rejected or network error'}`,
           error: true,
         },
       ]);

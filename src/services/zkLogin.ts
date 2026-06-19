@@ -59,25 +59,28 @@ export const getStoredSession = (): ZkLoginSession | null => {
   };
 };
 
-export const decodeJwt = (jwt: string): any => {
+export const decodeJwt = (jwt: string): { iss: string; sub: string; aud: string | string[]; [key: string]: unknown } => {
   const parts = jwt.split('.');
   if (parts.length !== 3) {
     throw new Error('Invalid JWT format');
   }
   const payloadJson = atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'));
-  return JSON.parse(payloadJson);
+  return JSON.parse(payloadJson) as { iss: string; sub: string; aud: string | string[]; [key: string]: unknown };
 };
 
 export const deriveZkAddress = (jwt: string, userSalt: string): string => {
   const decoded = decodeJwt(jwt);
   const iss = decoded.iss;
   const sub = decoded.sub;
+  const aud = Array.isArray(decoded.aud) ? decoded.aud[0] : decoded.aud;
   
   return computeZkLoginAddress({
     claimName: 'sub',
     claimValue: sub,
     userSalt: BigInt(userSalt).toString(),
     iss,
+    aud,
+    legacyAddress: false,
   });
 };
 
@@ -85,7 +88,7 @@ export const getZkProof = async (
   jwt: string,
   session: ZkLoginSession,
   userSalt: string
-): Promise<any> => {
+): Promise<unknown> => {
   const keypair = Ed25519Keypair.fromSecretKey(session.ephemeralPrivateKey);
   const extendedEphemeralPublicKey = getExtendedEphemeralPublicKey(keypair.getPublicKey());
   
