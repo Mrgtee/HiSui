@@ -1,6 +1,5 @@
 import { Transaction } from '@mysten/sui/transactions';
 import { suiClient } from './suiClient';
-import { TOKENS } from './ptbBuilder';
 
 export interface GuardianReport {
   success: boolean;
@@ -101,12 +100,12 @@ export const runGuardianChecks = async (
 
     // 4. Calculate actual execution slippage (Risk Class 2)
     if (success && oraclePrice) {
-      // Find SUI and USDC balance changes
+      // Find SUI and USDC balance changes (using resilient endsWith and includes match)
       const suiChange = dryRunResult.balanceChanges.find(
-        (change: { coinType: string; amount: string }) => change.coinType === TOKENS.SUI
+        (change: { coinType: string; amount: string }) => change.coinType.endsWith('::sui::SUI')
       );
       const usdcChange = dryRunResult.balanceChanges.find(
-        (change: { coinType: string; amount: string }) => change.coinType === TOKENS.USDC
+        (change: { coinType: string; amount: string }) => change.coinType.toLowerCase().includes('usdc')
       );
 
       if (suiChange && usdcChange) {
