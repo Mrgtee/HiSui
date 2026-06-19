@@ -18,11 +18,11 @@ export interface Action {
 // SUI and USDC token types on Testnet
 export const TOKENS = {
   SUI: '0x2::sui::SUI',
-  USDC: '0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC',
+  USDC: '0x26b3bc67befc214058ca78ea9a2690298d731a2d4309485ec3d40198063c4abc::usdc::USDC',
 };
 
 // Cetus SUI/USDC Testnet Pool Address (v4 CLMM Pool)
-const TESTNET_POOL_ADDRESS = '0xcf39cbb87a6d8d9753df1821037bd7117e2906494428cf252621037bd7117e29'; 
+const TESTNET_POOL_ADDRESS = '0xa9cbcfadcbc4fc235c3a6019100b9344cb35f5f91560f191c545ba2407d27622'; 
 
 export const buildPTB = async (actions: Action[], senderAddress: string): Promise<Transaction> => {
   const tx = new Transaction();

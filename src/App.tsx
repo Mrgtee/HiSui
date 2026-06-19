@@ -137,7 +137,7 @@ function App() {
       // Fetch USDC
       const usdcBal = await suiClient.getBalance({
         owner: activeWalletAddress,
-        coinType: '0xa1ec7fc00a6f40db9693ad1415d0c193ad3906494428cf252621037bd7117e29::usdc::USDC',
+        coinType: '0x26b3bc67befc214058ca78ea9a2690298d731a2d4309485ec3d40198063c4abc::usdc::USDC',
       });
 
       setBalance({
