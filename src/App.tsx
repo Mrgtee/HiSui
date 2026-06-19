@@ -159,7 +159,7 @@ function App() {
   const handleGoogleLogin = async () => {
     setIsZkLoading(true);
     try {
-      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+      const clientId = (typeof import.meta.env !== 'undefined' ? import.meta.env.VITE_GOOGLE_CLIENT_ID : undefined) || process.env.VITE_GOOGLE_CLIENT_ID || '';
       if (!clientId) {
         alert('Google OAuth Client ID is missing. Add it to VITE_GOOGLE_CLIENT_ID in your .env file.');
         setIsZkLoading(false);
