@@ -51,6 +51,51 @@ const getTokenDecimals = (symbol: string): number => {
   return 6; // USDC, USDT, DEEP
 };
 
+const TokenLogo = ({ symbol, className = "h-5 w-5" }: { symbol: string; className?: string }) => {
+  const [srcError, setSrcError] = useState(false);
+  const clean = symbol?.toUpperCase();
+
+  const logos: Record<string, string> = {
+    SUI: 'https://coin-images.coingecko.com/coins/images/26375/large/sui-ocean-square.png',
+    USDC: 'https://coin-images.coingecko.com/coins/images/6319/large/USD_Coin_icon.png',
+    USDT: 'https://coin-images.coingecko.com/coins/images/325/large/Tether.png',
+    DEEP: 'https://coin-images.coingecko.com/coins/images/68257/large/deepbook_LOGO_200x200.jpg',
+    CETUS: 'https://coin-images.coingecko.com/coins/images/30256/large/cetus.png',
+  };
+
+  const colors: Record<string, string> = {
+    SUI: 'bg-sui-blue/20 text-sui-blue border-sui-blue/30',
+    USDC: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+    USDT: 'bg-teal-500/20 text-teal-400 border-teal-500/30',
+    DEEP: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+    CETUS: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+  };
+
+  const fallbackColor = colors[clean] || 'bg-zinc-800 text-zinc-400 border-zinc-700';
+  const logoUrl = logos[clean];
+
+  useEffect(() => {
+    setSrcError(false);
+  }, [symbol]);
+
+  if (logoUrl && !srcError) {
+    return (
+      <img
+        src={logoUrl}
+        alt={symbol}
+        onError={() => setSrcError(true)}
+        className={`${className} rounded-full object-cover border border-border-dark bg-sui-dark/40`}
+      />
+    );
+  }
+
+  return (
+    <div className={`${className} rounded-full border flex items-center justify-center text-[9px] font-outfit font-extrabold uppercase tracking-tight select-none ${fallbackColor}`}>
+      {clean.slice(0, 2)}
+    </div>
+  );
+};
+
 function App() {
   const currentAccount = useCurrentAccount();
   const { mutateAsync: signAndExecuteTxb } = useSignAndExecuteTransaction();
@@ -89,6 +134,7 @@ function App() {
   const [showZkDropdown, setShowZkDropdown] = useState(false);
   const [copiedZk, setCopiedZk] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [showTokensDropdown, setShowTokensDropdown] = useState(false);
 
   // Withdraw Form states
   const [withdrawRecipient, setWithdrawRecipient] = useState('');
@@ -284,6 +330,19 @@ function App() {
     setUserEmail(null);
     setShowZkDropdown(false);
     setBalance({ SUI: '0', USDC: '0', USDT: '0', DEEP: '0', CETUS: '0' });
+  };
+
+  const handleNewChat = () => {
+    setMessages([
+      {
+        sender: 'bot',
+        text: 'Hello! I am HiSui, your AI Web3 Intent Assistant. Tell me what you want to do on Sui (e.g. "Swap 5 SUI for USDC and deposit it in NAVI"), and I will compile the transaction block, verify it for slippage and oracle freshness, and help you sign it.',
+      },
+    ]);
+    setInput('');
+    setActiveIntent(null);
+    setActiveReport(null);
+    setExecutionTx(null);
   };
 
   // Submit plain English query
@@ -567,70 +626,99 @@ function App() {
     }
   };
 
-  return (
+    return (
     <div className="min-h-screen bg-sui-dark text-zinc-100 flex flex-col font-sans relative overflow-hidden select-none">
       {/* Ambient Nebula Glows */}
       <div className="absolute top-[-25%] left-[-20%] w-[65%] h-[65%] rounded-full bg-sui-blue/8 blur-[140px] animate-float-slow pointer-events-none z-0" />
       <div className="absolute bottom-[-25%] right-[-20%] w-[65%] h-[65%] rounded-full bg-sui-pink/6 blur-[140px] animate-float-delayed pointer-events-none z-0" />
 
-      {/* Top Navbar */}
-      <header className="border-b border-border-dark px-6 py-4 flex justify-between items-center bg-sui-dark/30 backdrop-blur-xl sticky top-0 z-50">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2.5">
-            <img 
-              src="/logo.png" 
-              alt="HiSui Logo" 
-              className="h-10 w-auto object-contain hover:scale-[1.06] active:scale-[0.98] transition-transform duration-300 cursor-pointer" 
-            />
-            <div>
-              <h1 className="text-xl font-outfit font-extrabold tracking-tight text-white flex items-center gap-2">
-                <span className="bg-gradient-to-r from-sui-blue via-white to-sui-pink bg-clip-text text-transparent">
-                  HiSui
-                </span>
-                <select
-                  value={network}
-                  onChange={(e) => selectNetwork(e.target.value as 'mainnet' | 'testnet')}
-                  className="bg-sui-blue/10 text-sui-blue border border-sui-blue/20 text-[10px] font-bold px-2 py-0.5 rounded-full focus:outline-none cursor-pointer hover:bg-sui-blue/20 hover:border-sui-blue/40 transition-all"
-                >
-                  <option value="mainnet" className="bg-[#030f1c] text-zinc-100">Mainnet</option>
-                  <option value="testnet" className="bg-[#030f1c] text-zinc-100">Testnet</option>
-                </select>
-              </h1>
-              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">AI Web3 Intent Engine & Guardian</p>
+      {/* Main Layout containing Left Sidebar + Main Content Area */}
+      <div className="flex-1 flex overflow-hidden h-screen z-10 relative">
+        {/* Left Sidebar */}
+        <aside className="w-72 bg-sui-dark/35 border-r border-border-dark backdrop-blur-xl h-screen flex flex-col justify-between p-4 z-20 shrink-0 select-none">
+          <div className="flex flex-col gap-6 flex-1">
+            {/* Logo */}
+            <div className="flex items-center gap-2.5 select-none px-2 pt-2">
+              <img 
+                src="/logo.png" 
+                alt="HiSui Logo" 
+                className="h-10 w-auto object-contain hover:scale-[1.06] active:scale-[0.98] transition-transform duration-300 cursor-pointer" 
+              />
+              <div>
+                <h1 className="text-lg font-outfit font-extrabold tracking-tight text-white flex items-center gap-2">
+                  <span className="bg-gradient-to-r from-sui-blue via-white to-sui-pink bg-clip-text text-transparent">
+                    HiSui
+                  </span>
+                  <select
+                    value={network}
+                    onChange={(e) => selectNetwork(e.target.value as 'mainnet' | 'testnet')}
+                    className="bg-sui-blue/10 text-sui-blue border border-sui-blue/20 text-[9px] font-bold px-1.5 py-0.5 rounded-full focus:outline-none cursor-pointer hover:bg-sui-blue/20 hover:border-sui-blue/40 transition-all font-sans"
+                  >
+                    <option value="mainnet" className="bg-[#030f1c] text-zinc-100">Mainnet</option>
+                    <option value="testnet" className="bg-[#030f1c] text-zinc-100">Testnet</option>
+                  </select>
+                </h1>
+                <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">AI Intent Engine</p>
+              </div>
+            </div>
+
+            {/* Action Button: New Intent */}
+            <button
+              onClick={handleNewChat}
+              className="flex items-center justify-center gap-2.5 w-full bg-sui-blue/10 border border-sui-blue/20 hover:border-sui-blue/40 text-sui-blue hover:text-white px-4 py-3 rounded-xl transition-all text-xs font-bold cursor-pointer hover:bg-sui-blue/20"
+            >
+              <Sparkles className="h-4 w-4" />
+              New Chat Intent
+            </button>
+
+            {/* Tokens Popover Menu */}
+            <div className="relative">
+              <button
+                onClick={() => setShowTokensDropdown(!showTokensDropdown)}
+                className="flex items-center justify-between w-full bg-sui-dark/50 border border-border-dark hover:border-sui-blue/40 px-4 py-3.5 rounded-xl transition-all cursor-pointer text-xs font-bold"
+              >
+                <div className="flex items-center gap-2.5">
+                  <Coins className="h-4.5 w-4.5 text-sui-blue" />
+                  <span className="text-zinc-200">Balances & Tokens</span>
+                </div>
+                <ChevronDown className="h-4 w-4 text-zinc-500 transition-transform duration-200" style={{ transform: showTokensDropdown ? 'rotate(180deg)' : 'none' }} />
+              </button>
+              
+              {showTokensDropdown && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-40" 
+                    onClick={() => setShowTokensDropdown(false)} 
+                  />
+                  <div className="absolute left-0 right-0 mt-2 bg-sui-dark/95 border border-border-dark backdrop-blur-2xl rounded-2xl shadow-xl p-3 flex flex-col gap-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                    {(['SUI', 'USDC', 'USDT', 'DEEP', 'CETUS'] as const).map((token) => (
+                      <div key={token} className="flex items-center justify-between p-2.5 rounded-xl hover:bg-white/[0.03] transition-colors">
+                        <div className="flex items-center gap-3">
+                          <TokenLogo symbol={token} className="h-6 w-6 shrink-0" />
+                          <div className="flex flex-col">
+                            <span className="text-xs font-bold text-zinc-200">{token}</span>
+                            <span className="text-[8px] text-zinc-500 font-semibold uppercase">
+                              {token === 'SUI' ? 'Sui Network' : token === 'CETUS' ? 'Cetus Protocol' : token === 'DEEP' ? 'DeepBook' : 'Stablecoin'}
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-xs font-mono font-bold text-zinc-300">{balance[token]}</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           </div>
-        </div>
 
-        <div className="flex items-center gap-4">
-          {activeWalletAddress && (
-            <div className="hidden lg:flex items-center gap-4 bg-sui-dark/35 border border-border-dark px-4 py-2 rounded-xl backdrop-blur-md shadow-inner">
-              <div className="flex items-center gap-2 border-r border-border-dark pr-4">
-                <Coins className="h-4 w-4 text-sui-blue" />
-                <span className="text-xs font-semibold text-zinc-200">{balance.SUI} SUI</span>
-              </div>
-              <div className="flex items-center gap-2 border-r border-border-dark pr-4">
-                <span className="text-xs font-semibold text-emerald-400">{balance.USDC} USDC</span>
-              </div>
-              <div className="flex items-center gap-2 border-r border-border-dark pr-4">
-                <span className="text-xs font-semibold text-teal-400">{balance.USDT} USDT</span>
-              </div>
-              <div className="flex items-center gap-2 border-r border-border-dark pr-4">
-                <span className="text-xs font-semibold text-blue-400">{balance.DEEP} DEEP</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-amber-400">{balance.CETUS} CETUS</span>
-              </div>
-            </div>
-          )}
-
-          {/* Connection Controls */}
-          <div className="flex items-center gap-2">
+          {/* Bottom Profile / Connection */}
+          <div className="border-t border-border-dark pt-4 flex flex-col gap-3">
             {!activeWalletAddress ? (
-              <>
+              <div className="flex flex-col gap-2">
                 <button
                   onClick={handleGoogleLogin}
                   disabled={isZkLoading}
-                  className="flex items-center gap-2 bg-white text-sui-dark font-extrabold px-4 py-2.5 rounded-xl hover:bg-zinc-100 transition-all text-xs shadow-sm hover:shadow-[0_0_15px_rgba(77,162,255,0.35)] cursor-pointer disabled:opacity-50"
+                  className="flex items-center justify-center gap-2 w-full bg-white text-sui-dark font-extrabold px-4 py-2.5 rounded-xl hover:bg-zinc-100 transition-all text-xs shadow-sm hover:shadow-[0_0_15px_rgba(77,162,255,0.35)] cursor-pointer disabled:opacity-50"
                 >
                   {isZkLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin text-sui-dark" />
@@ -656,22 +744,25 @@ function App() {
                   )}
                   Google Sign-In
                 </button>
-                <div className="theme-dapp-kit-connect">
+                <div className="theme-dapp-kit-connect w-full">
                   <ConnectButton connectText="Connect Wallet" />
                 </div>
-              </>
+              </div>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="relative">
                 {zkAddress ? (
-                  <div className="relative">
+                  <>
                     <button
                       onClick={() => setShowZkDropdown(!showZkDropdown)}
-                      className="flex items-center gap-2 bg-sui-dark/50 border border-border-dark hover:border-sui-blue/50 px-4 py-2.5 rounded-xl transition-all cursor-pointer shadow-sm text-xs"
+                      className="flex items-center justify-between w-full bg-sui-dark/50 border border-border-dark hover:border-sui-blue/50 px-4 py-3 rounded-xl transition-all cursor-pointer shadow-sm text-xs"
                     >
-                      <span className="text-xs text-zinc-300 font-mono font-bold">
-                        {zkAddress.slice(0, 6)}...{zkAddress.slice(-4)}
-                      </span>
-                      <ChevronDown className="h-3.5 w-3.5 text-zinc-500 transition-transform duration-200" style={{ transform: showZkDropdown ? 'rotate(180deg)' : 'none' }} />
+                      <div className="flex flex-col text-left truncate pr-2">
+                        {userEmail && <span className="text-[10px] text-zinc-400 font-semibold truncate">{userEmail}</span>}
+                        <span className="text-[10px] text-zinc-500 font-mono">
+                          {zkAddress.slice(0, 8)}...{zkAddress.slice(-6)}
+                        </span>
+                      </div>
+                      <ChevronDown className="h-3.5 w-3.5 text-zinc-500 shrink-0 transition-transform duration-200" style={{ transform: showZkDropdown ? 'rotate(180deg)' : 'none' }} />
                     </button>
 
                     {showZkDropdown && (
@@ -680,7 +771,7 @@ function App() {
                           className="fixed inset-0 z-40" 
                           onClick={() => setShowZkDropdown(false)} 
                         />
-                        <div className="absolute right-0 mt-2.5 w-72 bg-sui-dark/95 border border-border-dark backdrop-blur-2xl rounded-2xl shadow-xl p-4 flex flex-col gap-4 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                        <div className="absolute bottom-14 left-0 right-0 bg-sui-dark/95 border border-border-dark backdrop-blur-2xl rounded-2xl shadow-xl p-4 flex flex-col gap-4 z-50 animate-in fade-in slide-in-from-bottom-2 duration-150">
                           {userEmail && (
                             <div className="flex flex-col border-b border-border-dark pb-3">
                               <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Google Session</span>
@@ -693,7 +784,7 @@ function App() {
                           <div className="flex flex-col gap-1">
                             <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Wallet Address</span>
                             <div className="flex items-center justify-between bg-sui-dark/40 border border-border-dark rounded-xl px-3 py-2 mt-1">
-                              <span className="text-[10px] font-mono text-zinc-400 truncate w-48">
+                              <span className="text-[10px] font-mono text-zinc-400 truncate w-40">
                                 {zkAddress}
                               </span>
                               <button
@@ -756,248 +847,220 @@ function App() {
                         </div>
                       </>
                     )}
-                  </div>
+                  </>
                 ) : (
-                  <div className="theme-dapp-kit-connect">
+                  <div className="theme-dapp-kit-connect w-full">
                     <ConnectButton />
                   </div>
                 )}
               </div>
             )}
           </div>
-        </div>
-      </header>
+        </aside>
 
       {/* Main Container */}
-      <main className="flex-1 flex overflow-hidden z-10 relative">
+      < main className = "flex-1 flex overflow-hidden z-10 relative" >
         {/* Left Side: Conversational Chat */}
-        <section className="flex-1 flex flex-col border-r border-border-dark bg-sui-dark/10 backdrop-blur-sm">
+        < section className = "flex-1 flex flex-col border-r border-border-dark bg-sui-dark/10 backdrop-blur-sm" >
           {/* Messages Log */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-4">
-            {messages.map((msg, index) => (
-              <div
-                key={index}
-                className={`flex gap-3 max-w-[85%] ${
-                  msg.sender === 'user' ? 'ml-auto flex-row-reverse' : ''
-                }`}
-              >
+          < div className = "flex-1 overflow-y-auto p-6 space-y-4" >
+            {
+              messages.map((msg, index) => (
                 <div
-                  className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 shadow-md ${
-                    msg.sender === 'user'
-                      ? 'bg-sui-blue/15 border border-sui-blue/30'
-                      : 'bg-sui-dark/60 border border-border-dark'
-                  }`}
+                  key={index}
+                  className={`flex gap-3 w-full ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}
                 >
-                  {msg.sender === 'user' ? (
-                    <Wallet className="h-4 w-4 text-sui-blue" />
-                  ) : (
-                    <Bot className="h-4 w-4 text-sui-pink" />
-                  )}
-                </div>
-
-                <div
-                  className={`p-4 rounded-2xl border text-xs leading-relaxed shadow-sm ${
-                    msg.sender === 'user'
-                      ? 'bg-sui-blue/10 border-sui-blue/20 text-zinc-100 rounded-tr-none'
-                      : msg.error
-                      ? 'bg-red-500/10 border-red-500/25 text-red-300 rounded-tl-none'
-                      : 'bg-card-dark border-border-dark text-zinc-300 rounded-tl-none'
-                  }`}
-                >
-                  <p className="font-medium whitespace-pre-wrap">{msg.text}</p>
-                  
-                  {msg.intent && (
-                    <div className="mt-3 bg-sui-dark/40 border border-border-dark p-3 rounded-xl flex flex-col gap-2 shadow-inner">
-                      <div className="flex items-center gap-2 text-[10px] font-bold text-sui-blue uppercase tracking-wider">
-                        <Sparkles className="h-3.5 w-3.5 text-sui-pink animate-pulse" />
-                        AI Intent Compiled
-                      </div>
-                      <p className="text-[10px] text-zinc-400 font-semibold">{msg.intent.summary}</p>
-                    </div>
-                  )}
-
-                  {msg.txDigest && (
-                    <div className="mt-3 bg-emerald-500/5 border border-emerald-500/20 p-3 rounded-xl flex flex-col gap-1.5 shadow-inner">
-                      <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Transaction Confirmed:</span>
-                      <a
-                        href={`https://suiscan.xyz/${network}/tx/${msg.txDigest}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-xs text-sui-blue hover:text-sui-pink underline break-all font-mono transition-colors"
-                      >
-                        {msg.txDigest}
-                      </a>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-            {isParsing && (
-              <div className="flex gap-3 items-center text-xs text-zinc-500 italic">
-                <Loader2 className="h-4 w-4 animate-spin text-sui-blue" />
-                HiSui is parsing your intent...
-              </div>
-            )}
-          </div>
-
-          {/* Typing Area */}
-          <div className="p-4 border-t border-border-dark bg-sui-dark/15 backdrop-blur-md">
-            <div className="relative flex items-center bg-sui-dark/45 border border-border-dark rounded-xl focus-within:border-sui-blue/50 focus-within:shadow-[0_0_15px_rgba(77,162,255,0.15)] transition-all">
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                placeholder={
-                  activeWalletAddress
-                    ? 'e.g. Swap 0.5 SUI for USDC'
-                    : 'Connect wallet or zkLogin to begin...'
-                }
-                disabled={!activeWalletAddress || isParsing}
-                className="w-full bg-transparent pl-4 pr-12 py-3.5 text-xs text-zinc-100 placeholder-zinc-700 focus:outline-none disabled:opacity-50"
-              />
-              <button
-                onClick={handleSend}
-                disabled={!input.trim() || isParsing}
-                className="absolute right-2 p-2 bg-gradient-to-r from-sui-blue to-sui-pink disabled:from-zinc-800 disabled:to-zinc-800 disabled:text-zinc-600 text-sui-dark rounded-lg hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center cursor-pointer shadow-md"
-              >
-                <Send className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        </section>
-
-        {/* Right Side: Intent Preview & Guardian Risk Checklist */}
-        <section className="w-[430px] flex flex-col bg-sui-dark/20 p-6 overflow-y-auto space-y-6 backdrop-blur-md">
-          <div className="flex items-center gap-2 pb-4 border-b border-border-dark">
-            <ShieldCheck className="h-5 w-5 text-sui-blue" />
-            <h2 className="font-outfit font-extrabold text-sm text-white uppercase tracking-wider">Intent & Guardian Preview</h2>
-          </div>
-
-          {!activeIntent ? (
-            <div className="flex-1 flex flex-col items-center justify-center text-center text-zinc-500 px-4 py-20">
-              <Bot className="h-12 w-12 text-zinc-700 mb-3 animate-pulse" />
-              <p className="text-xs font-bold text-zinc-400">No active intent compiled yet.</p>
-              <p className="text-[10px] text-zinc-600 mt-1 max-w-[280px]">Submit a plain English goal in the chat, and the compiled block will appear here for verification.</p>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {/* Intent Summary Card */}
-              <div className="bg-sui-dark/40 border border-border-dark p-5 rounded-2xl flex flex-col gap-3 shadow-lg backdrop-blur-xl relative">
-                <div className="flex justify-between items-center">
-                  <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Proposed Flow</span>
-                  <span className="text-[10px] bg-sui-blue/15 text-sui-blue border border-sui-blue/20 px-2.5 py-0.5 rounded-full font-bold">PTB Block</span>
-                </div>
-                <p className="text-xs font-bold text-white leading-tight">{activeIntent.summary}</p>
-
-                {/* Steps Visualizer */}
-                <div className="mt-2 space-y-3.5 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-[2px] before:bg-border-dark">
-                  {activeIntent.actions.map((act, index) => (
-                    <div key={index} className="flex gap-4 items-start pl-6 relative">
-                      <div className="absolute left-1.5 h-3.5 w-3.5 rounded-full bg-gradient-to-r from-sui-blue to-sui-pink border-4 border-sui-dark flex items-center justify-center shadow-[0_0_8px_rgba(77,162,255,0.6)]" />
-                      <div className="flex-1 bg-sui-dark/50 border border-border-dark p-3 rounded-xl flex items-center justify-between hover:border-sui-blue/30 transition-all hover:scale-[1.01]">
-                        <div>
-                          <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">{act.type}</span>
-                          <p className="text-xs text-zinc-200 mt-0.5 font-medium">
-                            {act.type === 'swap' 
-                              ? `Swap ${parseFloat(act.amount) / Math.pow(10, getTokenDecimals(act.fromToken || 'SUI'))} ${act.fromToken} for ${act.toToken}` 
-                              : `Deposit ${act.amount === 'all_swapped' ? 'all swapped assets' : parseFloat(act.amount) / Math.pow(10, getTokenDecimals(act.tokenType || 'USDC'))} ${act.tokenType || 'USDC'} into NAVI`
-                            }
-                          </p>
-                        </div>
-                        <ArrowRight className="h-4 w-4 text-zinc-600 shrink-0" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Guardian Checks Panel */}
-              <div className="bg-sui-dark/40 border border-border-dark p-5 rounded-2xl flex flex-col gap-4 shadow-lg backdrop-blur-xl">
-                <div className="flex items-center gap-2 border-b border-border-dark pb-3">
-                  <ShieldCheck className="h-4.5 w-4.5 text-sui-blue" />
-                  <span className="text-[9px] font-bold text-white uppercase tracking-wider">Guardian Simulation</span>
-                </div>
-
-                {isSimulating ? (
-                  <div className="flex flex-col items-center justify-center py-6 gap-2">
-                    <Loader2 className="h-5 w-5 animate-spin text-sui-blue" />
-                    <span className="text-[10px] text-zinc-500 italic">Running on-chain dry-run...</span>
+                  <div
+                    className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 shadow-md ${msg.sender === 'user' ? 'bg-sui-blue/15 border border-sui-blue/30' : 'bg-sui-dark/60 border border-border-dark'}`}
+                  >
+                    {msg.sender === 'user' ? (
+                      <Wallet className="h-4 w-4 text-sui-blue" />
+                    ) : (
+                      <Bot className="h-4 w-4 text-sui-pink" />
+                    )}
                   </div>
-                ) : (
-                  <div className="space-y-4">
-                    {/* Simulation Status */}
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Dry-run Simulation:</span>
-                      <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
-                        activeReport?.success 
-                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
-                          : 'bg-red-500/10 text-red-400 border-red-500/20'
-                      }`}>
-                        {activeReport?.success ? 'SUCCESS' : 'FAILED'}
-                      </span>
+
+                  <div
+                    className={`p-4 rounded-2xl border text-xs leading-relaxed shadow-sm max-w-[85%] ${msg.sender === 'user' ? 'bg-sui-blue/10 border-sui-blue/20 text-zinc-100 rounded-tr-none' : msg.error ? 'bg-red-500/10 border-red-500/25 text-red-300 rounded-tl-none' : 'bg-card-dark border-border-dark text-zinc-300 rounded-tl-none'}`}
+                  >
+                    <p className="font-medium whitespace-pre-wrap">{msg.text}</p>
+
+                    {msg.intent && (
+                      <div className="mt-3 bg-sui-dark/40 border border-border-dark p-3 rounded-xl flex flex-col gap-2 shadow-inner">
+                        <div className="flex items-center gap-2 text-[10px] font-bold text-sui-blue uppercase tracking-wider">
+                          <Sparkles className="h-3.5 w-3.5 text-sui-pink animate-pulse" />
+                          AI Intent Compiled
+                        </div>
+                        <p className="text-[10px] text-zinc-400 font-semibold">{msg.intent.summary}</p>
+                      </div>
+                    )}
+
+                    {msg.txDigest && (
+                      <div className="mt-3 bg-emerald-500/5 border border-emerald-500/20 p-3 rounded-xl flex flex-col gap-1.5 shadow-inner">
+                        <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Transaction Confirmed:</span>
+                        <a
+                          href={`https://suiscan.xyz/${network}/tx/${msg.txDigest}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-xs text-sui-blue hover:text-sui-pink underline break-all font-mono transition-colors"
+                        >
+                          {msg.txDigest}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))
+            }
+
+            {
+              isParsing && (
+                <div className="flex gap-3 items-center text-xs text-zinc-500 italic pl-11">
+                  <Loader2 className="h-4 w-4 animate-spin text-sui-blue" />
+                  HiSui is parsing your intent...
+                </div>
+              )
+            }
+
+            {/* Inline Intent & Guardian Preview (Scrolls with Chat) */}
+            {
+              activeIntent && (
+                <div className="max-w-xl mr-auto ml-11 bg-sui-dark/40 border border-border-dark p-5 rounded-2xl flex flex-col gap-5 shadow-lg backdrop-blur-xl animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between border-b border-border-dark pb-3">
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck className="h-4.5 w-4.5 text-sui-blue" />
+                      <span className="text-[9px] font-bold text-white uppercase tracking-wider">Intent & Guardian Preview</span>
                     </div>
+                    <span className="text-[9px] bg-sui-blue/15 text-sui-blue border border-sui-blue/20 px-2 py-0.5 rounded-full font-bold">PTB Block</span>
+                  </div>
 
-                    {/* Dynamic Rates */}
-                    {activeReport?.oraclePrice && (
-                      <div className="flex justify-between items-center text-xs border-b border-border-dark pb-2">
-                        <span className="text-zinc-500 font-medium">Oracle SUI/USD Price:</span>
-                        <span className="font-bold text-zinc-200">${activeReport.oraclePrice.toFixed(4)}</span>
-                      </div>
-                    )}
-                    {activeReport?.executionRate && (
-                      <div className="flex justify-between items-center text-xs border-b border-border-dark pb-2">
-                        <span className="text-zinc-500 font-medium">Cetus Execution Rate:</span>
-                        <span className="font-bold text-zinc-200">{activeReport.executionRate.toFixed(4)} {activeReport.executionSymbol || 'USDC'}/SUI</span>
-                      </div>
-                    )}
+                  <div className="space-y-4">
+                    {/* Proposed Flow */}
+                    <div className="flex flex-col gap-2">
+                      <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Proposed Flow</span>
+                      <p className="text-xs font-bold text-white leading-tight">{activeIntent.summary}</p>
 
-                    {/* Warnings List */}
-                    {activeReport?.warnings && activeReport.warnings.length > 0 && (
-                      <div className="space-y-2">
-                        {activeReport.warnings.map((warn, i) => (
-                          <div
-                            key={i}
-                            className={`flex gap-2.5 p-3 rounded-xl border text-[11px] leading-relaxed ${
-                              warn.level === 'danger'
-                                ? 'bg-red-500/5 border-red-500/20 text-red-300'
-                                : warn.level === 'warning'
-                                ? 'bg-yellow-500/5 border-yellow-500/15 text-yellow-300'
-                                : 'bg-sui-dark/60 border-border-dark text-zinc-400'
-                            }`}
-                          >
-                            <AlertTriangle className={`h-4 w-4 shrink-0 mt-0.5 \${warn.level === 'danger' ? 'text-red-400' : warn.level === 'warning' ? 'text-yellow-400' : 'text-zinc-500'}`} />
-                            <div>{warn.message}</div>
+                      <div className="mt-2 space-y-3.5 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-[2px] before:bg-border-dark">
+                        {activeIntent.actions.map((act, index) => (
+                          <div key={index} className="flex gap-4 items-start pl-6 relative">
+                            <div className="absolute left-1.5 h-3.5 w-3.5 rounded-full bg-gradient-to-r from-sui-blue to-sui-pink border-4 border-sui-dark flex items-center justify-center shadow-[0_0_8px_rgba(77,162,255,0.6)]" />
+                            <div className="flex-1 bg-sui-dark/50 border border-border-dark p-3 rounded-xl flex items-center justify-between hover:border-sui-blue/30 transition-all hover:scale-[1.01]">
+                              <div>
+                                <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">{act.type}</span>
+                                <p className="text-xs text-zinc-200 mt-0.5 font-medium">
+                                  {act.type === 'swap'
+                                    ? `Swap ${parseFloat(act.amount) / Math.pow(10, getTokenDecimals(act.fromToken || 'SUI'))} ${act.fromToken} for ${act.toToken}`
+                                    : `Deposit ${act.amount === 'all_swapped' ? 'all swapped assets' : parseFloat(act.amount) / Math.pow(10, getTokenDecimals(act.tokenType || 'USDC'))} ${act.tokenType || 'USDC'} into NAVI`
+                                  }
+                                </p>
+                              </div>
+                              <ArrowRight className="h-4 w-4 text-zinc-600 shrink-0" />
+                            </div>
                           </div>
                         ))}
                       </div>
-                    )}
-                  </div>
-                )}
-              </div>
+                    </div>
 
-              {/* Execution Action */}
-              <button
-                onClick={handleExecute}
-                disabled={isExecuting || !activeReport?.success}
-                className="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-sui-blue to-sui-pink text-sui-dark font-extrabold py-3.5 rounded-xl text-xs transition-all shadow-lg shadow-sui-blue/15 hover:shadow-sui-pink/25 hover:scale-[1.01] active:scale-[0.99] disabled:from-zinc-800 disabled:to-zinc-800 disabled:text-zinc-600 disabled:shadow-none cursor-pointer"
-              >
-                {isExecuting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Signing & Executing Block...
-                  </>
-                ) : (
-                  <>
-                    <ShieldCheck className="h-4.5 w-4.5" />
-                    Approve & Sign Transaction
-                  </>
-                )}
-              </button>
-            </div>
-          )}
+                    {/* Guardian Simulation */}
+                    <div className="border-t border-border-dark pt-3 flex flex-col gap-3">
+                      <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Guardian Simulation</span>
+
+                      {isSimulating ? (
+                        <div className="flex flex-col items-center justify-center py-4 gap-2">
+                          <Loader2 className="h-4 w-4 animate-spin text-sui-blue" />
+                          <span className="text-[9px] text-zinc-500 italic">Running dry-run simulation...</span>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-semibold text-zinc-500">Dry-run Simulation:</span>
+                            <span className={`text-[9px] font-bold px-2.5 py-0.5 rounded-full border ${activeReport?.success ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
+                              {activeReport?.success ? 'SUCCESS' : 'FAILED'}
+                            </span>
+                          </div>
+
+                          {activeReport?.oraclePrice && (
+                            <div className="flex justify-between items-center text-xs border-b border-border-dark pb-1.5">
+                              <span className="text-zinc-500 font-medium">Oracle SUI/USD Price:</span>
+                              <span className="font-bold text-zinc-200">${activeReport.oraclePrice.toFixed(4)}</span>
+                            </div>
+                          )}
+                          {activeReport?.executionRate && (
+                            <div className="flex justify-between items-center text-xs border-b border-border-dark pb-1.5">
+                              <span className="text-zinc-500 font-medium">Cetus Execution Rate:</span>
+                              <span className="font-bold text-zinc-200">${activeReport.executionRate.toFixed(4)} ${activeReport.executionSymbol || 'USDC'}/SUI</span>
+                            </div>
+                          )}
+
+                          {activeReport?.warnings && activeReport.warnings.length > 0 && (
+                            <div className="space-y-2 mt-2">
+                              {activeReport.warnings.map((warn, i) => (
+                                <div
+                                  key={i}
+                                  className={`flex gap-2.5 p-3 rounded-xl border text-[11px] leading-relaxed ${warn.level === 'danger' ? 'bg-red-500/5 border-red-500/20 text-red-300' : warn.level === 'warning' ? 'bg-yellow-500/5 border-yellow-500/15 text-yellow-300' : 'bg-sui-dark/60 border-border-dark text-zinc-400'}`}
+                                >
+                                  <AlertTriangle className={`h-4 w-4 shrink-0 mt-0.5 ${warn.level === 'danger' ? 'text-red-400' : warn.level === 'warning' ? 'text-yellow-400' : 'text-zinc-500'}`} />
+                                  <div>{warn.message}</div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Execution Button */}
+                    <button
+                      onClick={handleExecute}
+                      disabled={isExecuting || !activeReport?.success}
+                      className="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-sui-blue to-sui-pink text-sui-dark font-extrabold py-3.5 rounded-xl text-xs transition-all shadow-lg shadow-sui-blue/15 hover:shadow-sui-pink/25 hover:scale-[1.01] active:scale-[0.99] disabled:from-zinc-800 disabled:to-zinc-800 disabled:text-zinc-600 disabled:shadow-none cursor-pointer mt-2"
+                    >
+                      {isExecuting ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Signing & Executing Block...
+                        </>
+                      ) : (
+                        <>
+                          <ShieldCheck className="h-4.5 w-4.5" />
+                          Approve & Sign Transaction
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )
+            }
+          </div>
         </section>
+
+        {/* Typing Input Bar (Centered) */}
+        <div className="p-6 border-t border-border-dark bg-sui-dark/15 backdrop-blur-md shrink-0">
+          <div className="max-w-3xl mx-auto w-full relative flex items-center bg-sui-dark/45 border border-border-dark rounded-xl focus-within:border-sui-blue/50 focus-within:shadow-[0_0_15px_rgba(77,162,255,0.15)] transition-all">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+              placeholder={
+                activeWalletAddress
+                  ? 'e.g. Swap 0.5 SUI for USDC'
+                  : 'Connect wallet or zkLogin to begin...'
+              }
+              disabled={!activeWalletAddress || isParsing}
+              className="w-full bg-transparent pl-4 pr-12 py-4 text-xs text-zinc-100 placeholder-zinc-700 focus:outline-none disabled:opacity-50"
+            />
+            <button
+              onClick={handleSend}
+              disabled={!input.trim() || isParsing}
+              className="absolute right-2.5 p-2.5 bg-gradient-to-r from-sui-blue to-sui-pink disabled:from-zinc-800 disabled:to-zinc-800 disabled:text-zinc-600 text-sui-dark rounded-lg hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center cursor-pointer shadow-md"
+            >
+              <Send className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
       </main>
+    </div>
 
       {/* Withdraw Modal Overlay */}
       {showWithdrawModal && (
@@ -1040,7 +1103,7 @@ function App() {
                   <div className="bg-sui-dark/60 border border-border-dark p-3.5 rounded-xl w-full flex flex-col gap-2 mt-2">
                     <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Transaction Digest</span>
                     <a
-                      href={`https://suiscan.xyz/\${network}/tx/\${withdrawSuccessTx}`}
+                      href={`https://suiscan.xyz/${network}/tx/${withdrawSuccessTx}`}
                       target="_blank"
                       rel="noreferrer"
                       className="text-xs text-sui-blue hover:text-sui-pink underline font-mono break-all flex items-center justify-center gap-1.5 transition-colors"
@@ -1072,10 +1135,11 @@ function App() {
                             setWithdrawAsset(token);
                             setWithdrawError(null);
                           }}
-                          className={`flex flex-col items-center p-3 rounded-xl border text-center transition-all cursor-pointer \${withdrawAsset === token ? 'bg-sui-blue/10 border-sui-blue/50 text-white font-bold ring-1 ring-sui-blue/20' : 'bg-sui-dark/50 border-border-dark hover:border-zinc-800 text-zinc-400 hover:text-zinc-300'}`}
+                          className={`flex flex-col items-center p-3 rounded-xl border text-center transition-all cursor-pointer ${withdrawAsset === token ? 'bg-sui-blue/10 border-sui-blue/50 text-white font-bold ring-1 ring-sui-blue/20' : 'bg-sui-dark/50 border-border-dark hover:border-zinc-800 text-zinc-400 hover:text-zinc-300'}`}
                         >
-                          <span className="text-xs font-bold">{token}</span>
-                          <span className={`text-[9px] mt-1 font-semibold \${withdrawAsset === token ? 'text-sui-blue font-bold' : 'text-zinc-500'}`}>
+                          <TokenLogo symbol={token} className="h-5 w-5 shrink-0 mb-1" />
+                          <span className="text-[10px] font-bold">{token}</span>
+                          <span className={`text-[8px] mt-0.5 font-semibold ${withdrawAsset === token ? 'text-sui-blue font-bold' : 'text-zinc-500'}`}>
                             {balance[token]}
                           </span>
                         </button>
@@ -1162,9 +1226,9 @@ function App() {
           </div>
         </div>
       )}
-
     </div>
   );
+
 }
 
 export default App;
