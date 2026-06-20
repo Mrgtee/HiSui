@@ -59,8 +59,15 @@ const getCoinOfAmount = async (
     console.error("Failed to query user coins:", err);
   }
   
-  // Dummy fallback object ID for dry-run simulation
-  return tx.object('0x0000000000000000000000000000000000000000000000000000000000000002');
+  // Dummy fallback object ID for dry-run simulation (using 0x5 which is the Sui System State object, a valid Move Object rather than a Move Package)
+  return tx.object('0x0000000000000000000000000000000000000000000000000000000000000005');
+};
+
+const resolveTokenAddress = (symbolOrAddress: string, config: any): string => {
+  const clean = symbolOrAddress.toUpperCase();
+  if (clean === 'SUI') return config.TOKENS.SUI;
+  if (clean === 'USDC') return config.TOKENS.USDC;
+  return symbolOrAddress;
 };
 
 // Initialize Cetus SDKs for both environments
@@ -135,8 +142,8 @@ export const buildPTB = async (
     const action = actions[i];
     
     if (action.type === 'swap') {
-      const from = action.fromToken === 'SUI' ? config.TOKENS.SUI : action.fromToken || config.TOKENS.SUI;
-      const to = action.toToken === 'USDC' ? config.TOKENS.USDC : action.toToken || config.TOKENS.USDC;
+      const from = resolveTokenAddress(action.fromToken || 'SUI', config);
+      const to = resolveTokenAddress(action.toToken || 'USDC', config);
       const amountVal = action.amount;
       
       const poolAddress = config.POOL_ADDRESS;
@@ -239,7 +246,7 @@ export const buildPTB = async (
 
       // Check if there is a deposit action following this swap in the PTB for USDC
       const hasNextDeposit = actions.slice(i + 1).some(
-        act => act.type === 'deposit' && (act.tokenType === 'USDC' || !act.tokenType)
+        act => act.type === 'deposit' && (act.tokenType?.toUpperCase() === 'USDC' || !act.tokenType)
       );
 
       if (hasNextDeposit) {
@@ -251,7 +258,7 @@ export const buildPTB = async (
       }
 
     } else if (action.type === 'deposit') {
-      const isUSDC = action.tokenType === 'USDC' || !action.tokenType;
+      const isUSDC = action.tokenType?.toUpperCase() === 'USDC' || !action.tokenType;
       const naviToken = isUSDC ? config.TOKENS.NAVI_USDC : config.TOKENS.SUI;
       const amountVal = action.amount;
 
