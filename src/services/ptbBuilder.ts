@@ -6,12 +6,12 @@ import BN from 'bn.js';
 import { getSuiClient } from './suiClient';
 import type { SuiClient } from '@mysten/sui/client';
 export const normalizeSuiAddress = (address: string): string => {
-  const clean = address.toLowerCase().trim();
-  if (!clean.startsWith('0x')) return clean;
+  const clean = address.trim();
+  if (!clean.toLowerCase().startsWith('0x')) return clean;
   
   // If it's a full coin type (e.g. 0x...::module::Struct), normalize the address part
   const parts = clean.split('::');
-  const addrPart = parts[0].slice(2); // remove 0x
+  const addrPart = parts[0].slice(2).toLowerCase(); // remove 0x and lowercase only the address part
   const padded = addrPart.padStart(64, '0');
   
   parts[0] = '0x' + padded;
@@ -24,54 +24,49 @@ const getCoinOfAmount = async (
   amount: string | number,
   tx: Transaction
 ): Promise<TransactionArgument> => {
-  try {
-    const coinRes = await client.getCoins({
-      owner: sender,
-      coinType,
-    });
-    
-    if (coinRes.data && coinRes.data.length > 0) {
-      if (amount === 'all_swapped' || amount === 'all') {
-        const coinId = coinRes.data[0].coinObjectId;
-        const bal = coinRes.data[0].balance;
-        const [splitCoin] = tx.splitCoins(tx.object(coinId), [tx.pure.u64(bal)]);
-        return splitCoin;
-      }
-      
-      const targetAmount = BigInt(amount);
-      const singleCoin = coinRes.data.find(c => BigInt(c.balance) >= targetAmount);
-      if (singleCoin) {
-        const [splitCoin] = tx.splitCoins(tx.object(singleCoin.coinObjectId), [tx.pure.u64(targetAmount.toString())]);
-        return splitCoin;
-      }
-      
-      const coinsToMerge = [];
-      let accumulated = 0n;
-      for (const c of coinRes.data) {
-        coinsToMerge.push(c.coinObjectId);
-        accumulated += BigInt(c.balance);
-        if (accumulated >= targetAmount) {
-          break;
-        }
-      }
-      
-      if (accumulated < targetAmount) {
-        throw new Error(`Insufficient balance of ${coinType}. Needed: ${targetAmount.toString()}, Available: ${accumulated.toString()}`);
-      }
-      
-      const primaryCoin = coinsToMerge[0];
-      if (coinsToMerge.length > 1) {
-        tx.mergeCoins(tx.object(primaryCoin), coinsToMerge.slice(1).map(id => tx.object(id)));
-      }
-      const [splitCoin] = tx.splitCoins(tx.object(primaryCoin), [tx.pure.u64(targetAmount.toString())]);
-      return splitCoin;
-    }
-  } catch (err) {
-    console.error("Failed to query user coins:", err);
+  const coinRes = await client.getCoins({
+    owner: sender,
+    coinType,
+  });
+  
+  if (!coinRes.data || coinRes.data.length === 0) {
+    throw new Error(`No coin objects found for type ${coinType}. Please verify that you have a balance of this coin in your wallet.`);
   }
   
-  // Dummy fallback object ID for dry-run simulation (using 0x5 which is the Sui System State object, a valid Move Object rather than a Move Package)
-  return tx.object('0x0000000000000000000000000000000000000000000000000000000000000005');
+  if (amount === 'all_swapped' || amount === 'all') {
+    const coinId = coinRes.data[0].coinObjectId;
+    const bal = coinRes.data[0].balance;
+    const [splitCoin] = tx.splitCoins(tx.object(coinId), [tx.pure.u64(bal)]);
+    return splitCoin;
+  }
+  
+  const targetAmount = BigInt(amount);
+  const singleCoin = coinRes.data.find(c => BigInt(c.balance) >= targetAmount);
+  if (singleCoin) {
+    const [splitCoin] = tx.splitCoins(tx.object(singleCoin.coinObjectId), [tx.pure.u64(targetAmount.toString())]);
+    return splitCoin;
+  }
+  
+  const coinsToMerge = [];
+  let accumulated = 0n;
+  for (const c of coinRes.data) {
+    coinsToMerge.push(c.coinObjectId);
+    accumulated += BigInt(c.balance);
+    if (accumulated >= targetAmount) {
+      break;
+    }
+  }
+  
+  if (accumulated < targetAmount) {
+    throw new Error(`Insufficient balance of ${coinType}. Needed: ${targetAmount.toString()}, Available: ${accumulated.toString()}`);
+  }
+  
+  const primaryCoin = coinsToMerge[0];
+  if (coinsToMerge.length > 1) {
+    tx.mergeCoins(tx.object(primaryCoin), coinsToMerge.slice(1).map(id => tx.object(id)));
+  }
+  const [splitCoin] = tx.splitCoins(tx.object(primaryCoin), [tx.pure.u64(targetAmount.toString())]);
+  return splitCoin;
 };
 
 const resolveTokenAddress = (symbolOrAddress: string, config: any): string => {
