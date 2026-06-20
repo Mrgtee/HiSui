@@ -15,8 +15,7 @@ import {
   Check,
   ExternalLink,
   X,
-  Menu,
-  HelpCircle
+  Menu
 } from 'lucide-react';
 import { getGoogleOAuthUrl, extractIdTokenFromUrl } from './services/oauth';
 import { 
@@ -151,15 +150,6 @@ function App() {
   const [copiedZk, setCopiedZk] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [showWelcomeTour, setShowWelcomeTour] = useState(false);
-  const [tourStep, setTourStep] = useState(0);
-
-  useEffect(() => {
-    const completed = localStorage.getItem('hisui_welcome_tour_completed');
-    if (completed !== 'true') {
-      setShowWelcomeTour(true);
-    }
-  }, []);
 
   // Withdraw Form states
   const [withdrawRecipient, setWithdrawRecipient] = useState('');
@@ -668,43 +658,31 @@ function App() {
     <div className="flex flex-col justify-between h-full font-sans">
       <div className="flex flex-col gap-6 flex-1 overflow-y-auto pr-1">
         {/* Logo and Network Selector */}
-        <div className="flex items-center justify-between select-none px-2 pt-2 shrink-0">
-          <div className="flex items-center gap-2.5">
-            <img 
-              src="/logo.png" 
-              alt="HiSui Logo" 
-              className="h-10 w-auto object-contain hover:scale-[1.06] active:scale-[0.98] transition-transform duration-300 cursor-pointer" 
-            />
-            <div>
-              <h1 className="text-lg font-outfit font-extrabold tracking-tight text-[#F5F9FF] flex items-center gap-2">
-                <span className="bg-gradient-to-r from-[#59C8FF] via-[#F5F9FF] to-[#A78BFA] bg-clip-text text-transparent">
-                  HiSui
-                </span>
-                <div className="relative flex items-center select-none">
-                  <span className="absolute left-2.5 w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
-                  <select
-                    value={network}
-                    onChange={(e) => selectNetwork(e.target.value as 'mainnet' | 'testnet')}
-                    className="bg-[rgba(89,200,255,0.10)] text-[#7EE7FF] border border-[rgba(89,200,255,0.28)] text-[9px] font-bold pl-5 pr-2.5 py-0.5 rounded-full focus:outline-none cursor-pointer hover:bg-[rgba(89,200,255,0.15)] transition-all font-sans appearance-none"
-                  >
-                    <option value="mainnet" className="bg-[#030f1c] text-zinc-100">Mainnet</option>
-                    <option value="testnet" className="bg-[#030f1c] text-zinc-100">Testnet</option>
-                  </select>
-                </div>
-              </h1>
-              <p className="text-[8px] text-[#9CB2C9] font-extrabold uppercase tracking-wider">AI INTENT ENGINE FOR SUI</p>
-            </div>
+        <div className="flex items-center gap-2.5 select-none px-2 pt-2 shrink-0">
+          <img 
+            src="/logo.png" 
+            alt="HiSui Logo" 
+            className="h-10 w-auto object-contain hover:scale-[1.06] active:scale-[0.98] transition-transform duration-300 cursor-pointer" 
+          />
+          <div>
+            <h1 className="text-lg font-outfit font-extrabold tracking-tight text-[#F5F9FF] flex items-center gap-2">
+              <span className="bg-gradient-to-r from-[#59C8FF] via-[#F5F9FF] to-[#A78BFA] bg-clip-text text-transparent">
+                HiSui
+              </span>
+              <div className="relative flex items-center select-none">
+                <span className="absolute left-2.5 w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
+                <select
+                  value={network}
+                  onChange={(e) => selectNetwork(e.target.value as 'mainnet' | 'testnet')}
+                  className="bg-[rgba(89,200,255,0.10)] text-[#7EE7FF] border border-[rgba(89,200,255,0.28)] text-[9px] font-bold pl-5 pr-2.5 py-0.5 rounded-full focus:outline-none cursor-pointer hover:bg-[rgba(89,200,255,0.15)] transition-all font-sans appearance-none"
+                >
+                  <option value="mainnet" className="bg-[#030f1c] text-zinc-100">Mainnet</option>
+                  <option value="testnet" className="bg-[#030f1c] text-zinc-100">Testnet</option>
+                </select>
+              </div>
+            </h1>
+            <p className="text-[8px] text-[#9CB2C9] font-extrabold uppercase tracking-wider">AI INTENT ENGINE FOR SUI</p>
           </div>
-          <button
-            onClick={() => {
-              setTourStep(0);
-              setShowWelcomeTour(true);
-            }}
-            className="text-[#9CB2C9] hover:text-[#59C8FF] p-1.5 rounded-xl hover:bg-white/[0.04] transition-all cursor-pointer select-none shrink-0"
-            title="Help / Welcome Tour"
-          >
-            <HelpCircle className="h-4.5 w-4.5" />
-          </button>
         </div>
 
         {/* Action Button: New Intent */}
@@ -1431,192 +1409,6 @@ function App() {
                   </button>
                 </div>
               )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Welcome Feature Tour Modal Overlay */}
-      {showWelcomeTour && (
-        <div className="fixed inset-0 bg-sui-dark/85 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-[#030f1c] border border-white/[0.08] rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col animate-in scale-in duration-200">
-            {/* Modal Header */}
-            <div className="flex justify-between items-center px-6 py-5 border-b border-white/[0.04] bg-[#030f1c]/30">
-              <div className="flex items-center gap-2.5">
-                <div className="bg-sui-blue/15 p-2 rounded-xl text-sui-blue border border-sui-blue/20">
-                  <Sparkles className="h-5 w-5 animate-pulse" />
-                </div>
-                <div>
-                  <h3 className="text-md font-outfit font-extrabold text-white tracking-tight">Welcome to HiSui</h3>
-                  <p className="text-[10px] text-zinc-500 font-semibold">Learn how to compile intents and secure your assets on SUI</p>
-                </div>
-              </div>
-              <button
-                onClick={() => {
-                  setShowWelcomeTour(false);
-                  localStorage.setItem('hisui_welcome_tour_completed', 'true');
-                }}
-                className="text-zinc-500 hover:text-white p-1.5 rounded-xl hover:bg-white/[0.05] transition-colors cursor-pointer"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            {/* Modal Body / Steps */}
-            <div className="p-6 space-y-6 flex-1">
-              {tourStep === 0 && (
-                <div className="space-y-4 animate-in fade-in duration-150">
-                  <div className="flex justify-center py-4">
-                    <div className="relative h-20 w-20 rounded-full overflow-hidden border-2 border-sui-blue/30 shadow-[0_0_24px_rgba(89,200,255,0.2)] animate-float-slow">
-                      <img src="/mascot.jpg" alt="HiSui Mascot" className="h-full w-full object-cover" />
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <h4 className="text-sm font-bold text-white">HiSui: AI Web3 Intent Engine</h4>
-                    <p className="text-xs text-zinc-400 mt-1 max-w-sm mx-auto leading-relaxed">
-                      HiSui parses plain English instructions, compiles them into on-chain transaction blocks, simulates them for safety, and helps you sign them securely.
-                    </p>
-                  </div>
-                  <div className="bg-[#071321]/60 border border-white/[0.04] p-4 rounded-2xl space-y-2.5">
-                    <div className="flex gap-3 text-xs text-zinc-300">
-                      <span className="text-sui-blue font-bold">✨</span>
-                      <span><strong>AI Intent Parser</strong>: Write swaps, transfers, or deposits in natural language.</span>
-                    </div>
-                    <div className="flex gap-3 text-xs text-zinc-300">
-                      <span className="text-sui-blue font-bold">🛡️</span>
-                      <span><strong>Guardian Checks</strong>: Real-time slippage and oracle price validation.</span>
-                    </div>
-                    <div className="flex gap-3 text-xs text-zinc-300">
-                      <span className="text-sui-blue font-bold">🔑</span>
-                      <span><strong>zkLogin Accounts</strong>: Log in using your Google credentials.</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {tourStep === 1 && (
-                <div className="space-y-4 animate-in fade-in duration-150">
-                  <div className="bg-[#071321]/60 border border-white/[0.04] p-4 rounded-2xl">
-                    <span className="text-[9px] font-bold text-[#9CB2C9] uppercase tracking-wider">Try typing:</span>
-                    <div className="mt-2 space-y-2">
-                      <div className="bg-[#0D1B2A] border border-white/[0.04] p-2.5 rounded-xl text-xs font-mono text-[#D7E6F5] select-all">
-                        "swap 0.5 SUI for USDC"
-                      </div>
-                      <div className="bg-[#0D1B2A] border border-white/[0.04] p-2.5 rounded-xl text-xs font-mono text-[#D7E6F5] select-all">
-                        "swap half my SUI and deposit it in NAVI"
-                      </div>
-                      <div className="bg-[#0D1B2A] border border-white/[0.04] p-2.5 rounded-xl text-xs font-mono text-[#D7E6F5] select-all">
-                        "send 0.1 SUI to 0x154f..."
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-white">Smart Intent Compiling</h4>
-                    <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
-                      Our Gemini-powered engine automatically parses decimals, handles asset routing, and resolves balance keywords against your live wallet balances.
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {tourStep === 2 && (
-                <div className="space-y-4 animate-in fade-in duration-150">
-                  <div className="flex justify-center">
-                    <div className="bg-emerald-500/10 border border-emerald-500/20 p-3.5 rounded-2xl text-emerald-400">
-                      <ShieldCheck className="h-10 w-10" />
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <h4 className="text-sm font-bold text-white">Guardian Safety Simulation</h4>
-                    <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
-                      Every intent goes through a real-time dry-run simulation on the Sui blockchain before you approve it.
-                    </p>
-                  </div>
-                  <div className="bg-[#071321]/60 border border-white/[0.04] p-4 rounded-2xl space-y-2.5">
-                    <div className="flex gap-3 text-xs text-zinc-300">
-                      <span className="text-emerald-400 font-bold">📈</span>
-                      <span><strong>Price Feeds</strong>: Double-checks transaction prices against real-time Pyth Network feeds.</span>
-                    </div>
-                    <div className="flex gap-3 text-xs text-zinc-300">
-                      <span className="text-emerald-400 font-bold">⚠️</span>
-                      <span><strong>Slippage Shield</strong>: Flags price impact alerts (Info, Warning, Danger) to protect you from frontrunning.</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {tourStep === 3 && (
-                <div className="space-y-4 animate-in fade-in duration-150">
-                  <div className="flex justify-center">
-                    <div className="bg-sui-blue/10 border border-sui-blue/20 p-3.5 rounded-2xl text-sui-blue">
-                      <Wallet className="h-10 w-10" />
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <h4 className="text-sm font-bold text-white">zkLogin & Wallet Connectivity</h4>
-                    <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
-                      Secure login without private key management.
-                    </p>
-                  </div>
-                  <div className="bg-[#071321]/60 border border-white/[0.04] p-4 rounded-2xl space-y-2.5">
-                    <div className="flex gap-3 text-xs text-zinc-300">
-                      <span className="text-sui-blue font-bold">🔐</span>
-                      <span><strong>zkLogin Support</strong>: Log in using your Google credentials. Cryptographic proofs secure your assets on-chain.</span>
-                    </div>
-                    <div className="flex gap-3 text-xs text-zinc-300">
-                      <span className="text-sui-blue font-bold">💸</span>
-                      <span><strong>Dropdown Menu</strong>: Copy address, withdraw funds, and monitor proof generation status from the profile card.</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Modal Footer */}
-            <div className="flex justify-between items-center px-6 py-5 border-t border-white/[0.04] bg-[#030f1c]/30">
-              <button
-                onClick={() => {
-                  setShowWelcomeTour(false);
-                  localStorage.setItem('hisui_welcome_tour_completed', 'true');
-                }}
-                className="text-xs text-zinc-500 hover:text-white font-bold cursor-pointer transition-colors"
-              >
-                Skip Tour
-              </button>
-              
-              <div className="flex items-center gap-1.5">
-                {[0, 1, 2, 3].map((step) => (
-                  <button
-                    key={step}
-                    onClick={() => setTourStep(step)}
-                    className={`h-1.5 rounded-full transition-all cursor-pointer ${tourStep === step ? 'w-5 bg-sui-blue' : 'w-1.5 bg-white/10 hover:bg-white/20'}`}
-                  />
-                ))}
-              </div>
-
-              <div className="flex items-center gap-2">
-                {tourStep > 0 && (
-                  <button
-                    onClick={() => setTourStep((prev) => prev - 1)}
-                    className="bg-white/5 border border-white/10 hover:bg-white/10 text-white font-bold px-3.5 py-1.5 rounded-xl text-xs transition-colors cursor-pointer"
-                  >
-                    Back
-                  </button>
-                )}
-                <button
-                  onClick={() => {
-                    if (tourStep < 3) {
-                      setTourStep((prev) => prev + 1);
-                    } else {
-                      setShowWelcomeTour(false);
-                      localStorage.setItem('hisui_welcome_tour_completed', 'true');
-                    }
-                  }}
-                  className="bg-gradient-to-r from-sui-blue to-sui-pink text-sui-dark font-extrabold px-4 py-1.5 rounded-xl text-xs transition-transform active:scale-95 cursor-pointer shadow-md"
-                >
-                  {tourStep === 3 ? 'Get Started' : 'Next'}
-                </button>
-              </div>
             </div>
           </div>
         </div>
