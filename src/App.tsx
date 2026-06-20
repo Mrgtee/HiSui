@@ -10,7 +10,6 @@ import {
   Loader2, 
   LogOut, 
   ArrowRight,
-  TrendingUp,
   Coins
 } from 'lucide-react';
 import { getGoogleOAuthUrl, extractIdTokenFromUrl } from './services/oauth';
@@ -57,7 +56,7 @@ function App() {
   const [isZkLoading, setIsZkLoading] = useState(false);
 
   // App States
-  const [balance, setBalance] = useState({ SUI: '0', USDC: '0' });
+  const [balance, setBalance] = useState({ SUI: '0', USDC: '0', USDT: '0', DEEP: '0', CETUS: '0' });
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       sender: 'bot',
@@ -139,19 +138,38 @@ function App() {
         owner: activeWalletAddress,
         coinType: '0x2::sui::SUI',
       });
-      // Fetch USDC based on active network config
-      const usdcTokenAddress = network === 'mainnet'
-        ? '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC'
-        : '0x0eedc3857f39f5e44b5786ebcd790317902ffca9960f44fcea5b7589cfc7a784::usdc::USDC';
 
-      const usdcBal = await client.getBalance({
-        owner: activeWalletAddress,
-        coinType: usdcTokenAddress,
-      });
+      // Configs per network
+      const tokenConfigs = {
+        mainnet: {
+          USDC: '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC',
+          USDT: '0xc060006111016b8a020ad5b33834984a437aaa7d3c74c18e09a95d48aceab08c::coin::COIN',
+          DEEP: '0xdeeb7a4662eec9f2f3def03fb937a663dddaa2e215b8078a284d026b7946c270::deep::DEEP',
+          CETUS: '0x6864a6f921804860930db6ddbe2e16acdf8504495ea7481637a1c8b9a8fe54b::cetus::CETUS',
+        },
+        testnet: {
+          USDC: '0x0588cff950e0eaf4cd50d337c1a36570bc1517793fd3303e1513e8ad4d2aa96::usdc::USDC',
+          USDT: '0x26b3bc67befc214058ca78ea9a2690298d731a2d4309485ec3d40198063c4abc::usdt::USDT',
+          CETUS: '0x26b3bc67befc214058ca78ea9a2690298d731a2d4309485ec3d40198063c4abc::cetus::CETUS',
+          DEEP: '0xdeeb7a4662eec9f2f3def03fb937a663dddaa2e215b8078a284d026b7946c270::deep::DEEP',
+        }
+      };
+
+      const cfg = tokenConfigs[network];
+
+      const [usdcBal, usdtBal, deepBal, cetusBal] = await Promise.all([
+        client.getBalance({ owner: activeWalletAddress, coinType: cfg.USDC }),
+        client.getBalance({ owner: activeWalletAddress, coinType: cfg.USDT }),
+        client.getBalance({ owner: activeWalletAddress, coinType: cfg.DEEP }),
+        client.getBalance({ owner: activeWalletAddress, coinType: cfg.CETUS }),
+      ]);
 
       setBalance({
         SUI: (parseInt(suiBal.totalBalance, 10) / 1e9).toFixed(3),
         USDC: (parseInt(usdcBal.totalBalance, 10) / 1e6).toFixed(2),
+        USDT: (parseInt(usdtBal.totalBalance, 10) / 1e6).toFixed(2),
+        DEEP: (parseInt(deepBal.totalBalance, 10) / 1e6).toFixed(2),
+        CETUS: (parseInt(cetusBal.totalBalance, 10) / 1e9).toFixed(2),
       });
     } catch (err) {
       console.warn('Failed to fetch wallet balance:', err);
@@ -193,7 +211,7 @@ function App() {
     setZkAddress(null);
     setZkProof(null);
     setZkSession(null);
-    setBalance({ SUI: '0', USDC: '0' });
+    setBalance({ SUI: '0', USDC: '0', USDT: '0', DEEP: '0', CETUS: '0' });
   };
 
   // Submit plain English query
@@ -373,14 +391,22 @@ function App() {
 
         <div className="flex items-center gap-4">
           {activeWalletAddress && (
-            <div className="hidden md:flex items-center gap-4 bg-zinc-900 border border-border-dark px-4 py-2 rounded-xl">
+            <div className="hidden lg:flex items-center gap-4 bg-zinc-900 border border-border-dark px-4 py-2 rounded-xl">
               <div className="flex items-center gap-2 border-r border-border-dark pr-4">
                 <Coins className="h-4 w-4 text-purple-400" />
                 <span className="text-sm font-semibold">{balance.SUI} SUI</span>
               </div>
+              <div className="flex items-center gap-2 border-r border-border-dark pr-4">
+                <span className="text-sm font-semibold text-emerald-400">{balance.USDC} USDC</span>
+              </div>
+              <div className="flex items-center gap-2 border-r border-border-dark pr-4">
+                <span className="text-sm font-semibold text-teal-400">{balance.USDT} USDT</span>
+              </div>
+              <div className="flex items-center gap-2 border-r border-border-dark pr-4">
+                <span className="text-sm font-semibold text-blue-400">{balance.DEEP} DEEP</span>
+              </div>
               <div className="flex items-center gap-2">
-                <TrendingUp className="h-4 w-4 text-emerald-400" />
-                <span className="text-sm font-semibold">{balance.USDC} USDC</span>
+                <span className="text-sm font-semibold text-amber-400">{balance.CETUS} CETUS</span>
               </div>
             </div>
           )}

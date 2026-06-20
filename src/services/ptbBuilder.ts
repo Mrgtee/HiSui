@@ -65,8 +65,9 @@ const getCoinOfAmount = async (
 
 const resolveTokenAddress = (symbolOrAddress: string, config: any): string => {
   const clean = symbolOrAddress.toUpperCase();
-  if (clean === 'SUI') return config.TOKENS.SUI;
-  if (clean === 'USDC') return config.TOKENS.USDC;
+  if (config.TOKENS[clean]) {
+    return config.TOKENS[clean];
+  }
   return symbolOrAddress;
 };
 
@@ -86,13 +87,16 @@ export interface Action {
   tokenType?: string; // used for deposit
 }
 
-// SUI and USDC configurations per network
+// SUI, USDC, USDT, DEEP, and CETUS configurations per network
 export const NETWORK_CONFIG = {
   mainnet: {
     TOKENS: {
       SUI: '0x2::sui::SUI',
       USDC: '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC',
       NAVI_USDC: '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC',
+      USDT: '0xc060006111016b8a020ad5b33834984a437aaa7d3c74c18e09a95d48aceab08c::coin::COIN',
+      DEEP: '0xdeeb7a4662eec9f2f3def03fb937a663dddaa2e215b8078a284d026b7946c270::deep::DEEP',
+      CETUS: '0x6864a6f921804860930db6ddbe2e16acdf8504495ea7481637a1c8b9a8fe54b::cetus::CETUS',
     },
     POOL_ADDRESS: '0xb8d7d9e66a60c239e7a60110efcf8de6c705580ed924d0dde141f4a0e2c90105', // 0.25% fee tier SUI/USDC native pool
     NAVI_ENV: 'prod' as const,
@@ -102,6 +106,9 @@ export const NETWORK_CONFIG = {
       SUI: '0x2::sui::SUI',
       USDC: '0x0588cff950e0eaf4cd50d337c1a36570bc1517793fd3303e1513e8ad4d2aa96::usdc::USDC', // Cetus Testnet USDC
       NAVI_USDC: '0x0eedc3857f39f5e44b5786ebcd790317902ffca9960f44fcea5b7589cfc7a784::usdc::USDC', // NAVI Testnet USDC
+      USDT: '0x26b3bc67befc214058ca78ea9a2690298d731a2d4309485ec3d40198063c4abc::usdt::USDT',
+      CETUS: '0x26b3bc67befc214058ca78ea9a2690298d731a2d4309485ec3d40198063c4abc::cetus::CETUS',
+      DEEP: '0xdeeb7a4662eec9f2f3def03fb937a663dddaa2e215b8078a284d026b7946c270::deep::DEEP',
     },
     POOL_ADDRESS: '0x67f43a36dfef87e91586bc77ec9947fb0da127e867f64778317e2ee05cafe21a',
     NAVI_ENV: 'dev' as const,
@@ -165,10 +172,16 @@ export const buildPTB = async (
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const poolAny = pool as any;
 
+      const getTokenDecimals = (coinType: string, cfg: any): number => {
+        if (coinType === cfg.TOKENS.SUI) return 9;
+        if (coinType === cfg.TOKENS.CETUS) return 9;
+        return 6; // USDC, USDT, DEEP are all 6 decimals
+      };
+
       // Determine a2b and decimals dynamically based on pool coin types
       const a2b = from === poolAny.coinTypeA;
-      const decimalsA = poolAny.coinTypeA === config.TOKENS.SUI ? 9 : 6;
-      const decimalsB = poolAny.coinTypeB === config.TOKENS.SUI ? 9 : 6;
+      const decimalsA = getTokenDecimals(poolAny.coinTypeA, config);
+      const decimalsB = getTokenDecimals(poolAny.coinTypeB, config);
 
       // 2. Perform preswap quote to validate liquidity and pool state
       const amountIn = new BN(amountVal);
