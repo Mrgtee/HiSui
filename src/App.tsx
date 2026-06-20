@@ -636,9 +636,9 @@ function App() {
 
   const renderSidebarContents = () => (
     <div className="flex flex-col justify-between h-full font-sans">
-      <div className="flex flex-col gap-6 flex-1">
+      <div className="flex flex-col gap-6 flex-1 overflow-y-auto pr-1">
         {/* Logo and Network Selector */}
-        <div className="flex items-center gap-2.5 select-none px-2 pt-2">
+        <div className="flex items-center gap-2.5 select-none px-2 pt-2 shrink-0">
           <img 
             src="/logo.png" 
             alt="HiSui Logo" 
@@ -671,14 +671,14 @@ function App() {
             handleNewChat();
             setMobileMenuOpen(false);
           }}
-          className="flex items-center justify-center gap-2.5 w-full bg-gradient-to-b from-[#163A5A] to-[#10263D] border border-[rgba(89,200,255,0.10)] hover:border-[#2E6EA6] text-[#59C8FF] px-4 py-3 rounded-xl transition-all text-xs font-bold cursor-pointer shadow-md"
+          className="flex items-center justify-center gap-2.5 w-full bg-gradient-to-b from-[#163A5A] to-[#10263D] border border-[rgba(89,200,255,0.10)] hover:border-[#2E6EA6] text-[#59C8FF] px-4 py-3 rounded-xl transition-all text-xs font-bold cursor-pointer shadow-md shrink-0"
         >
           <Sparkles className="h-4 w-4 text-[#59C8FF]" />
           New Chat Intent
         </button>
 
         {/* Balances & Tokens Panel */}
-        <div className="bg-[rgba(13,27,42,0.82)] border border-[rgba(89,200,255,0.12)] rounded-2xl p-4 flex flex-col gap-3.5 shadow-[0_12px_40px_rgba(0,0,0,0.28)]">
+        <div className="bg-[rgba(13,27,42,0.82)] border border-[rgba(89,200,255,0.12)] rounded-2xl p-4 flex flex-col gap-3.5 shadow-[0_12px_40px_rgba(0,0,0,0.28)] shrink-0">
           <div className="flex items-center gap-2 text-[10px] text-[#9CB2C9] font-extrabold uppercase tracking-wider pb-1 border-b border-[rgba(89,200,255,0.10)]">
             <Coins className="h-4 w-4 text-[#59C8FF]" />
             <span>Balances & Tokens</span>
@@ -709,7 +709,7 @@ function App() {
       </div>
 
       {/* Bottom Profile / Connection */}
-      <div className="border-t border-[rgba(89,200,255,0.10)] pt-4 flex flex-col gap-3">
+      <div className="border-t border-[rgba(89,200,255,0.10)] pt-4 flex flex-col gap-3 shrink-0">
         {!activeWalletAddress ? (
           <div className="flex flex-col gap-2">
             <button
