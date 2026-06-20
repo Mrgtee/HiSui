@@ -668,7 +668,7 @@ function App() {
         </button>
 
         {/* Balances & Tokens Panel */}
-        <div className="bg-white/[0.02] border border-white/[0.06] backdrop-blur-md rounded-2xl p-4 flex flex-col gap-3.5">
+        <div className="bg-gradient-to-b from-white/[0.03] to-white/[0.01] border border-white/[0.08] backdrop-blur-xl rounded-2xl p-4 flex flex-col gap-3.5 shadow-md">
           <div className="flex items-center gap-2 text-[10px] text-zinc-400 font-extrabold uppercase tracking-wider pb-1 border-b border-white/[0.04]">
             <Coins className="h-4 w-4 text-sui-blue" />
             <span>Balances & Tokens</span>
@@ -867,7 +867,7 @@ function App() {
     return (
       <div className="space-y-6">
         {/* Intent Summary Card */}
-        <div className="bg-white/[0.02] border border-white/[0.06] p-5 rounded-2xl flex flex-col gap-3 shadow-lg backdrop-blur-xl relative">
+        <div className="bg-gradient-to-b from-white/[0.03] to-white/[0.01] border border-white/[0.08] p-5 rounded-2xl flex flex-col gap-3 shadow-lg backdrop-blur-xl relative">
           <div className="flex justify-between items-center">
             <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Proposed Flow</span>
             <span className="text-[10px] bg-sui-blue/15 text-sui-blue border border-sui-blue/20 px-2.5 py-0.5 rounded-full font-bold">PTB Block</span>
@@ -897,7 +897,7 @@ function App() {
         </div>
 
         {/* Guardian Checks Panel */}
-        <div className="bg-white/[0.02] border border-white/[0.06] p-5 rounded-2xl flex flex-col gap-4 shadow-lg backdrop-blur-xl">
+        <div className="bg-gradient-to-b from-white/[0.03] to-white/[0.01] border border-white/[0.08] p-5 rounded-2xl flex flex-col gap-4 shadow-lg backdrop-blur-xl">
           <div className="flex items-center gap-2 border-b border-white/[0.06] pb-3">
             <ShieldCheck className="h-4.5 w-4.5 text-sui-blue" />
             <span className="text-[9px] font-bold text-white uppercase tracking-wider">Guardian Simulation</span>
@@ -1025,7 +1025,7 @@ function App() {
       <div className="flex-1 flex overflow-hidden h-screen z-10 relative">
         
         {/* Left Sidebar (Desktop: permanently visible, Mobile: hidden) */}
-        <aside className="hidden md:flex w-72 bg-white/[0.02] border border-white/[0.06] backdrop-blur-xl rounded-3xl p-4 my-4 ml-4 h-[calc(100vh-2rem)] flex-col justify-between shrink-0 select-none shadow-2xl">
+        <aside className="hidden md:flex w-72 bg-gradient-to-b from-white/[0.03] to-white/[0.01] border border-white/[0.08] backdrop-blur-2xl rounded-3xl p-4 my-4 ml-4 h-[calc(100vh-2rem)] flex-col justify-between shrink-0 select-none shadow-[0_8px_32px_rgba(0,0,0,0.45)]">
           {renderSidebarContents()}
         </aside>
 
@@ -1036,7 +1036,7 @@ function App() {
               className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden animate-in fade-in duration-200" 
               onClick={() => setMobileMenuOpen(false)} 
             />
-            <aside className="fixed inset-y-0 left-0 w-72 bg-[#030f1c] border-r border-border-dark p-4 z-50 flex flex-col justify-between md:hidden animate-in slide-in-from-left duration-250 select-none">
+            <aside className="fixed inset-y-0 left-0 w-72 bg-gradient-to-b from-[#030f1c] to-[#030f1c]/95 border-r border-white/[0.08] p-4 z-50 flex flex-col justify-between md:hidden animate-in slide-in-from-left duration-250 select-none shadow-2xl backdrop-blur-2xl">
               <div className="flex justify-end mb-2">
                 <button
                   onClick={() => setMobileMenuOpen(false)}
@@ -1053,7 +1053,7 @@ function App() {
         )}
 
         {/* Middle Column: Chat and Floating Input Box */}
-        <div className="flex-1 bg-white/[0.01] border border-white/[0.05] backdrop-blur-xl rounded-3xl my-4 mx-4 h-[calc(100vh-2rem)] flex flex-col overflow-hidden relative shadow-xl">
+        <div className="flex-1 bg-gradient-to-b from-white/[0.03] to-white/[0.01] border border-white/[0.08] backdrop-blur-2xl rounded-3xl my-4 mx-4 h-[calc(100vh-2rem)] flex flex-col overflow-hidden relative shadow-[0_8px_32px_rgba(0,0,0,0.45)]">
           
           {/* Messages Log */}
           <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-32 space-y-4">
@@ -1073,7 +1073,13 @@ function App() {
                 </div>
 
                 <div
-                  className={`p-4 rounded-2xl border text-xs leading-relaxed shadow-md max-w-[85%] backdrop-blur-md ${msg.sender === 'user' ? 'bg-sui-blue/[0.08] border-sui-blue/20 text-zinc-100 rounded-tr-none' : msg.error ? 'bg-red-500/[0.04] border-red-500/20 text-red-300 rounded-tl-none' : 'bg-white/[0.03] border-white/[0.08] text-zinc-200 rounded-tl-none'}`}
+                  className={`p-4 text-xs leading-relaxed max-w-[85%] ${
+                    msg.sender === 'user' 
+                      ? 'bg-gradient-to-b from-sui-blue/[0.12] to-sui-blue/[0.04] border border-sui-blue/30 text-zinc-100 rounded-2xl rounded-tr-none shadow-md backdrop-blur-md' 
+                      : msg.error 
+                      ? 'bg-gradient-to-b from-red-500/[0.08] to-red-500/[0.02] border border-red-500/20 text-red-300 rounded-2xl rounded-tl-none shadow-md backdrop-blur-md' 
+                      : 'bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/[0.08] text-zinc-200 rounded-2xl rounded-tl-none shadow-md backdrop-blur-md'
+                  }`}
                 >
                   <p className="font-medium whitespace-pre-wrap">{msg.text}</p>
 
@@ -1114,7 +1120,7 @@ function App() {
             {/* Inline Intent & Guardian Preview (Mobile/Tablet Only: visible only on screens smaller than lg) */}
             {activeIntent && (
               <div className="block lg:hidden max-w-xl mr-auto ml-11 p-1 animate-in fade-in duration-200">
-                <div className="bg-white/[0.02] border border-white/[0.06] p-5 rounded-2xl flex flex-col gap-5 shadow-lg backdrop-blur-xl">
+                <div className="bg-gradient-to-b from-white/[0.03] to-white/[0.01] border border-white/[0.08] p-5 rounded-2xl flex flex-col gap-5 shadow-lg backdrop-blur-xl">
                   <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
                     <div className="flex items-center gap-2">
                       <ShieldCheck className="h-4.5 w-4.5 text-sui-blue" />
@@ -1130,7 +1136,7 @@ function App() {
 
           {/* Floating Bottom Input Bar */}
           <div className="absolute bottom-4 left-4 right-4 z-20">
-            <div className="max-w-2xl mx-auto w-full relative flex items-center bg-[#030f1c]/80 backdrop-blur-2xl border border-white/[0.08] rounded-xl focus-within:border-sui-blue/50 focus-within:shadow-[0_0_15px_rgba(77,162,255,0.15)] transition-all">
+            <div className="max-w-2xl mx-auto w-full relative flex items-center bg-gradient-to-b from-[#030f1c]/90 to-[#030f1c]/80 backdrop-blur-2xl border border-white/[0.1] rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] focus-within:border-sui-blue/50 focus-within:shadow-[0_0_20px_rgba(77,162,255,0.25)] transition-all">
               <input
                 type="text"
                 value={input}
@@ -1157,7 +1163,7 @@ function App() {
         </div>
 
         {/* Right Sidebar: Intent Preview & Guardian Risk Checklist (Desktop Only: hidden on screens smaller than lg) */}
-        <section className="hidden lg:flex w-[400px] xl:w-[430px] flex-col bg-white/[0.02] border border-white/[0.06] backdrop-blur-xl rounded-3xl p-6 my-4 mr-4 h-[calc(100vh-2rem)] overflow-y-auto shrink-0 shadow-2xl select-none">
+        <section className="hidden lg:flex w-[400px] xl:w-[430px] flex-col bg-gradient-to-b from-white/[0.03] to-white/[0.01] border border-white/[0.08] backdrop-blur-2xl rounded-3xl p-6 my-4 mr-4 h-[calc(100vh-2rem)] overflow-y-auto shrink-0 shadow-[0_8px_32px_rgba(0,0,0,0.45)] select-none">
           <div className="flex items-center gap-2 pb-4 border-b border-white/[0.06]">
             <ShieldCheck className="h-5 w-5 text-sui-blue" />
             <h2 className="font-outfit font-extrabold text-sm text-white uppercase tracking-wider">Intent & Guardian Preview</h2>
