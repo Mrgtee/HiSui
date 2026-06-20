@@ -144,11 +144,12 @@ export const getCetusSdk = (network: 'mainnet' | 'testnet') => {
 };
 
 export interface Action {
-  type: 'swap' | 'deposit';
+  type: 'swap' | 'deposit' | 'transfer';
   fromToken?: string;
   toToken?: string;
   amount: string; // raw base units (e.g. MIST for SUI)
-  tokenType?: string; // used for deposit
+  tokenType?: string; // used for deposit/transfer
+  recipient?: string; // used for transfer SUI address
 }
 
 // SUI, USDC, USDT, DEEP, and CETUS configurations per network
@@ -364,6 +365,20 @@ export const buildPTB = async (
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await depositCoinPTB(tx, naviToken, depositCoinObj as any, depositOptions);
+    } else if (action.type === 'transfer') {
+      const token = resolveTokenAddress(action.tokenType || 'SUI', config);
+      const amountVal = action.amount;
+      const recipient = action.recipient || senderAddress;
+
+      let transferCoinObj;
+      if (normalizeSuiAddress(token) === normalizeSuiAddress(config.TOKENS.SUI)) {
+        const [splitCoin] = tx.splitCoins(tx.gas, [tx.pure.u64(amountVal)]);
+        transferCoinObj = splitCoin;
+      } else {
+        transferCoinObj = await getCoinOfAmount(client, senderAddress, token, amountVal, tx);
+      }
+
+      tx.transferObjects([transferCoinObj as any], tx.pure.address(recipient));
     }
   }
 

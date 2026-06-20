@@ -388,8 +388,20 @@ function App() {
 
     try {
       // 1. AI Intent Parsing (Gemini API)
-      const parsedIntent = await parseUserIntent(userQuery);
+      const parsedIntent = await parseUserIntent(userQuery, balance, activeWalletAddress);
       
+      if (parsedIntent.clarificationRequired) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: 'bot',
+            text: parsedIntent.clarificationMessage || 'Could you please clarify your intent? For example, specify the token amount or swap asset.',
+          },
+        ]);
+        setIsParsing(false);
+        return;
+      }
+
       setMessages((prev) => [
         ...prev,
         {
