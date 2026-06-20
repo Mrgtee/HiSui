@@ -135,7 +135,6 @@ function App() {
   const [showZkDropdown, setShowZkDropdown] = useState(false);
   const [copiedZk, setCopiedZk] = useState(false);
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
-  const [showTokensDropdown, setShowTokensDropdown] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Withdraw Form states
@@ -628,7 +627,7 @@ function App() {
     }
   };
 
-      const renderSidebarContents = () => (
+        const renderSidebarContents = () => (
     <div className="flex flex-col justify-between h-full">
       <div className="flex flex-col gap-6 flex-1">
         {/* Logo and Network Selector */}
@@ -652,7 +651,7 @@ function App() {
                 <option value="testnet" className="bg-[#030f1c] text-zinc-100">Testnet</option>
               </select>
             </h1>
-            <p className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">AI Intent Engine</p>
+            <p className="text-[8px] text-zinc-500 font-extrabold uppercase tracking-wider">AI INTENT ENGINE FOR SUI</p>
           </div>
         </div>
 
@@ -668,43 +667,34 @@ function App() {
           New Chat Intent
         </button>
 
-        {/* Tokens Popover Menu */}
-        <div className="relative">
-          <button
-            onClick={() => setShowTokensDropdown(!showTokensDropdown)}
-            className="flex items-center justify-between w-full bg-sui-dark/50 border border-border-dark hover:border-sui-blue/40 px-4 py-3.5 rounded-xl transition-all cursor-pointer text-xs font-bold"
-          >
-            <div className="flex items-center gap-2.5">
-              <Coins className="h-4.5 w-4.5 text-sui-blue" />
-              <span className="text-zinc-200">Balances & Tokens</span>
-            </div>
-            <ChevronDown className="h-4 w-4 text-zinc-500 transition-transform duration-200" style={{ transform: showTokensDropdown ? 'rotate(180deg)' : 'none' }} />
-          </button>
-          
-          {showTokensDropdown && (
-            <>
-              <div 
-                className="fixed inset-0 z-40" 
-                onClick={() => setShowTokensDropdown(false)} 
-              />
-              <div className="absolute left-0 right-0 mt-2 bg-sui-dark/95 border border-border-dark backdrop-blur-2xl rounded-2xl shadow-xl p-3 flex flex-col gap-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                {(['SUI', 'USDC', 'USDT', 'DEEP', 'CETUS'] as const).map((token) => (
-                  <div key={token} className="flex items-center justify-between p-2.5 rounded-xl hover:bg-white/[0.03] transition-colors">
-                    <div className="flex items-center gap-3">
-                      <TokenLogo symbol={token} className="h-6 w-6 shrink-0" />
-                      <div className="flex flex-col">
-                        <span className="text-xs font-bold text-zinc-200">{token}</span>
-                        <span className="text-[8px] text-zinc-500 font-semibold uppercase">
-                          {token === 'SUI' ? 'Sui Network' : token === 'CETUS' ? 'Cetus Protocol' : token === 'DEEP' ? 'DeepBook' : 'Stablecoin'}
-                        </span>
-                      </div>
-                    </div>
-                    <span className="text-xs font-mono font-bold text-zinc-300">{balance[token]}</span>
+        {/* Balances & Tokens Panel */}
+        <div className="bg-white/[0.02] border border-white/[0.06] backdrop-blur-md rounded-2xl p-4 flex flex-col gap-3.5">
+          <div className="flex items-center gap-2 text-[10px] text-zinc-400 font-extrabold uppercase tracking-wider pb-1 border-b border-white/[0.04]">
+            <Coins className="h-4 w-4 text-sui-blue" />
+            <span>Balances & Tokens</span>
+          </div>
+          <div className="flex flex-col gap-1">
+            {(['SUI', 'USDC', 'USDT', 'DEEP', 'CETUS'] as const).map((token) => (
+              <div key={token} className="flex items-center justify-between p-1.5 rounded-xl hover:bg-white/[0.02] transition-colors">
+                <div className="flex items-center gap-2.5">
+                  <TokenLogo symbol={token} className="h-7 w-7 shrink-0" />
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold text-zinc-200">{token}</span>
+                    <span className="text-[7px] text-zinc-500 font-extrabold uppercase tracking-tight leading-none mt-0.5">
+                      {token === 'SUI' 
+                        ? 'SUI NETWORK' 
+                        : token === 'CETUS' 
+                        ? 'CETUS PROTOCOL' 
+                        : token === 'DEEP' 
+                        ? 'DEEPBOOK' 
+                        : 'STABLECOIN'}
+                    </span>
                   </div>
-                ))}
+                </div>
+                <span className="text-xs font-mono font-bold text-zinc-300">{balance[token]}</span>
               </div>
-            </>
-          )}
+            ))}
+          </div>
         </div>
       </div>
 
@@ -771,9 +761,9 @@ function App() {
                       className="fixed inset-0 z-40" 
                       onClick={() => setShowZkDropdown(false)} 
                     />
-                    <div className="absolute bottom-14 left-0 right-0 bg-sui-dark/95 border border-border-dark backdrop-blur-2xl rounded-2xl shadow-xl p-4 flex flex-col gap-4 z-50 animate-in fade-in slide-in-from-bottom-2 duration-150">
+                    <div className="absolute bottom-14 left-0 right-0 bg-[#030f1c] border border-white/[0.08] backdrop-blur-2xl rounded-2xl shadow-xl p-4 flex flex-col gap-4 z-50 animate-in fade-in slide-in-from-bottom-2 duration-150">
                       {userEmail && (
-                        <div className="flex flex-col border-b border-border-dark pb-3">
+                        <div className="flex flex-col border-b border-white/[0.04] pb-3">
                           <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Google Session</span>
                           <span className="text-xs font-semibold text-zinc-300 mt-1 truncate" title={userEmail}>
                             {userEmail}
@@ -783,7 +773,7 @@ function App() {
 
                       <div className="flex flex-col gap-1">
                         <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Wallet Address</span>
-                        <div className="flex items-center justify-between bg-sui-dark/40 border border-border-dark rounded-xl px-3 py-2 mt-1">
+                        <div className="flex items-center justify-between bg-sui-dark/40 border border-white/[0.06] rounded-xl px-3 py-2 mt-1">
                           <span className="text-[10px] font-mono text-zinc-400 truncate w-40">
                             {zkAddress}
                           </span>
@@ -797,7 +787,7 @@ function App() {
                         </div>
                       </div>
 
-                      <div className="flex flex-col gap-1 border-t border-border-dark pt-3">
+                      <div className="flex flex-col gap-1 border-t border-white/[0.04] pt-3">
                         <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">zkLogin Proof Status</span>
                         {isZkLoading ? (
                           <div className="flex items-center gap-2 text-[10px] text-amber-400 mt-1">
@@ -824,7 +814,7 @@ function App() {
                         )}
                       </div>
 
-                      <div className="flex flex-col gap-2 pt-1.5 border-t border-border-dark">
+                      <div className="flex flex-col gap-2 pt-1.5 border-t border-white/[0.04]">
                         <button
                           onClick={() => {
                             setShowZkDropdown(false);
@@ -877,7 +867,7 @@ function App() {
     return (
       <div className="space-y-6">
         {/* Intent Summary Card */}
-        <div className="bg-sui-dark/40 border border-border-dark p-5 rounded-2xl flex flex-col gap-3 shadow-lg backdrop-blur-xl relative">
+        <div className="bg-white/[0.02] border border-white/[0.06] p-5 rounded-2xl flex flex-col gap-3 shadow-lg backdrop-blur-xl relative">
           <div className="flex justify-between items-center">
             <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Proposed Flow</span>
             <span className="text-[10px] bg-sui-blue/15 text-sui-blue border border-sui-blue/20 px-2.5 py-0.5 rounded-full font-bold">PTB Block</span>
@@ -885,11 +875,11 @@ function App() {
           <p className="text-xs font-bold text-white leading-tight">{activeIntent.summary}</p>
 
           {/* Steps Visualizer */}
-          <div className="mt-2 space-y-3.5 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-[2px] before:bg-border-dark">
+          <div className="mt-2 space-y-3.5 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-[2px] before:bg-white/[0.06]">
             {activeIntent.actions.map((act, index) => (
               <div key={index} className="flex gap-4 items-start pl-6 relative">
-                <div className="absolute left-1.5 h-3.5 w-3.5 rounded-full bg-gradient-to-r from-sui-blue to-sui-pink border-4 border-sui-dark flex items-center justify-center shadow-[0_0_8px_rgba(77,162,255,0.6)]" />
-                <div className="flex-1 bg-sui-dark/50 border border-border-dark p-3 rounded-xl flex items-center justify-between hover:border-sui-blue/30 transition-all hover:scale-[1.01]">
+                <div className="absolute left-1.5 h-3.5 w-3.5 rounded-full bg-gradient-to-r from-sui-blue to-sui-pink border-4 border-[#030f1c] flex items-center justify-center shadow-[0_0_8px_rgba(77,162,255,0.6)]" />
+                <div className="flex-1 bg-white/[0.01] border border-white/[0.04] p-3 rounded-xl flex items-center justify-between hover:border-sui-blue/30 transition-all hover:scale-[1.01]">
                   <div>
                     <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">{act.type}</span>
                     <p className="text-xs text-zinc-200 mt-0.5 font-medium">
@@ -907,8 +897,8 @@ function App() {
         </div>
 
         {/* Guardian Checks Panel */}
-        <div className="bg-sui-dark/40 border border-border-dark p-5 rounded-2xl flex flex-col gap-4 shadow-lg backdrop-blur-xl">
-          <div className="flex items-center gap-2 border-b border-border-dark pb-3">
+        <div className="bg-white/[0.02] border border-white/[0.06] p-5 rounded-2xl flex flex-col gap-4 shadow-lg backdrop-blur-xl">
+          <div className="flex items-center gap-2 border-b border-white/[0.06] pb-3">
             <ShieldCheck className="h-4.5 w-4.5 text-sui-blue" />
             <span className="text-[9px] font-bold text-white uppercase tracking-wider">Guardian Simulation</span>
           </div>
@@ -934,13 +924,13 @@ function App() {
 
               {/* Dynamic Rates */}
               {activeReport?.oraclePrice && (
-                <div className="flex justify-between items-center text-xs border-b border-border-dark pb-2">
+                <div className="flex justify-between items-center text-xs border-b border-white/[0.04] pb-2">
                   <span className="text-zinc-500 font-medium">Oracle SUI/USD Price:</span>
                   <span className="font-bold text-zinc-200">${activeReport.oraclePrice.toFixed(4)}</span>
                 </div>
               )}
               {activeReport?.executionRate && (
-                <div className="flex justify-between items-center text-xs border-b border-border-dark pb-2">
+                <div className="flex justify-between items-center text-xs border-b border-white/[0.04] pb-2">
                   <span className="text-zinc-500 font-medium">Cetus Execution Rate:</span>
                   <span className="font-bold text-zinc-200">{activeReport.executionRate.toFixed(4)} {activeReport.executionSymbol || 'USDC'}/SUI</span>
                 </div>
@@ -954,13 +944,13 @@ function App() {
                       key={i}
                       className={`flex gap-2.5 p-3 rounded-xl border text-[11px] leading-relaxed ${
                         warn.level === 'danger'
-                          ? 'bg-red-500/5 border-red-500/20 text-red-300'
+                          ? 'bg-red-500/[0.03] border border-red-500/10 text-red-300'
                           : warn.level === 'warning'
-                          ? 'bg-yellow-500/5 border-yellow-500/15 text-yellow-300'
-                          : 'bg-sui-dark/60 border-border-dark text-zinc-400'
+                          ? 'bg-yellow-500/[0.03] border border-yellow-500/10 text-yellow-300'
+                          : 'bg-white/[0.02] border border-white/[0.04] text-zinc-400'
                       }`}
                     >
-                      <AlertTriangle className={`h-4 w-4 shrink-0 mt-0.5 ${warn.level === 'danger' ? 'text-red-400' : warn.level === 'warning' ? 'text-yellow-400' : 'text-zinc-500'}`} />
+                      <AlertTriangle className={`h-4 w-4 shrink-0 mt-0.5 &{warn.level === 'danger' ? 'text-red-400' : warn.level === 'warning' ? 'text-yellow-400' : 'text-zinc-500'}`} />
                       <div>{warn.message}</div>
                     </div>
                   ))}
@@ -1035,7 +1025,7 @@ function App() {
       <div className="flex-1 flex overflow-hidden h-screen z-10 relative">
         
         {/* Left Sidebar (Desktop: permanently visible, Mobile: hidden) */}
-        <aside className="hidden md:flex w-72 bg-sui-dark/35 border-r border-border-dark backdrop-blur-xl h-screen flex-col justify-between p-4 shrink-0 select-none">
+        <aside className="hidden md:flex w-72 bg-white/[0.02] border border-white/[0.06] backdrop-blur-xl rounded-3xl p-4 my-4 ml-4 h-[calc(100vh-2rem)] flex-col justify-between shrink-0 select-none shadow-2xl">
           {renderSidebarContents()}
         </aside>
 
@@ -1062,18 +1052,18 @@ function App() {
           </>
         )}
 
-        {/* Middle Column: Chat and Centered Input Box */}
-        <div className="flex-1 flex flex-col bg-sui-dark/10 h-full overflow-hidden relative">
+        {/* Middle Column: Chat and Floating Input Box */}
+        <div className="flex-1 bg-white/[0.01] border border-white/[0.05] backdrop-blur-xl rounded-3xl my-4 mx-4 h-[calc(100vh-2rem)] flex flex-col overflow-hidden relative shadow-xl">
           
           {/* Messages Log */}
-          <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-32 space-y-4">
             {messages.map((msg, index) => (
               <div
                 key={index}
                 className={`flex gap-3 w-full ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}
               >
                 <div
-                  className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 shadow-md ${msg.sender === 'user' ? 'bg-sui-blue/15 border border-sui-blue/30' : 'bg-sui-dark/60 border border-border-dark'}`}
+                  className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 shadow-md ${msg.sender === 'user' ? 'bg-sui-blue/15 border border-sui-blue/30' : 'bg-white/[0.04] border border-white/[0.08]'}`}
                 >
                   {msg.sender === 'user' ? (
                     <Wallet className="h-4 w-4 text-sui-blue" />
@@ -1083,12 +1073,12 @@ function App() {
                 </div>
 
                 <div
-                  className={`p-4 rounded-2xl border text-xs leading-relaxed shadow-sm max-w-[85%] ${msg.sender === 'user' ? 'bg-sui-blue/10 border-sui-blue/20 text-zinc-100 rounded-tr-none' : msg.error ? 'bg-red-500/10 border-red-500/25 text-red-300 rounded-tl-none' : 'bg-card-dark border-border-dark text-zinc-300 rounded-tl-none'}`}
+                  className={`p-4 rounded-2xl border text-xs leading-relaxed shadow-md max-w-[85%] backdrop-blur-md ${msg.sender === 'user' ? 'bg-sui-blue/[0.08] border-sui-blue/20 text-zinc-100 rounded-tr-none' : msg.error ? 'bg-red-500/[0.04] border-red-500/20 text-red-300 rounded-tl-none' : 'bg-white/[0.03] border-white/[0.08] text-zinc-200 rounded-tl-none'}`}
                 >
                   <p className="font-medium whitespace-pre-wrap">{msg.text}</p>
 
                   {msg.intent && (
-                    <div className="mt-3 bg-sui-dark/40 border border-border-dark p-3 rounded-xl flex flex-col gap-2 shadow-inner">
+                    <div className="mt-3 bg-white/[0.02] border border-white/[0.05] p-3 rounded-xl flex flex-col gap-2 shadow-inner">
                       <div className="flex items-center gap-2 text-[10px] font-bold text-sui-blue uppercase tracking-wider">
                         <Sparkles className="h-3.5 w-3.5 text-sui-pink animate-pulse" />
                         AI Intent Compiled
@@ -1124,8 +1114,8 @@ function App() {
             {/* Inline Intent & Guardian Preview (Mobile/Tablet Only: visible only on screens smaller than lg) */}
             {activeIntent && (
               <div className="block lg:hidden max-w-xl mr-auto ml-11 p-1 animate-in fade-in duration-200">
-                <div className="bg-sui-dark/50 border border-border-dark p-5 rounded-2xl flex flex-col gap-5 shadow-lg backdrop-blur-xl">
-                  <div className="flex items-center justify-between border-b border-border-dark pb-3">
+                <div className="bg-white/[0.02] border border-white/[0.06] p-5 rounded-2xl flex flex-col gap-5 shadow-lg backdrop-blur-xl">
+                  <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
                     <div className="flex items-center gap-2">
                       <ShieldCheck className="h-4.5 w-4.5 text-sui-blue" />
                       <span className="text-[9px] font-bold text-white uppercase tracking-wider">Intent & Guardian Preview</span>
@@ -1138,9 +1128,9 @@ function App() {
             )}
           </div>
 
-          {/* Centered Bottom Input Bar */}
-          <div className="p-4 md:p-6 border-t border-border-dark bg-sui-dark/15 backdrop-blur-md shrink-0">
-            <div className="max-w-3xl mx-auto w-full relative flex items-center bg-sui-dark/45 border border-border-dark rounded-xl focus-within:border-sui-blue/50 focus-within:shadow-[0_0_15px_rgba(77,162,255,0.15)] transition-all">
+          {/* Floating Bottom Input Bar */}
+          <div className="absolute bottom-4 left-4 right-4 z-20">
+            <div className="max-w-2xl mx-auto w-full relative flex items-center bg-[#030f1c]/80 backdrop-blur-2xl border border-white/[0.08] rounded-xl focus-within:border-sui-blue/50 focus-within:shadow-[0_0_15px_rgba(77,162,255,0.15)] transition-all">
               <input
                 type="text"
                 value={input}
@@ -1167,8 +1157,8 @@ function App() {
         </div>
 
         {/* Right Sidebar: Intent Preview & Guardian Risk Checklist (Desktop Only: hidden on screens smaller than lg) */}
-        <section className="hidden lg:flex w-[400px] xl:w-[430px] flex-col bg-sui-dark/20 p-6 overflow-y-auto space-y-6 border-l border-border-dark shrink-0 backdrop-blur-md select-none">
-          <div className="flex items-center gap-2 pb-4 border-b border-border-dark">
+        <section className="hidden lg:flex w-[400px] xl:w-[430px] flex-col bg-white/[0.02] border border-white/[0.06] backdrop-blur-xl rounded-3xl p-6 my-4 mr-4 h-[calc(100vh-2rem)] overflow-y-auto shrink-0 shadow-2xl select-none">
+          <div className="flex items-center gap-2 pb-4 border-b border-white/[0.06]">
             <ShieldCheck className="h-5 w-5 text-sui-blue" />
             <h2 className="font-outfit font-extrabold text-sm text-white uppercase tracking-wider">Intent & Guardian Preview</h2>
           </div>
@@ -1180,9 +1170,9 @@ function App() {
       {/* Withdraw Modal Overlay */}
       {showWithdrawModal && (
         <div className="fixed inset-0 bg-sui-dark/85 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-[#030f1c] border border-border-dark rounded-3xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col animate-in scale-in duration-200">
+          <div className="bg-[#030f1c] border border-white/[0.08] rounded-3xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col animate-in scale-in duration-200">
             {/* Modal Header */}
-            <div className="flex justify-between items-center px-6 py-5 border-b border-border-dark bg-sui-dark/30">
+            <div className="flex justify-between items-center px-6 py-5 border-b border-white/[0.04] bg-[#030f1c]/30">
               <div className="flex items-center gap-2.5">
                 <div className="bg-sui-blue/15 p-2 rounded-xl text-sui-blue border border-sui-blue/20">
                   <ArrowRight className="h-5 w-5 -rotate-45" />
@@ -1198,7 +1188,7 @@ function App() {
                   setWithdrawError(null);
                   setWithdrawSuccessTx(null);
                 }}
-                className="text-zinc-500 hover:text-white p-1.5 rounded-xl hover:bg-sui-dark/65 transition-colors cursor-pointer"
+                className="text-zinc-500 hover:text-white p-1.5 rounded-xl hover:bg-white/[0.05] transition-colors cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -1215,7 +1205,7 @@ function App() {
                     <h4 className="text-sm font-bold text-emerald-400">Withdrawal Successful!</h4>
                     <p className="text-[10px] text-zinc-500 mt-1 font-semibold">Your transaction has been broadcast and executed on the blockchain.</p>
                   </div>
-                  <div className="bg-sui-dark/60 border border-border-dark p-3.5 rounded-xl w-full flex flex-col gap-2 mt-2">
+                  <div className="bg-[#030f1c]/60 border border-white/[0.06] p-3.5 rounded-xl w-full flex flex-col gap-2 mt-2">
                     <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Transaction Digest</span>
                     <a
                       href={`https://suiscan.xyz/${network}/tx/${withdrawSuccessTx}`}
@@ -1250,7 +1240,7 @@ function App() {
                             setWithdrawAsset(token);
                             setWithdrawError(null);
                           }}
-                          className={`flex flex-col items-center p-3 rounded-xl border text-center transition-all cursor-pointer ${withdrawAsset === token ? 'bg-sui-blue/10 border-sui-blue/50 text-white font-bold ring-1 ring-sui-blue/20' : 'bg-sui-dark/50 border-border-dark hover:border-zinc-800 text-zinc-400 hover:text-zinc-300'}`}
+                          className={`flex flex-col items-center p-3 rounded-xl border text-center transition-all cursor-pointer ${withdrawAsset === token ? 'bg-sui-blue/10 border-sui-blue/50 text-white font-bold ring-1 ring-sui-blue/20' : 'bg-white/[0.02] border border-white/[0.06] hover:border-zinc-800 text-zinc-400 hover:text-zinc-300'}`}
                         >
                           <TokenLogo symbol={token} className="h-5 w-5 shrink-0 mb-1" />
                           <span className="text-[10px] font-bold">{token}</span>
@@ -1273,7 +1263,7 @@ function App() {
                         setWithdrawRecipient(e.target.value);
                         setWithdrawError(null);
                       }}
-                      className="w-full bg-sui-dark/50 border border-border-dark rounded-xl px-4 py-3 text-xs text-zinc-100 placeholder-zinc-700 focus:outline-none focus:border-sui-blue transition-colors"
+                      className="w-full bg-white/[0.02] border border-white/[0.06] rounded-xl px-4 py-3 text-xs text-zinc-100 placeholder-zinc-700 focus:outline-none focus:border-sui-blue transition-colors"
                     />
                   </div>
 
@@ -1290,7 +1280,7 @@ function App() {
                           setWithdrawAmount(e.target.value);
                           setWithdrawError(null);
                         }}
-                        className="w-full bg-sui-dark/50 border border-border-dark rounded-xl pl-4 pr-16 py-3 text-xs text-zinc-100 placeholder-zinc-700 focus:outline-none focus:border-sui-blue transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="w-full bg-white/[0.02] border border-white/[0.06] rounded-xl pl-4 pr-16 py-3 text-xs text-zinc-100 placeholder-zinc-700 focus:outline-none focus:border-sui-blue transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                       <button
                         onClick={() => {
