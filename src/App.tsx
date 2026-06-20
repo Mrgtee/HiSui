@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { ConnectButton, useCurrentAccount, useSignAndExecuteTransaction, useSuiClientContext } from '@mysten/dapp-kit';
 import { 
   Send, 
@@ -128,6 +128,13 @@ function App() {
   const [isSimulating, setIsSimulating] = useState(false);
   const [executionTx, setExecutionTx] = useState<Transaction | null>(null);
   const [isExecuting, setIsExecuting] = useState(false);
+  const [isExecuted, setIsExecuted] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  // Auto scroll to bottom of chat
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isParsing]);
 
   // ZkLogin custom UI states
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -343,6 +350,7 @@ function App() {
     setActiveIntent(null);
     setActiveReport(null);
     setExecutionTx(null);
+    setIsExecuted(false);
   };
 
   // Submit plain English query
@@ -368,6 +376,7 @@ function App() {
     setIsParsing(true);
     setActiveIntent(null);
     setActiveReport(null);
+    setIsExecuted(false);
 
     try {
       // 1. AI Intent Parsing (Gemini API)
@@ -489,8 +498,7 @@ function App() {
       ]);
 
       // Reset
-      setActiveIntent(null);
-      setActiveReport(null);
+      setIsExecuted(true);
       setExecutionTx(null);
       fetchBalances();
 
@@ -857,6 +865,17 @@ function App() {
 
   const renderPreviewContents = () => {
     if (!activeIntent) {
+      if (isParsing) {
+        return (
+          <div className="flex-1 flex flex-col items-center justify-center text-center text-[#6E8298] px-4 py-20 h-full">
+            <div className="relative mb-4 h-16 w-16 rounded-full overflow-hidden border border-[rgba(89,200,255,0.10)] shadow-lg flex items-center justify-center bg-[#0D1B2A] animate-pulse">
+              <Loader2 className="h-7 w-7 animate-spin text-[#59C8FF]" />
+            </div>
+            <p className="text-xs font-bold text-[#F5F9FF]">Compiling Intent...</p>
+            <p className="text-[10px] text-[#6E8298] mt-1 max-w-[280px]">HiSui is parsing your input and simulating the transaction block...</p>
+          </div>
+        );
+      }
       return (
         <div className="flex-1 flex flex-col items-center justify-center text-center text-[#6E8298] px-4 py-20 h-full">
           <div className="relative mb-4 h-16 w-16 rounded-full overflow-hidden border border-[rgba(89,200,255,0.10)] shadow-lg animate-pulse">
@@ -967,13 +986,22 @@ function App() {
         {/* Execution Action */}
         <button
           onClick={handleExecute}
-          disabled={isExecuting || !activeReport?.success}
-          className="w-full flex items-center justify-center gap-2.5 bg-gradient-to-b from-[#163A5A] to-[#10263D] border border-[rgba(89,200,255,0.10)] disabled:border-transparent text-[#59C8FF] disabled:text-[#465A70] font-extrabold py-3.5 rounded-xl text-xs transition-all shadow-lg hover:border-[#2E6EA6] hover:scale-[1.01] active:scale-[0.99] disabled:from-[#0D1B2A] disabled:to-[#0D1B2A] disabled:shadow-none cursor-pointer"
+          disabled={isExecuting || !activeReport?.success || isExecuted}
+          className={`w-full flex items-center justify-center gap-2.5 border font-extrabold py-3.5 rounded-xl text-xs transition-all shadow-lg cursor-pointer ${
+            isExecuted
+              ? 'bg-[rgba(6,36,29,0.72)] border-[rgba(34,197,94,0.32)] text-[#4ADE80] shadow-[0_0_32px_rgba(34,197,94,0.12)]'
+              : 'bg-gradient-to-b from-[#163A5A] to-[#10263D] border border-[rgba(89,200,255,0.10)] text-[#59C8FF] hover:border-[#2E6EA6] hover:scale-[1.01] active:scale-[0.99] disabled:from-[#0D1B2A] disabled:to-[#0D1B2A] disabled:text-[#465A70] disabled:border-transparent disabled:shadow-none'
+          }`}
         >
           {isExecuting ? (
             <>
               <Loader2 className="h-4 w-4 animate-spin text-[#59C8FF]" />
               Signing & Executing Block...
+            </>
+          ) : isExecuted ? (
+            <>
+              <Check className="h-4.5 w-4.5 text-[#4ADE80]" />
+              Transaction Executed
             </>
           ) : (
             <>
@@ -1067,8 +1095,14 @@ function App() {
             />
           </div>
 
+          {/* Top Gradient Fade to prevent hard cut-off */}
+          <div className="absolute top-0 left-0 right-0 h-10 bg-gradient-to-b from-[#081423] via-[#081423]/80 to-transparent z-20 pointer-events-none rounded-t-3xl" />
+
+          {/* Bottom Gradient Fade to prevent text clashing with input */}
+          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#081423] via-[#081423]/80 to-transparent z-15 pointer-events-none rounded-b-3xl" />
+
           {/* Messages Log */}
-          <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-32 space-y-4 z-10 relative">
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 pt-10 pb-36 space-y-4 z-10 relative">
             {messages.map((msg, index) => (
               <div
                 key={index}
@@ -1130,6 +1164,8 @@ function App() {
                 HiSui is parsing your intent...
               </div>
             )}
+
+            <div ref={messagesEndRef} />
 
             {/* Inline Intent & Guardian Preview (Mobile/Tablet Only: visible only on screens smaller than lg) */}
             {activeIntent && (
