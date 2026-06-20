@@ -28,7 +28,9 @@ Available Actions:
    - Supported tokens: "SUI", "USDC", "USDT", "DEEP", "CETUS".
 3. TRANSFER:
    - Must specify: type="transfer", tokenType, recipient, and amount.
-   - Supported tokens: "SUI", "USDC", "USDT", "DEEP", "CETUS".
+   - tokenType: The token symbol being transferred (e.g. "SUI", "USDC", "USDT", "DEEP", "CETUS"). Do NOT include or append destination address or other words in the tokenType field.
+   - recipient: The destination SUI address (starting with "0x").
+   - amount: The raw amount in base units (MIST for SUI).
 
 Important decimal conversions:
 - SUI has 9 decimals. If SUI is specified (e.g., "10 SUI"), multiply the amount by 1,000,000,000 (1e9) to convert to base units (represented as a string integer. E.g. "10" -> "10000000000").
@@ -67,6 +69,21 @@ Output:
   "summary": "Request SUI/USDT Swap clarification",
   "clarificationRequired": true,
   "clarificationMessage": "How much SUI would you like to swap for USDT?"
+}
+
+Example 4: "send 0.1 SUI to 0x154fb6dbd7af51b381a28907b2b2c0fa1a92f2553d147857e53e09d10d3e9612"
+Output:
+{
+  "actions": [
+    {
+      "type": "transfer",
+      "tokenType": "SUI",
+      "recipient": "0x154fb6dbd7af51b381a28907b2b2c0fa1a92f2553d147857e53e09d10d3e9612",
+      "amount": "100000000"
+    }
+  ],
+  "summary": "Transfer 0.1 SUI to 0x154fb6dbd7af51b381a28907b2b2c0fa1a92f2553d147857e53e09d10d3e9612",
+  "clarificationRequired": false
 }
 `;
 

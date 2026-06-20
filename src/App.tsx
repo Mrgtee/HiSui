@@ -928,6 +928,8 @@ function App() {
                     <p className="text-xs text-[#D7E6F5] mt-0.5 font-medium">
                       {act.type === 'swap' 
                         ? `Swap ${parseFloat(act.amount) / Math.pow(10, getTokenDecimals(act.fromToken || 'SUI'))} ${act.fromToken} for ${act.toToken}` 
+                        : act.type === 'transfer'
+                        ? `Transfer ${parseFloat(act.amount) / Math.pow(10, getTokenDecimals(act.tokenType || 'SUI'))} ${act.tokenType || 'SUI'} to ${act.recipient ? act.recipient.slice(0, 6) + '...' + act.recipient.slice(-4) : 'recipient'}`
                         : `Deposit ${act.amount === 'all_swapped' ? 'all swapped assets' : parseFloat(act.amount) / Math.pow(10, getTokenDecimals(act.tokenType || 'USDC'))} ${act.tokenType || 'USDC'} into NAVI`
                       }
                     </p>
