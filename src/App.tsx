@@ -64,6 +64,7 @@ function App() {
   const [zkAddress, setZkAddress] = useState<string | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [zkProof, setZkProof] = useState<any | null>(null);
+  const [zkProofError, setZkProofError] = useState<string | null>(null);
   const [zkSession, setZkSession] = useState<ZkLoginSession | null>(null);
   const [isZkLoading, setIsZkLoading] = useState(false);
 
@@ -180,6 +181,7 @@ function App() {
     const fetchZkProofData = async () => {
       if (!jwt || !zkSession) return;
       setIsZkLoading(true);
+      setZkProofError(null);
       try {
         const salt = getOrGenerateSalt();
         const proof = await getZkProof(jwt, zkSession, salt, network);
@@ -187,6 +189,7 @@ function App() {
       } catch (err) {
         console.error('Failed to fetch ZK Proof for network ' + network + ':', err);
         setZkProof(null);
+        setZkProofError((err as Error).message || 'Unknown error');
       } finally {
         setIsZkLoading(false);
       }
@@ -365,8 +368,25 @@ function App() {
     try {
       let digest = '';
 
-      if (zkAddress && zkProof && zkSession && jwt) {
+      if (currentAccount) {
+        // Execute using standard browser wallet
+        const response = await signAndExecuteTxb({
+          transaction: executionTx,
+        });
+        digest = response.digest;
+      } else if (zkAddress) {
         // Execute using zkLogin Session Key
+        if (!jwt || !zkSession) {
+          throw new Error('zkLogin session or JWT is missing. Please log in again.');
+        }
+        if (!zkProof) {
+          throw new Error(
+            `ZK Proof is missing or failed to fetch. ${
+              zkProofError ? `Details: ${zkProofError}` : 'Please wait for the proof to load or try logging in again.'
+            }`
+          );
+        }
+
         const keypair = Ed25519Keypair.fromSecretKey(zkSession.ephemeralPrivateKey);
         const client = getSuiClient(network);
         
@@ -397,11 +417,7 @@ function App() {
 
         digest = response.digest;
       } else {
-        // Execute using standard browser wallet
-        const response = await signAndExecuteTxb({
-          transaction: executionTx,
-        });
-        digest = response.digest;
+        throw new Error('No wallet or zkLogin account is connected.');
       }
 
       setMessages((prev) => [
@@ -442,7 +458,15 @@ function App() {
   };
 
   const handleWithdrawSubmit = async () => {
-    if (!zkAddress || !zkProof || !zkSession || !jwt) return;
+    if (!zkAddress || !zkSession || !jwt) return;
+    if (!zkProof) {
+      setWithdrawError(
+        `ZK Proof is missing or failed to fetch. ${
+          zkProofError ? `Details: ${zkProofError}` : 'Please wait for the proof to load or try logging in again.'
+        }`
+      );
+      return;
+    }
     if (!withdrawRecipient.trim() || !withdrawAmount.trim()) {
       setWithdrawError('Recipient address and amount are required.');
       return;
@@ -670,6 +694,33 @@ function App() {
                                 {copiedZk ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
                               </button>
                             </div>
+                          </div>
+
+                          <div className="flex flex-col gap-1 border-t border-border-dark pt-3">
+                            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">zkLogin Proof Status</span>
+                            {isZkLoading ? (
+                              <div className="flex items-center gap-2 text-xs text-amber-400 mt-1">
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                                <span>Generating ZK Proof...</span>
+                              </div>
+                            ) : zkProof ? (
+                              <div className="flex items-center gap-1.5 text-xs text-emerald-400 mt-1 font-semibold">
+                                <Check className="h-3.5 w-3.5" />
+                                <span>Proof ready & synced</span>
+                              </div>
+                            ) : (
+                              <div className="flex flex-col gap-1 mt-1">
+                                <div className="flex items-center gap-1.5 text-xs text-red-400 font-semibold">
+                                  <AlertTriangle className="h-3.5 w-3.5" />
+                                  <span>Proof generation failed</span>
+                                </div>
+                                {zkProofError && (
+                                  <p className="text-[10px] text-red-500 font-mono break-words max-h-16 overflow-y-auto leading-tight bg-red-950/20 border border-red-500/10 p-1.5 rounded-lg mt-0.5">
+                                    {zkProofError}
+                                  </p>
+                                )}
+                              </div>
+                            )}
                           </div>
 
                           <div className="flex flex-col gap-2 pt-1 border-t border-border-dark">

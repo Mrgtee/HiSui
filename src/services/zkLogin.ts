@@ -95,7 +95,7 @@ export const getZkProof = async (
   
   const proverUrl = network === 'mainnet' 
     ? 'https://prover.mystenlabs.com/v1' 
-    : 'https://prover-dev.zklogin.net/v1';
+    : 'https://prover-dev.mystenlabs.com/v1';
 
   const response = await fetch(proverUrl, {
     method: 'POST',
