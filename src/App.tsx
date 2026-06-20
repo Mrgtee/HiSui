@@ -568,47 +568,57 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-bg-dark text-zinc-100 flex flex-col font-sans">
+    <div className="min-h-screen bg-sui-dark text-zinc-100 flex flex-col font-sans relative overflow-hidden select-none">
+      {/* Ambient Nebula Glows */}
+      <div className="absolute top-[-25%] left-[-20%] w-[65%] h-[65%] rounded-full bg-sui-blue/8 blur-[140px] animate-float-slow pointer-events-none z-0" />
+      <div className="absolute bottom-[-25%] right-[-20%] w-[65%] h-[65%] rounded-full bg-sui-pink/6 blur-[140px] animate-float-delayed pointer-events-none z-0" />
+
       {/* Top Navbar */}
-      <header className="border-b border-border-dark px-6 py-4 flex justify-between items-center bg-card-dark/50 backdrop-blur-md sticky top-0 z-50">
+      <header className="border-b border-border-dark px-6 py-4 flex justify-between items-center bg-sui-dark/30 backdrop-blur-xl sticky top-0 z-50">
         <div className="flex items-center gap-3">
-          <div className="bg-purple-600 p-2 rounded-xl flex items-center justify-center shadow-lg shadow-purple-600/30">
-            <Sparkles className="h-6 w-6 text-white" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-              HiSui
-              <select
-                value={network}
-                onChange={(e) => selectNetwork(e.target.value as 'mainnet' | 'testnet')}
-                className="bg-purple-600/20 text-purple-400 border border-purple-600/30 text-[10px] font-semibold px-2 py-0.5 rounded-full focus:outline-none cursor-pointer hover:bg-purple-600/30 transition-colors"
-              >
-                <option value="mainnet" className="bg-zinc-950 text-zinc-100">Mainnet</option>
-                <option value="testnet" className="bg-zinc-950 text-zinc-100">Testnet</option>
-              </select>
-            </h1>
-            <p className="text-xs text-zinc-500">AI Web3 Intent Engine & Guardian</p>
+          <div className="flex items-center gap-2.5">
+            <img 
+              src="/logo.png" 
+              alt="HiSui Logo" 
+              className="h-10 w-auto object-contain hover:scale-[1.06] active:scale-[0.98] transition-transform duration-300 cursor-pointer" 
+            />
+            <div>
+              <h1 className="text-xl font-outfit font-extrabold tracking-tight text-white flex items-center gap-2">
+                <span className="bg-gradient-to-r from-sui-blue via-white to-sui-pink bg-clip-text text-transparent">
+                  HiSui
+                </span>
+                <select
+                  value={network}
+                  onChange={(e) => selectNetwork(e.target.value as 'mainnet' | 'testnet')}
+                  className="bg-sui-blue/10 text-sui-blue border border-sui-blue/20 text-[10px] font-bold px-2 py-0.5 rounded-full focus:outline-none cursor-pointer hover:bg-sui-blue/20 hover:border-sui-blue/40 transition-all"
+                >
+                  <option value="mainnet" className="bg-[#030f1c] text-zinc-100">Mainnet</option>
+                  <option value="testnet" className="bg-[#030f1c] text-zinc-100">Testnet</option>
+                </select>
+              </h1>
+              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">AI Web3 Intent Engine & Guardian</p>
+            </div>
           </div>
         </div>
 
         <div className="flex items-center gap-4">
           {activeWalletAddress && (
-            <div className="hidden lg:flex items-center gap-4 bg-zinc-900 border border-border-dark px-4 py-2 rounded-xl">
+            <div className="hidden lg:flex items-center gap-4 bg-sui-dark/35 border border-border-dark px-4 py-2 rounded-xl backdrop-blur-md shadow-inner">
               <div className="flex items-center gap-2 border-r border-border-dark pr-4">
-                <Coins className="h-4 w-4 text-purple-400" />
-                <span className="text-sm font-semibold">{balance.SUI} SUI</span>
+                <Coins className="h-4 w-4 text-sui-blue" />
+                <span className="text-xs font-semibold text-zinc-200">{balance.SUI} SUI</span>
               </div>
               <div className="flex items-center gap-2 border-r border-border-dark pr-4">
-                <span className="text-sm font-semibold text-emerald-400">{balance.USDC} USDC</span>
+                <span className="text-xs font-semibold text-emerald-400">{balance.USDC} USDC</span>
               </div>
               <div className="flex items-center gap-2 border-r border-border-dark pr-4">
-                <span className="text-sm font-semibold text-teal-400">{balance.USDT} USDT</span>
+                <span className="text-xs font-semibold text-teal-400">{balance.USDT} USDT</span>
               </div>
               <div className="flex items-center gap-2 border-r border-border-dark pr-4">
-                <span className="text-sm font-semibold text-blue-400">{balance.DEEP} DEEP</span>
+                <span className="text-xs font-semibold text-blue-400">{balance.DEEP} DEEP</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-amber-400">{balance.CETUS} CETUS</span>
+                <span className="text-xs font-semibold text-amber-400">{balance.CETUS} CETUS</span>
               </div>
             </div>
           )}
@@ -620,10 +630,10 @@ function App() {
                 <button
                   onClick={handleGoogleLogin}
                   disabled={isZkLoading}
-                  className="flex items-center gap-2 bg-white text-zinc-950 font-semibold px-4 py-2 rounded-xl hover:bg-zinc-100 transition-colors text-sm shadow-sm"
+                  className="flex items-center gap-2 bg-white text-sui-dark font-extrabold px-4 py-2.5 rounded-xl hover:bg-zinc-100 transition-all text-xs shadow-sm hover:shadow-[0_0_15px_rgba(77,162,255,0.35)] cursor-pointer disabled:opacity-50"
                 >
                   {isZkLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-zinc-950" />
+                    <Loader2 className="h-4 w-4 animate-spin text-sui-dark" />
                   ) : (
                     <svg className="h-4 w-4" viewBox="0 0 24 24">
                       <path
@@ -656,9 +666,9 @@ function App() {
                   <div className="relative">
                     <button
                       onClick={() => setShowZkDropdown(!showZkDropdown)}
-                      className="flex items-center gap-2 bg-zinc-900 border border-border-dark hover:border-purple-500/50 px-4 py-2 rounded-xl transition-all cursor-pointer shadow-sm text-sm"
+                      className="flex items-center gap-2 bg-sui-dark/50 border border-border-dark hover:border-sui-blue/50 px-4 py-2.5 rounded-xl transition-all cursor-pointer shadow-sm text-xs"
                     >
-                      <span className="text-xs text-zinc-300 font-mono font-semibold">
+                      <span className="text-xs text-zinc-300 font-mono font-bold">
                         {zkAddress.slice(0, 6)}...{zkAddress.slice(-4)}
                       </span>
                       <ChevronDown className="h-3.5 w-3.5 text-zinc-500 transition-transform duration-200" style={{ transform: showZkDropdown ? 'rotate(180deg)' : 'none' }} />
@@ -670,26 +680,26 @@ function App() {
                           className="fixed inset-0 z-40" 
                           onClick={() => setShowZkDropdown(false)} 
                         />
-                        <div className="absolute right-0 mt-2 w-72 bg-zinc-950 border border-border-dark rounded-2xl shadow-xl p-4 flex flex-col gap-4 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                        <div className="absolute right-0 mt-2.5 w-72 bg-sui-dark/95 border border-border-dark backdrop-blur-2xl rounded-2xl shadow-xl p-4 flex flex-col gap-4 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
                           {userEmail && (
                             <div className="flex flex-col border-b border-border-dark pb-3">
-                              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Google Session</span>
-                              <span className="text-sm font-semibold text-zinc-300 mt-1 truncate" title={userEmail}>
+                              <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Google Session</span>
+                              <span className="text-xs font-semibold text-zinc-300 mt-1 truncate" title={userEmail}>
                                 {userEmail}
                               </span>
                             </div>
                           )}
 
-                          <div className="flex flex-col gap-1.5">
-                            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Wallet Address</span>
-                            <div className="flex items-center justify-between bg-zinc-900 border border-border-dark rounded-xl px-3 py-2 mt-1">
-                              <span className="text-xs font-mono text-zinc-400 truncate w-48">
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Wallet Address</span>
+                            <div className="flex items-center justify-between bg-sui-dark/40 border border-border-dark rounded-xl px-3 py-2 mt-1">
+                              <span className="text-[10px] font-mono text-zinc-400 truncate w-48">
                                 {zkAddress}
                               </span>
                               <button
                                 onClick={handleCopyZkAddress}
-                                className="text-zinc-400 hover:text-purple-400 p-1.5 rounded-lg hover:bg-zinc-800 transition-colors flex items-center justify-center shrink-0"
-                                title="Copy full address"
+                                className="text-zinc-400 hover:text-sui-blue p-1.5 rounded-lg hover:bg-sui-dark/70 transition-colors flex items-center justify-center shrink-0"
+                                title="Copy address"
                               >
                                 {copiedZk ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
                               </button>
@@ -697,25 +707,25 @@ function App() {
                           </div>
 
                           <div className="flex flex-col gap-1 border-t border-border-dark pt-3">
-                            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">zkLogin Proof Status</span>
+                            <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">zkLogin Proof Status</span>
                             {isZkLoading ? (
-                              <div className="flex items-center gap-2 text-xs text-amber-400 mt-1">
+                              <div className="flex items-center gap-2 text-[10px] text-amber-400 mt-1">
                                 <Loader2 className="h-3 w-3 animate-spin" />
                                 <span>Generating ZK Proof...</span>
                               </div>
                             ) : zkProof ? (
-                              <div className="flex items-center gap-1.5 text-xs text-emerald-400 mt-1 font-semibold">
+                              <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 mt-1 font-bold">
                                 <Check className="h-3.5 w-3.5" />
                                 <span>Proof ready & synced</span>
                               </div>
                             ) : (
                               <div className="flex flex-col gap-1 mt-1">
-                                <div className="flex items-center gap-1.5 text-xs text-red-400 font-semibold">
+                                <div className="flex items-center gap-1.5 text-[10px] text-red-400 font-bold">
                                   <AlertTriangle className="h-3.5 w-3.5" />
                                   <span>Proof generation failed</span>
                                 </div>
                                 {zkProofError && (
-                                  <p className="text-[10px] text-red-500 font-mono break-words max-h-16 overflow-y-auto leading-tight bg-red-950/20 border border-red-500/10 p-1.5 rounded-lg mt-0.5">
+                                  <p className="text-[9px] text-red-400/90 font-mono break-words max-h-16 overflow-y-auto leading-tight bg-red-950/20 border border-red-500/10 p-1.5 rounded-lg mt-0.5">
                                     {zkProofError}
                                   </p>
                                 )}
@@ -723,21 +733,21 @@ function App() {
                             )}
                           </div>
 
-                          <div className="flex flex-col gap-2 pt-1 border-t border-border-dark">
+                          <div className="flex flex-col gap-2 pt-1.5 border-t border-border-dark">
                             <button
                               onClick={() => {
                                 setShowZkDropdown(false);
                                 setShowWithdrawModal(true);
                               }}
-                              className="flex items-center gap-2.5 w-full text-left text-sm font-semibold text-zinc-300 hover:text-white px-3 py-2.5 rounded-xl hover:bg-zinc-900 transition-colors"
+                              className="flex items-center gap-2.5 w-full text-left text-xs font-bold text-zinc-300 hover:text-sui-blue px-3 py-2.5 rounded-xl hover:bg-sui-blue/10 transition-colors cursor-pointer"
                             >
-                              <ArrowRight className="h-4 w-4 text-purple-400 -rotate-45" />
+                              <ArrowRight className="h-4 w-4 text-sui-blue -rotate-45" />
                               Withdraw Assets
                             </button>
 
                             <button
                               onClick={handleLogout}
-                              className="flex items-center gap-2.5 w-full text-left text-sm font-semibold text-red-400 hover:text-red-300 px-3 py-2.5 rounded-xl hover:bg-red-500/10 transition-colors"
+                              className="flex items-center gap-2.5 w-full text-left text-xs font-bold text-red-400 hover:text-red-300 px-3 py-2.5 rounded-xl hover:bg-red-500/10 transition-colors cursor-pointer"
                             >
                               <LogOut className="h-4 w-4 text-red-400" />
                               Disconnect Wallet
@@ -759,9 +769,9 @@ function App() {
       </header>
 
       {/* Main Container */}
-      <main className="flex-1 flex overflow-hidden">
+      <main className="flex-1 flex overflow-hidden z-10 relative">
         {/* Left Side: Conversational Chat */}
-        <section className="flex-1 flex flex-col border-r border-border-dark bg-zinc-950/20">
+        <section className="flex-1 flex flex-col border-r border-border-dark bg-sui-dark/10 backdrop-blur-sm">
           {/* Messages Log */}
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
             {messages.map((msg, index) => (
@@ -774,46 +784,46 @@ function App() {
                 <div
                   className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 shadow-md ${
                     msg.sender === 'user'
-                      ? 'bg-purple-600/30 border border-purple-600/30'
-                      : 'bg-zinc-900 border border-border-dark'
+                      ? 'bg-sui-blue/15 border border-sui-blue/30'
+                      : 'bg-sui-dark/60 border border-border-dark'
                   }`}
                 >
                   {msg.sender === 'user' ? (
-                    <Wallet className="h-4 w-4 text-purple-400" />
+                    <Wallet className="h-4 w-4 text-sui-blue" />
                   ) : (
-                    <Bot className="h-4 w-4 text-purple-400" />
+                    <Bot className="h-4 w-4 text-sui-pink" />
                   )}
                 </div>
 
                 <div
-                  className={`p-4 rounded-2xl border text-sm leading-relaxed ${
+                  className={`p-4 rounded-2xl border text-xs leading-relaxed shadow-sm ${
                     msg.sender === 'user'
-                      ? 'bg-purple-600/10 border-purple-600/20 text-zinc-100 rounded-tr-none'
+                      ? 'bg-sui-blue/10 border-sui-blue/20 text-zinc-100 rounded-tr-none'
                       : msg.error
                       ? 'bg-red-500/10 border-red-500/25 text-red-300 rounded-tl-none'
                       : 'bg-card-dark border-border-dark text-zinc-300 rounded-tl-none'
                   }`}
                 >
-                  <p>{msg.text}</p>
+                  <p className="font-medium whitespace-pre-wrap">{msg.text}</p>
                   
                   {msg.intent && (
-                    <div className="mt-3 bg-zinc-950/40 border border-border-dark p-3 rounded-xl flex flex-col gap-2">
-                      <div className="flex items-center gap-2 text-xs font-semibold text-purple-400">
-                        <Sparkles className="h-3.5 w-3.5" />
+                    <div className="mt-3 bg-sui-dark/40 border border-border-dark p-3 rounded-xl flex flex-col gap-2 shadow-inner">
+                      <div className="flex items-center gap-2 text-[10px] font-bold text-sui-blue uppercase tracking-wider">
+                        <Sparkles className="h-3.5 w-3.5 text-sui-pink animate-pulse" />
                         AI Intent Compiled
                       </div>
-                      <p className="text-xs text-zinc-400 font-semibold">{msg.intent.summary}</p>
+                      <p className="text-[10px] text-zinc-400 font-semibold">{msg.intent.summary}</p>
                     </div>
                   )}
 
                   {msg.txDigest && (
-                    <div className="mt-3 bg-emerald-500/5 border border-emerald-500/20 p-3 rounded-xl flex flex-col gap-1.5">
-                      <span className="text-xs font-semibold text-emerald-400">Transaction Confirmed:</span>
+                    <div className="mt-3 bg-emerald-500/5 border border-emerald-500/20 p-3 rounded-xl flex flex-col gap-1.5 shadow-inner">
+                      <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Transaction Confirmed:</span>
                       <a
                         href={`https://suiscan.xyz/${network}/tx/${msg.txDigest}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-xs text-purple-400 underline break-all font-mono"
+                        className="text-xs text-sui-blue hover:text-sui-pink underline break-all font-mono transition-colors"
                       >
                         {msg.txDigest}
                       </a>
@@ -824,15 +834,15 @@ function App() {
             ))}
             {isParsing && (
               <div className="flex gap-3 items-center text-xs text-zinc-500 italic">
-                <Loader2 className="h-4 w-4 animate-spin text-purple-500" />
+                <Loader2 className="h-4 w-4 animate-spin text-sui-blue" />
                 HiSui is parsing your intent...
               </div>
             )}
           </div>
 
           {/* Typing Area */}
-          <div className="p-4 border-t border-border-dark bg-card-dark/25">
-            <div className="relative flex items-center">
+          <div className="p-4 border-t border-border-dark bg-sui-dark/15 backdrop-blur-md">
+            <div className="relative flex items-center bg-sui-dark/45 border border-border-dark rounded-xl focus-within:border-sui-blue/50 focus-within:shadow-[0_0_15px_rgba(77,162,255,0.15)] transition-all">
               <input
                 type="text"
                 value={input}
@@ -840,16 +850,16 @@ function App() {
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                 placeholder={
                   activeWalletAddress
-                    ? 'e.g. Swap 5 SUI for USDC and deposit it in NAVI'
+                    ? 'e.g. Swap 0.5 SUI for USDC'
                     : 'Connect wallet or zkLogin to begin...'
                 }
                 disabled={!activeWalletAddress || isParsing}
-                className="w-full bg-zinc-900 border border-border-dark rounded-xl pl-4 pr-12 py-3 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-purple-500 transition-colors disabled:opacity-50"
+                className="w-full bg-transparent pl-4 pr-12 py-3.5 text-xs text-zinc-100 placeholder-zinc-700 focus:outline-none disabled:opacity-50"
               />
               <button
                 onClick={handleSend}
                 disabled={!input.trim() || isParsing}
-                className="absolute right-2 p-2 bg-purple-600 hover:bg-purple-500 disabled:bg-zinc-800 disabled:text-zinc-600 text-white rounded-lg transition-colors flex items-center justify-center"
+                className="absolute right-2 p-2 bg-gradient-to-r from-sui-blue to-sui-pink disabled:from-zinc-800 disabled:to-zinc-800 disabled:text-zinc-600 text-sui-dark rounded-lg hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center cursor-pointer shadow-md"
               >
                 <Send className="h-4 w-4" />
               </button>
@@ -858,44 +868,44 @@ function App() {
         </section>
 
         {/* Right Side: Intent Preview & Guardian Risk Checklist */}
-        <section className="w-[450px] flex flex-col bg-card-dark/30 p-6 overflow-y-auto space-y-6">
+        <section className="w-[430px] flex flex-col bg-sui-dark/20 p-6 overflow-y-auto space-y-6 backdrop-blur-md">
           <div className="flex items-center gap-2 pb-4 border-b border-border-dark">
-            <ShieldCheck className="h-5 w-5 text-purple-400" />
-            <h2 className="font-bold text-white tracking-tight">Intent & Guardian Preview</h2>
+            <ShieldCheck className="h-5 w-5 text-sui-blue" />
+            <h2 className="font-outfit font-extrabold text-sm text-white uppercase tracking-wider">Intent & Guardian Preview</h2>
           </div>
 
           {!activeIntent ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center text-zinc-500 px-4 py-20">
-              <Bot className="h-12 w-12 text-zinc-700 mb-3" />
-              <p className="text-sm font-semibold">No active intent compiled yet.</p>
-              <p className="text-xs text-zinc-600 mt-1">Submit a plain English goal in the chat, and the compiled block will appear here for verification.</p>
+              <Bot className="h-12 w-12 text-zinc-700 mb-3 animate-pulse" />
+              <p className="text-xs font-bold text-zinc-400">No active intent compiled yet.</p>
+              <p className="text-[10px] text-zinc-600 mt-1 max-w-[280px]">Submit a plain English goal in the chat, and the compiled block will appear here for verification.</p>
             </div>
           ) : (
             <div className="space-y-6">
               {/* Intent Summary Card */}
-              <div className="bg-zinc-900 border border-border-dark p-5 rounded-2xl flex flex-col gap-3 shadow-md">
+              <div className="bg-sui-dark/40 border border-border-dark p-5 rounded-2xl flex flex-col gap-3 shadow-lg backdrop-blur-xl relative">
                 <div className="flex justify-between items-center">
-                  <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Proposed Flow</span>
-                  <span className="text-[10px] bg-purple-600/20 text-purple-400 px-2.5 py-0.5 rounded-full font-semibold">PTB Block</span>
+                  <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Proposed Flow</span>
+                  <span className="text-[10px] bg-sui-blue/15 text-sui-blue border border-sui-blue/20 px-2.5 py-0.5 rounded-full font-bold">PTB Block</span>
                 </div>
-                <p className="text-sm font-bold text-white">{activeIntent.summary}</p>
+                <p className="text-xs font-bold text-white leading-tight">{activeIntent.summary}</p>
 
                 {/* Steps Visualizer */}
-                <div className="mt-2 space-y-3 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-[2px] before:bg-zinc-800">
+                <div className="mt-2 space-y-3.5 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-[2px] before:bg-border-dark">
                   {activeIntent.actions.map((act, index) => (
                     <div key={index} className="flex gap-4 items-start pl-6 relative">
-                      <div className="absolute left-1.5 h-3.5 w-3.5 rounded-full bg-purple-600 border-4 border-zinc-900 flex items-center justify-center" />
-                      <div className="flex-1 bg-zinc-950/50 border border-border-dark p-3 rounded-xl flex items-center justify-between">
+                      <div className="absolute left-1.5 h-3.5 w-3.5 rounded-full bg-gradient-to-r from-sui-blue to-sui-pink border-4 border-sui-dark flex items-center justify-center shadow-[0_0_8px_rgba(77,162,255,0.6)]" />
+                      <div className="flex-1 bg-sui-dark/50 border border-border-dark p-3 rounded-xl flex items-center justify-between hover:border-sui-blue/30 transition-all hover:scale-[1.01]">
                         <div>
-                          <span className="text-xs font-semibold text-zinc-500 uppercase">{act.type}</span>
-                          <p className="text-xs text-zinc-200 mt-0.5">
+                          <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">{act.type}</span>
+                          <p className="text-xs text-zinc-200 mt-0.5 font-medium">
                             {act.type === 'swap' 
                               ? `Swap ${parseFloat(act.amount) / Math.pow(10, getTokenDecimals(act.fromToken || 'SUI'))} ${act.fromToken} for ${act.toToken}` 
                               : `Deposit ${act.amount === 'all_swapped' ? 'all swapped assets' : parseFloat(act.amount) / Math.pow(10, getTokenDecimals(act.tokenType || 'USDC'))} ${act.tokenType || 'USDC'} into NAVI`
                             }
                           </p>
                         </div>
-                        <ArrowRight className="h-4 w-4 text-zinc-600" />
+                        <ArrowRight className="h-4 w-4 text-zinc-600 shrink-0" />
                       </div>
                     </div>
                   ))}
@@ -903,40 +913,42 @@ function App() {
               </div>
 
               {/* Guardian Checks Panel */}
-              <div className="bg-zinc-900 border border-border-dark p-5 rounded-2xl flex flex-col gap-4 shadow-md">
+              <div className="bg-sui-dark/40 border border-border-dark p-5 rounded-2xl flex flex-col gap-4 shadow-lg backdrop-blur-xl">
                 <div className="flex items-center gap-2 border-b border-border-dark pb-3">
-                  <ShieldCheck className="h-4 w-4 text-purple-400" />
-                  <span className="text-xs font-bold text-white uppercase tracking-wider">Guardian Simulation</span>
+                  <ShieldCheck className="h-4.5 w-4.5 text-sui-blue" />
+                  <span className="text-[9px] font-bold text-white uppercase tracking-wider">Guardian Simulation</span>
                 </div>
 
                 {isSimulating ? (
                   <div className="flex flex-col items-center justify-center py-6 gap-2">
-                    <Loader2 className="h-5 w-5 animate-spin text-purple-500" />
-                    <span className="text-xs text-zinc-500 italic">Running on-chain dry-run...</span>
+                    <Loader2 className="h-5 w-5 animate-spin text-sui-blue" />
+                    <span className="text-[10px] text-zinc-500 italic">Running on-chain dry-run...</span>
                   </div>
                 ) : (
                   <div className="space-y-4">
                     {/* Simulation Status */}
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-zinc-400">Dry-run Simulation:</span>
-                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                        activeReport?.success ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'
+                      <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Dry-run Simulation:</span>
+                      <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                        activeReport?.success 
+                          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                          : 'bg-red-500/10 text-red-400 border-red-500/20'
                       }`}>
-                        {activeReport?.success ? 'COMPILING SUCCESS' : 'SIMULATION FAIL'}
+                        {activeReport?.success ? 'SUCCESS' : 'FAILED'}
                       </span>
                     </div>
 
                     {/* Dynamic Rates */}
                     {activeReport?.oraclePrice && (
                       <div className="flex justify-between items-center text-xs border-b border-border-dark pb-2">
-                        <span className="text-zinc-400">Oracle SUI/USD Price:</span>
-                        <span className="font-semibold text-white">${activeReport.oraclePrice.toFixed(4)}</span>
+                        <span className="text-zinc-500 font-medium">Oracle SUI/USD Price:</span>
+                        <span className="font-bold text-zinc-200">${activeReport.oraclePrice.toFixed(4)}</span>
                       </div>
                     )}
                     {activeReport?.executionRate && (
                       <div className="flex justify-between items-center text-xs border-b border-border-dark pb-2">
-                        <span className="text-zinc-400">Cetus Execution Rate:</span>
-                        <span className="font-semibold text-white">{activeReport.executionRate.toFixed(4)} {activeReport.executionSymbol || 'USDC'}/SUI</span>
+                        <span className="text-zinc-500 font-medium">Cetus Execution Rate:</span>
+                        <span className="font-bold text-zinc-200">{activeReport.executionRate.toFixed(4)} {activeReport.executionSymbol || 'USDC'}/SUI</span>
                       </div>
                     )}
 
@@ -946,17 +958,15 @@ function App() {
                         {activeReport.warnings.map((warn, i) => (
                           <div
                             key={i}
-                            className={`flex gap-2.5 p-3 rounded-xl border text-xs leading-relaxed ${
+                            className={`flex gap-2.5 p-3 rounded-xl border text-[11px] leading-relaxed ${
                               warn.level === 'danger'
-                                ? 'bg-red-500/10 border-red-500/20 text-red-300'
+                                ? 'bg-red-500/5 border-red-500/20 text-red-300'
                                 : warn.level === 'warning'
-                                ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-300'
-                                : 'bg-zinc-950/40 border-border-dark text-zinc-400'
+                                ? 'bg-yellow-500/5 border-yellow-500/15 text-yellow-300'
+                                : 'bg-sui-dark/60 border-border-dark text-zinc-400'
                             }`}
                           >
-                            <AlertTriangle className={`h-4 w-4 shrink-0 ${
-                              warn.level === 'danger' ? 'text-red-400' : warn.level === 'warning' ? 'text-yellow-400' : 'text-zinc-500'
-                            }`} />
+                            <AlertTriangle className={`h-4 w-4 shrink-0 mt-0.5 \${warn.level === 'danger' ? 'text-red-400' : warn.level === 'warning' ? 'text-yellow-400' : 'text-zinc-500'}`} />
                             <div>{warn.message}</div>
                           </div>
                         ))}
@@ -970,7 +980,7 @@ function App() {
               <button
                 onClick={handleExecute}
                 disabled={isExecuting || !activeReport?.success}
-                className="w-full flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-500 disabled:bg-zinc-800 disabled:text-zinc-600 font-bold py-3.5 rounded-xl text-sm transition-all shadow-lg shadow-purple-600/15 disabled:shadow-none"
+                className="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-sui-blue to-sui-pink text-sui-dark font-extrabold py-3.5 rounded-xl text-xs transition-all shadow-lg shadow-sui-blue/15 hover:shadow-sui-pink/25 hover:scale-[1.01] active:scale-[0.99] disabled:from-zinc-800 disabled:to-zinc-800 disabled:text-zinc-600 disabled:shadow-none cursor-pointer"
               >
                 {isExecuting ? (
                   <>
@@ -979,7 +989,7 @@ function App() {
                   </>
                 ) : (
                   <>
-                    <ShieldCheck className="h-4 w-4" />
+                    <ShieldCheck className="h-4.5 w-4.5" />
                     Approve & Sign Transaction
                   </>
                 )}
@@ -991,17 +1001,17 @@ function App() {
 
       {/* Withdraw Modal Overlay */}
       {showWithdrawModal && (
-        <div className="fixed inset-0 bg-black/65 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-zinc-950 border border-border-dark rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col animate-in scale-in duration-200">
+        <div className="fixed inset-0 bg-sui-dark/85 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-[#030f1c] border border-border-dark rounded-3xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col animate-in scale-in duration-200">
             {/* Modal Header */}
-            <div className="flex justify-between items-center px-6 py-5 border-b border-border-dark bg-card-dark/20">
+            <div className="flex justify-between items-center px-6 py-5 border-b border-border-dark bg-sui-dark/30">
               <div className="flex items-center gap-2.5">
-                <div className="bg-purple-600/20 p-2 rounded-xl text-purple-400">
+                <div className="bg-sui-blue/15 p-2 rounded-xl text-sui-blue border border-sui-blue/20">
                   <ArrowRight className="h-5 w-5 -rotate-45" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-white tracking-tight">Withdraw Wallet Assets</h3>
-                  <p className="text-xs text-zinc-500">Send assets from your zkLogin wallet to another address</p>
+                  <h3 className="text-md font-outfit font-extrabold text-white tracking-tight">Withdraw Wallet Assets</h3>
+                  <p className="text-[10px] text-zinc-500 font-semibold">Send assets from your zkLogin wallet to another address</p>
                 </div>
               </div>
               <button
@@ -1010,7 +1020,7 @@ function App() {
                   setWithdrawError(null);
                   setWithdrawSuccessTx(null);
                 }}
-                className="text-zinc-500 hover:text-white p-1.5 rounded-xl hover:bg-zinc-900 transition-colors"
+                className="text-zinc-500 hover:text-white p-1.5 rounded-xl hover:bg-sui-dark/65 transition-colors cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -1025,17 +1035,17 @@ function App() {
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-emerald-400">Withdrawal Successful!</h4>
-                    <p className="text-xs text-zinc-500 mt-1">Your transaction has been broadcast and executed on the blockchain.</p>
+                    <p className="text-[10px] text-zinc-500 mt-1 font-semibold">Your transaction has been broadcast and executed on the blockchain.</p>
                   </div>
-                  <div className="bg-zinc-900 border border-border-dark p-3.5 rounded-xl w-full flex flex-col gap-2 mt-2">
-                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Transaction Digest</span>
+                  <div className="bg-sui-dark/60 border border-border-dark p-3.5 rounded-xl w-full flex flex-col gap-2 mt-2">
+                    <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Transaction Digest</span>
                     <a
-                      href={`https://suiscan.xyz/${network}/tx/${withdrawSuccessTx}`}
+                      href={`https://suiscan.xyz/\${network}/tx/\${withdrawSuccessTx}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-xs text-purple-400 hover:text-purple-300 underline font-mono break-all flex items-center justify-center gap-1.5"
+                      className="text-xs text-sui-blue hover:text-sui-pink underline font-mono break-all flex items-center justify-center gap-1.5 transition-colors"
                     >
-                      {withdrawSuccessTx.slice(0, 16)}...{withdrawSuccessTx.slice(-16)}
+                      {withdrawSuccessTx.slice(0, 12)}...{withdrawSuccessTx.slice(-12)}
                       <ExternalLink className="h-3 w-3 shrink-0" />
                     </a>
                   </div>
@@ -1044,7 +1054,7 @@ function App() {
                       setShowWithdrawModal(false);
                       setWithdrawSuccessTx(null);
                     }}
-                    className="w-full bg-purple-600 hover:bg-purple-500 font-bold py-3 rounded-xl text-sm transition-colors mt-4 cursor-pointer"
+                    className="w-full bg-gradient-to-r from-sui-blue to-sui-pink text-sui-dark font-extrabold py-3 rounded-xl text-xs transition-colors mt-4 cursor-pointer shadow-md"
                   >
                     Close Modal
                   </button>
@@ -1053,7 +1063,7 @@ function App() {
                 <div className="space-y-4">
                   {/* Asset Selection */}
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Select Token</label>
+                    <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Select Token</label>
                     <div className="grid grid-cols-5 gap-2 mt-1">
                       {(['SUI', 'USDC', 'USDT', 'DEEP', 'CETUS'] as const).map((token) => (
                         <button
@@ -1062,16 +1072,10 @@ function App() {
                             setWithdrawAsset(token);
                             setWithdrawError(null);
                           }}
-                          className={`flex flex-col items-center p-3 rounded-xl border text-center transition-all cursor-pointer ${
-                            withdrawAsset === token
-                              ? 'bg-purple-600/10 border-purple-500/50 text-white font-bold ring-1 ring-purple-500/20'
-                              : 'bg-zinc-900 border-border-dark hover:border-zinc-800 text-zinc-400'
-                          }`}
+                          className={`flex flex-col items-center p-3 rounded-xl border text-center transition-all cursor-pointer \${withdrawAsset === token ? 'bg-sui-blue/10 border-sui-blue/50 text-white font-bold ring-1 ring-sui-blue/20' : 'bg-sui-dark/50 border-border-dark hover:border-zinc-800 text-zinc-400 hover:text-zinc-300'}`}
                         >
                           <span className="text-xs font-bold">{token}</span>
-                          <span className={`text-[10px] mt-1 font-semibold ${
-                            withdrawAsset === token ? 'text-purple-400' : 'text-zinc-500'
-                          }`}>
+                          <span className={`text-[9px] mt-1 font-semibold \${withdrawAsset === token ? 'text-sui-blue font-bold' : 'text-zinc-500'}`}>
                             {balance[token]}
                           </span>
                         </button>
@@ -1081,7 +1085,7 @@ function App() {
 
                   {/* Recipient Address */}
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Recipient SUI Address</label>
+                    <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Recipient SUI Address</label>
                     <input
                       type="text"
                       placeholder="Enter 66-character destination address (0x...)"
@@ -1090,13 +1094,13 @@ function App() {
                         setWithdrawRecipient(e.target.value);
                         setWithdrawError(null);
                       }}
-                      className="w-full bg-zinc-900 border border-border-dark rounded-xl px-4 py-3 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-purple-500 transition-colors"
+                      className="w-full bg-sui-dark/50 border border-border-dark rounded-xl px-4 py-3 text-xs text-zinc-100 placeholder-zinc-700 focus:outline-none focus:border-sui-blue transition-colors"
                     />
                   </div>
 
                   {/* Amount Input */}
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Amount</label>
+                    <label className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Amount</label>
                     <div className="relative flex items-center mt-1">
                       <input
                         type="number"
@@ -1107,20 +1111,20 @@ function App() {
                           setWithdrawAmount(e.target.value);
                           setWithdrawError(null);
                         }}
-                        className="w-full bg-zinc-900 border border-border-dark rounded-xl pl-4 pr-16 py-3 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-purple-500 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        className="w-full bg-sui-dark/50 border border-border-dark rounded-xl pl-4 pr-16 py-3 text-xs text-zinc-100 placeholder-zinc-700 focus:outline-none focus:border-sui-blue transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       />
                       <button
                         onClick={() => {
                           setWithdrawAmount('MAX');
                           setWithdrawError(null);
                         }}
-                        className="absolute right-2 px-3 py-1.5 bg-purple-600/20 hover:bg-purple-600/30 text-purple-400 hover:text-purple-300 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                        className="absolute right-2 px-3 py-1.5 bg-sui-blue/15 hover:bg-sui-blue/25 text-sui-blue hover:text-sui-blue/90 rounded-lg text-[10px] font-bold transition-colors cursor-pointer"
                       >
                         MAX
                       </button>
                     </div>
                     {withdrawAsset === 'SUI' && (
-                      <span className="text-[10px] text-zinc-500 mt-1 italic">
+                      <span className="text-[9px] text-zinc-500 mt-1 italic font-semibold leading-normal">
                         Note: Selecting MAX SUI will transfer all SUI in the wallet minus the required blockchain gas execution fee.
                       </span>
                     )}
@@ -1128,7 +1132,7 @@ function App() {
 
                   {/* Error Notification */}
                   {withdrawError && (
-                    <div className="bg-red-500/10 border border-red-500/20 p-3.5 rounded-xl flex gap-2 text-xs text-red-300 leading-relaxed items-start animate-in fade-in duration-150">
+                    <div className="bg-red-500/10 border border-red-500/20 p-3.5 rounded-xl flex gap-2 text-[10px] text-red-300 leading-relaxed items-start animate-in fade-in duration-150">
                       <AlertTriangle className="h-4 w-4 shrink-0 text-red-400 mt-0.5" />
                       <div>{withdrawError}</div>
                     </div>
@@ -1138,7 +1142,7 @@ function App() {
                   <button
                     onClick={handleWithdrawSubmit}
                     disabled={isWithdrawing || !withdrawRecipient.trim() || !withdrawAmount.trim()}
-                    className="w-full flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-500 disabled:bg-zinc-800 disabled:text-zinc-600 font-bold py-3.5 rounded-xl text-sm transition-all shadow-lg shadow-purple-600/10 disabled:shadow-none cursor-pointer mt-4"
+                    className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-sui-blue to-sui-pink text-sui-dark font-extrabold py-3.5 rounded-xl text-xs transition-all shadow-lg shadow-sui-blue/15 hover:shadow-sui-pink/25 hover:scale-[1.01] active:scale-[0.99] disabled:from-zinc-800 disabled:to-zinc-800 disabled:text-zinc-600 disabled:shadow-none cursor-pointer mt-4"
                   >
                     {isWithdrawing ? (
                       <>
@@ -1158,6 +1162,7 @@ function App() {
           </div>
         </div>
       )}
+
     </div>
   );
 }
