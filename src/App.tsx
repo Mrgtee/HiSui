@@ -133,12 +133,15 @@ function App() {
 
   // Auto scroll to bottom of chat
   useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTo({
-        top: chatContainerRef.current.scrollHeight,
-        behavior: 'smooth',
-      });
-    }
+    const timer = setTimeout(() => {
+      if (chatContainerRef.current) {
+        chatContainerRef.current.scrollTo({
+          top: chatContainerRef.current.scrollHeight,
+          behavior: 'smooth',
+        });
+      }
+    }, 100);
+    return () => clearTimeout(timer);
   }, [messages, isParsing]);
 
   // ZkLogin custom UI states
@@ -1188,6 +1191,9 @@ function App() {
                 </div>
               </div>
             )}
+
+            {/* Spacer to prevent overlapping with the floating composer */}
+            <div className="h-32 shrink-0 pointer-events-none" />
           </div>
 
           {/* Intent Composer */}
