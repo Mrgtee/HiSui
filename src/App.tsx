@@ -100,6 +100,7 @@ function App() {
   const activeWalletAddress = currentAccount?.address || zkAddress;
 
   // Handle zkLogin redirect callback on mount
+  // Handle zkLogin redirect callback on mount
   useEffect(() => {
     const handleCallback = async () => {
       const idToken = extractIdTokenFromUrl();
@@ -128,12 +129,9 @@ function App() {
           const session = getStoredSession();
           if (session) {
             setZkSession(session);
-            // Fetch ZK proof from prover
-            const proof = await getZkProof(idToken, session, salt);
-            setZkProof(proof);
           }
         } catch (err) {
-          console.error('Failed to initialize zkLogin address/proof:', err);
+          console.error('Failed to initialize zkLogin address:', err);
         } finally {
           setIsZkLoading(false);
         }
@@ -165,11 +163,8 @@ function App() {
             const salt = getOrGenerateSalt();
             const address = deriveZkAddress(storedJwt, salt);
             setZkAddress(address);
-            
-            const proof = await getZkProof(storedJwt, session, salt);
-            setZkProof(proof);
           } catch (err) {
-            console.error('Failed to load stored zkLogin details:', err);
+            console.error('Failed to load stored zkLogin address:', err);
           } finally {
             setIsZkLoading(false);
           }
@@ -179,6 +174,26 @@ function App() {
 
     handleCallback();
   }, []);
+
+  // Fetch ZK proof dynamically when network, jwt, or zkSession changes
+  useEffect(() => {
+    const fetchZkProofData = async () => {
+      if (!jwt || !zkSession) return;
+      setIsZkLoading(true);
+      try {
+        const salt = getOrGenerateSalt();
+        const proof = await getZkProof(jwt, zkSession, salt, network);
+        setZkProof(proof);
+      } catch (err) {
+        console.error('Failed to fetch ZK Proof for network ' + network + ':', err);
+        setZkProof(null);
+      } finally {
+        setIsZkLoading(false);
+      }
+    };
+
+    fetchZkProofData();
+  }, [jwt, zkSession, network]);
 
   // Fetch balances
   const fetchBalances = useCallback(async () => {

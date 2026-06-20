@@ -87,12 +87,17 @@ export const deriveZkAddress = (jwt: string, userSalt: string): string => {
 export const getZkProof = async (
   jwt: string,
   session: ZkLoginSession,
-  userSalt: string
+  userSalt: string,
+  network: 'mainnet' | 'testnet' = 'mainnet'
 ): Promise<unknown> => {
   const keypair = Ed25519Keypair.fromSecretKey(session.ephemeralPrivateKey);
   const extendedEphemeralPublicKey = getExtendedEphemeralPublicKey(keypair.getPublicKey());
   
-  const response = await fetch('https://prover-dev.zklogin.net/v1', {
+  const proverUrl = network === 'mainnet' 
+    ? 'https://prover.mystenlabs.com/v1' 
+    : 'https://prover-dev.zklogin.net/v1';
+
+  const response = await fetch(proverUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
