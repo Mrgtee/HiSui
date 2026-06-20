@@ -1,7 +1,17 @@
 import { SuiClient, getFullnodeUrl } from '@mysten/sui/client';
 
-const MAINNET_RPC_URL = (typeof import.meta.env !== 'undefined' ? import.meta.env.VITE_SUI_MAINNET_RPC_URL : undefined) || process.env.VITE_SUI_MAINNET_RPC_URL || getFullnodeUrl('mainnet');
-const TESTNET_RPC_URL = (typeof import.meta.env !== 'undefined' ? import.meta.env.VITE_SUI_RPC_URL : undefined) || process.env.VITE_SUI_RPC_URL || getFullnodeUrl('testnet');
+const getEnvVar = (key: string): string | undefined => {
+  if (typeof import.meta.env !== 'undefined' && import.meta.env[key]) {
+    return import.meta.env[key];
+  }
+  if (typeof process !== 'undefined' && process.env && process.env[key]) {
+    return process.env[key];
+  }
+  return undefined;
+};
+
+const MAINNET_RPC_URL = getEnvVar('VITE_SUI_MAINNET_RPC_URL') || getFullnodeUrl('mainnet');
+const TESTNET_RPC_URL = getEnvVar('VITE_SUI_RPC_URL') || getEnvVar('VITE_SUI_TESTNET_RPC_URL') || getFullnodeUrl('testnet');
 
 export const mainnetClient = new SuiClient({ url: MAINNET_RPC_URL });
 export const testnetClient = new SuiClient({ url: TESTNET_RPC_URL });
