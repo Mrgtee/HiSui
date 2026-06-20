@@ -4,6 +4,64 @@ import { initCetusSDK } from '@cetusprotocol/cetus-sui-clmm-sdk';
 import { depositCoinPTB } from '@naviprotocol/lending';
 import BN from 'bn.js';
 import { getSuiClient } from './suiClient';
+import type { SuiClient } from '@mysten/sui/client';
+
+const getCoinOfAmount = async (
+  client: SuiClient,
+  sender: string,
+  coinType: string,
+  amount: string | number,
+  tx: Transaction
+): Promise<TransactionArgument> => {
+  try {
+    const coinRes = await client.getCoins({
+      owner: sender,
+      coinType,
+    });
+    
+    if (coinRes.data && coinRes.data.length > 0) {
+      if (amount === 'all_swapped' || amount === 'all') {
+        const coinId = coinRes.data[0].coinObjectId;
+        const bal = coinRes.data[0].balance;
+        const [splitCoin] = tx.splitCoins(tx.object(coinId), [tx.pure.u64(bal)]);
+        return splitCoin;
+      }
+      
+      const targetAmount = BigInt(amount);
+      const singleCoin = coinRes.data.find(c => BigInt(c.balance) >= targetAmount);
+      if (singleCoin) {
+        const [splitCoin] = tx.splitCoins(tx.object(singleCoin.coinObjectId), [tx.pure.u64(targetAmount.toString())]);
+        return splitCoin;
+      }
+      
+      const coinsToMerge = [];
+      let accumulated = 0n;
+      for (const c of coinRes.data) {
+        coinsToMerge.push(c.coinObjectId);
+        accumulated += BigInt(c.balance);
+        if (accumulated >= targetAmount) {
+          break;
+        }
+      }
+      
+      if (accumulated < targetAmount) {
+        throw new Error(`Insufficient balance of ${coinType}. Needed: ${targetAmount.toString()}, Available: ${accumulated.toString()}`);
+      }
+      
+      const primaryCoin = coinsToMerge[0];
+      if (coinsToMerge.length > 1) {
+        tx.mergeCoins(tx.object(primaryCoin), coinsToMerge.slice(1).map(id => tx.object(id)));
+      }
+      const [splitCoin] = tx.splitCoins(tx.object(primaryCoin), [tx.pure.u64(targetAmount.toString())]);
+      return splitCoin;
+    }
+  } catch (err) {
+    console.error("Failed to query user coins:", err);
+  }
+  
+  // Dummy fallback object ID for dry-run simulation
+  return tx.object('0x0000000000000000000000000000000000000000000000000000000000000002');
+};
 
 // Initialize Cetus SDKs for both environments
 const mainnetCetusSdk = initCetusSDK({ network: 'mainnet' });
@@ -125,7 +183,7 @@ export const buildPTB = async (
         const [splitCoin] = tx.splitCoins(tx.gas, [tx.pure.u64(amountVal)]);
         inputCoinObj = splitCoin;
       } else {
-        inputCoinObj = tx.object(action.fromToken || '');
+        inputCoinObj = await getCoinOfAmount(client, senderAddress, from, amountVal, tx);
       }
 
       // 4. Construct direct moveCall to avoid full payload overrides and keep composability.
@@ -207,30 +265,7 @@ export const buildPTB = async (
           depositCoinObj = lastSwappedCoin;
         } else {
           // On Testnet (decoupled) or if no swap happened, fetch NAVI USDC from user's wallet
-          try {
-            const coinRes = await client.getCoins({
-              owner: senderAddress,
-              coinType: naviToken,
-            });
-            if (coinRes.data && coinRes.data.length > 0) {
-              const coinId = coinRes.data[0].coinObjectId;
-              if (amountVal === 'all_swapped') {
-                // If it was decoupled but says all_swapped, split/deposit some default or the first coin balance
-                const bal = coinRes.data[0].balance;
-                const [splitCoin] = tx.splitCoins(tx.object(coinId), [tx.pure.u64(bal)]);
-                depositCoinObj = splitCoin;
-              } else {
-                const [splitCoin] = tx.splitCoins(tx.object(coinId), [tx.pure.u64(amountVal)]);
-                depositCoinObj = splitCoin;
-              }
-            } else {
-              // Dummy fallback to let simulation build and output a clean "Object not found"
-              depositCoinObj = tx.object('0x0000000000000000000000000000000000000000000000000000000000000000');
-            }
-          } catch (err) {
-            console.error("Failed to query user coins:", err);
-            depositCoinObj = tx.object('0x0000000000000000000000000000000000000000000000000000000000000000');
-          }
+          depositCoinObj = await getCoinOfAmount(client, senderAddress, naviToken, amountVal, tx);
         }
       }
 
