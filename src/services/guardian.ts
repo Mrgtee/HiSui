@@ -1,6 +1,6 @@
 import { Transaction } from '@mysten/sui/transactions';
 import { getSuiClient } from './suiClient';
-import { NETWORK_CONFIG } from './ptbBuilder';
+import { NETWORK_CONFIG, normalizeSuiAddress } from './ptbBuilder';
 
 export interface GuardianReport {
   success: boolean;
@@ -22,17 +22,18 @@ export interface GuardianReport {
 
 const getSymbolFromCoinType = (coinType: string, network: 'mainnet' | 'testnet'): string => {
   const config = NETWORK_CONFIG[network];
+  const normalizedCoinType = normalizeSuiAddress(coinType);
   for (const [symbol, address] of Object.entries(config.TOKENS)) {
-    if (address.toLowerCase() === coinType.toLowerCase()) {
+    if (normalizeSuiAddress(address) === normalizedCoinType) {
       if (symbol === 'NAVI_USDC') return 'USDC';
       return symbol;
     }
   }
-  if (coinType.endsWith('::sui::SUI')) return 'SUI';
-  if (coinType.toLowerCase().includes('usdc')) return 'USDC';
-  if (coinType.toLowerCase().includes('usdt')) return 'USDT';
-  if (coinType.toLowerCase().includes('deep')) return 'DEEP';
-  if (coinType.toLowerCase().includes('cetus')) return 'CETUS';
+  if (normalizedCoinType.endsWith('::sui::sui')) return 'SUI';
+  if (normalizedCoinType.toLowerCase().includes('usdc')) return 'USDC';
+  if (normalizedCoinType.toLowerCase().includes('usdt')) return 'USDT';
+  if (normalizedCoinType.toLowerCase().includes('deep')) return 'DEEP';
+  if (normalizedCoinType.toLowerCase().includes('cetus')) return 'CETUS';
   
   const parts = coinType.split('::');
   return parts[parts.length - 1] || 'UNKNOWN';
@@ -143,21 +144,21 @@ export const runGuardianChecks = async (
     if (success) {
       // Find SUI and non-SUI balance changes
       const suiChange = dryRunResult.balanceChanges.find(
-        (change: { coinType: string; amount: string }) => change.coinType.toLowerCase().endsWith('::sui::sui')
+        (change: { coinType: string; amount: string }) => normalizeSuiAddress(change.coinType).endsWith('::sui::sui')
       );
       
       const knownAddresses = new Set([
         ...Object.values(NETWORK_CONFIG.mainnet.TOKENS),
         ...Object.values(NETWORK_CONFIG.testnet.TOKENS)
-      ].map(addr => addr.toLowerCase()));
+      ].map(addr => normalizeSuiAddress(addr)));
 
       const otherChange = dryRunResult.balanceChanges.find(
         (change: { coinType: string; amount: string }) => {
-          const lowerType = change.coinType.toLowerCase();
-          return !lowerType.endsWith('::sui::sui') && knownAddresses.has(lowerType);
+          const normType = normalizeSuiAddress(change.coinType);
+          return !normType.endsWith('::sui::sui') && knownAddresses.has(normType);
         }
       ) || dryRunResult.balanceChanges.find(
-        (change: { coinType: string; amount: string }) => !change.coinType.toLowerCase().endsWith('::sui::sui')
+        (change: { coinType: string; amount: string }) => !normalizeSuiAddress(change.coinType).endsWith('::sui::sui')
       );
 
       if (suiChange && otherChange) {

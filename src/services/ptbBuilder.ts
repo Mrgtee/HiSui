@@ -5,7 +5,18 @@ import { depositCoinPTB } from '@naviprotocol/lending';
 import BN from 'bn.js';
 import { getSuiClient } from './suiClient';
 import type { SuiClient } from '@mysten/sui/client';
-
+export const normalizeSuiAddress = (address: string): string => {
+  const clean = address.toLowerCase().trim();
+  if (!clean.startsWith('0x')) return clean;
+  
+  // If it's a full coin type (e.g. 0x...::module::Struct), normalize the address part
+  const parts = clean.split('::');
+  const addrPart = parts[0].slice(2); // remove 0x
+  const padded = addrPart.padStart(64, '0');
+  
+  parts[0] = '0x' + padded;
+  return parts.join('::');
+};
 const getCoinOfAmount = async (
   client: SuiClient,
   sender: string,
@@ -66,9 +77,9 @@ const getCoinOfAmount = async (
 const resolveTokenAddress = (symbolOrAddress: string, config: any): string => {
   const clean = symbolOrAddress.toUpperCase();
   if (config.TOKENS[clean]) {
-    return config.TOKENS[clean];
+    return normalizeSuiAddress(config.TOKENS[clean]);
   }
-  return symbolOrAddress;
+  return normalizeSuiAddress(symbolOrAddress);
 };
 
 const resolvePoolAddress = async (
@@ -80,8 +91,9 @@ const resolvePoolAddress = async (
 ): Promise<string> => {
   // Resolve symbols to construct static lookup key
   const getSymbol = (addr: string): string | null => {
+    const normalizedAddr = normalizeSuiAddress(addr);
     for (const [sym, val] of Object.entries(config.TOKENS)) {
-      if ((val as string).toLowerCase() === addr.toLowerCase()) {
+      if (normalizeSuiAddress(val as string) === normalizedAddr) {
         if (sym === 'NAVI_USDC') return 'USDC';
         return sym;
       }
@@ -151,9 +163,9 @@ export const NETWORK_CONFIG = {
       SUI: '0x2::sui::SUI',
       USDC: '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC',
       NAVI_USDC: '0xdba34672e30cb065b1f93e3ab55318768fd6fef66c15942c9f7cb846e2f900e7::usdc::USDC',
-      USDT: '0xc060006111016b8a020ad5b33834984a437aaa7d3c74c18e09a95d48aceab08c::coin::COIN',
+      USDT: '0x375f70cf2ae4c00bf37117d0c85a2c71545e6ee05c4a5c7d282cd66a4504b068::usdt::USDT',
       DEEP: '0xdeeb7a4662eec9f2f3def03fb937a663dddaa2e215b8078a284d026b7946c270::deep::DEEP',
-      CETUS: '0x6864a6f921804860930db6ddbe2e16acdf8504495ea7481637a1c8b9a8fe54b::cetus::CETUS',
+      CETUS: '0x06864a6f921804860930db6ddbe2e16acdf8504495ea7481637a1c8b9a8fe54b::cetus::CETUS',
     },
     POOL_ADDRESS: '0xb8d7d9e66a60c239e7a60110efcf8de6c705580ed924d0dde141f4a0e2c90105', // 0.25% fee tier SUI/USDC native pool
     NAVI_ENV: 'prod' as const,
@@ -225,13 +237,14 @@ export const buildPTB = async (
       const poolAny = pool as any;
 
       const getTokenDecimals = (coinType: string, cfg: any): number => {
-        if (coinType === cfg.TOKENS.SUI) return 9;
-        if (coinType === cfg.TOKENS.CETUS) return 9;
+        const norm = normalizeSuiAddress(coinType);
+        if (norm === normalizeSuiAddress(cfg.TOKENS.SUI)) return 9;
+        if (norm === normalizeSuiAddress(cfg.TOKENS.CETUS)) return 9;
         return 6; // USDC, USDT, DEEP are all 6 decimals
       };
 
       // Determine a2b and decimals dynamically based on pool coin types
-      const a2b = from === poolAny.coinTypeA;
+      const a2b = normalizeSuiAddress(from) === normalizeSuiAddress(poolAny.coinTypeA);
       const decimalsA = getTokenDecimals(poolAny.coinTypeA, config);
       const decimalsB = getTokenDecimals(poolAny.coinTypeB, config);
 
@@ -255,7 +268,7 @@ export const buildPTB = async (
 
       // Split the input coin from gas if swapping SUI
       let inputCoinObj;
-      if (from === config.TOKENS.SUI) {
+      if (normalizeSuiAddress(from) === normalizeSuiAddress(config.TOKENS.SUI)) {
         const [splitCoin] = tx.splitCoins(tx.gas, [tx.pure.u64(amountVal)]);
         inputCoinObj = splitCoin;
       } else {
@@ -332,7 +345,7 @@ export const buildPTB = async (
       const amountVal = action.amount;
 
       let depositCoinObj;
-      if (naviToken === config.TOKENS.SUI) {
+      if (normalizeSuiAddress(naviToken) === normalizeSuiAddress(config.TOKENS.SUI)) {
         const [splitCoin] = tx.splitCoins(tx.gas, [tx.pure.u64(amountVal)]);
         depositCoinObj = splitCoin;
       } else {
