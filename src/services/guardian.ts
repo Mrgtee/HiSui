@@ -22,18 +22,18 @@ export interface GuardianReport {
 
 const getSymbolFromCoinType = (coinType: string, network: 'mainnet' | 'testnet'): string => {
   const config = NETWORK_CONFIG[network];
-  const normalizedCoinType = normalizeSuiAddress(coinType);
+  const normalizedCoinType = normalizeSuiAddress(coinType).toLowerCase();
   for (const [symbol, address] of Object.entries(config.TOKENS)) {
-    if (normalizeSuiAddress(address) === normalizedCoinType) {
+    if (normalizeSuiAddress(address).toLowerCase() === normalizedCoinType) {
       if (symbol === 'NAVI_USDC') return 'USDC';
       return symbol;
     }
   }
   if (normalizedCoinType.endsWith('::sui::sui')) return 'SUI';
-  if (normalizedCoinType.toLowerCase().includes('usdc')) return 'USDC';
-  if (normalizedCoinType.toLowerCase().includes('usdt')) return 'USDT';
-  if (normalizedCoinType.toLowerCase().includes('deep')) return 'DEEP';
-  if (normalizedCoinType.toLowerCase().includes('cetus')) return 'CETUS';
+  if (normalizedCoinType.includes('usdc')) return 'USDC';
+  if (normalizedCoinType.includes('usdt')) return 'USDT';
+  if (normalizedCoinType.includes('deep')) return 'DEEP';
+  if (normalizedCoinType.includes('cetus')) return 'CETUS';
   
   const parts = coinType.split('::');
   return parts[parts.length - 1] || 'UNKNOWN';
@@ -144,21 +144,21 @@ export const runGuardianChecks = async (
     if (success) {
       // Find SUI and non-SUI balance changes
       const suiChange = dryRunResult.balanceChanges.find(
-        (change: { coinType: string; amount: string }) => normalizeSuiAddress(change.coinType).endsWith('::sui::sui')
+        (change: { coinType: string; amount: string }) => normalizeSuiAddress(change.coinType).toLowerCase().endsWith('::sui::sui')
       );
       
       const knownAddresses = new Set([
         ...Object.values(NETWORK_CONFIG.mainnet.TOKENS),
         ...Object.values(NETWORK_CONFIG.testnet.TOKENS)
-      ].map(addr => normalizeSuiAddress(addr)));
+      ].map(addr => normalizeSuiAddress(addr).toLowerCase()));
 
       const otherChange = dryRunResult.balanceChanges.find(
         (change: { coinType: string; amount: string }) => {
-          const normType = normalizeSuiAddress(change.coinType);
+          const normType = normalizeSuiAddress(change.coinType).toLowerCase();
           return !normType.endsWith('::sui::sui') && knownAddresses.has(normType);
         }
       ) || dryRunResult.balanceChanges.find(
-        (change: { coinType: string; amount: string }) => !normalizeSuiAddress(change.coinType).endsWith('::sui::sui')
+        (change: { coinType: string; amount: string }) => !normalizeSuiAddress(change.coinType).toLowerCase().endsWith('::sui::sui')
       );
 
       if (suiChange && otherChange) {

@@ -39,6 +39,12 @@ interface ChatMessage {
   error?: boolean;
 }
 
+const getTokenDecimals = (symbol: string): number => {
+  const clean = symbol?.toUpperCase();
+  if (clean === 'SUI' || clean === 'CETUS') return 9;
+  return 6; // USDC, USDT, DEEP
+};
+
 function App() {
   const currentAccount = useCurrentAccount();
   const { mutateAsync: signAndExecuteTxb } = useSignAndExecuteTransaction();
@@ -606,8 +612,8 @@ function App() {
                           <span className="text-xs font-semibold text-zinc-500 uppercase">{act.type}</span>
                           <p className="text-xs text-zinc-200 mt-0.5">
                             {act.type === 'swap' 
-                              ? `Swap ${parseFloat(act.amount) / (act.fromToken === 'SUI' ? 1e9 : 1e6)} ${act.fromToken} for ${act.toToken}` 
-                              : `Deposit ${act.amount === 'all_swapped' ? 'all swapped assets' : parseFloat(act.amount) / (act.tokenType === 'SUI' ? 1e9 : 1e6)} ${act.tokenType || 'USDC'} into NAVI`
+                              ? `Swap ${parseFloat(act.amount) / Math.pow(10, getTokenDecimals(act.fromToken || 'SUI'))} ${act.fromToken} for ${act.toToken}` 
+                              : `Deposit ${act.amount === 'all_swapped' ? 'all swapped assets' : parseFloat(act.amount) / Math.pow(10, getTokenDecimals(act.tokenType || 'USDC'))} ${act.tokenType || 'USDC'} into NAVI`
                             }
                           </p>
                         </div>
