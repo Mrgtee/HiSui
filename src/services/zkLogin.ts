@@ -107,6 +107,50 @@ export const getZkProof = async (
   const keypair = Ed25519Keypair.fromSecretKey(session.ephemeralPrivateKey);
   const extendedEphemeralPublicKey = getExtendedEphemeralPublicKey(keypair.getPublicKey());
   
+  const shinamiKey = (typeof import.meta.env !== 'undefined' ? import.meta.env.VITE_SHINAMI_API_KEY : undefined) || process.env.VITE_SHINAMI_API_KEY;
+
+  if (shinamiKey) {
+    // If running locally in development (Vite), route through our configured dev proxy to bypass CORS.
+    // For production, developers typically add a proxy/rewrite rule (e.g. vercel.json) or serverless function.
+    const isDev = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    const proverUrl = isDev 
+      ? `/api/zkprover/${shinamiKey}`
+      : `https://api.us1.shinami.com/sui/zkprover/v1/${shinamiKey}`;
+
+    const response = await fetch(proverUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        method: 'shinami_zkp_createZkLoginProof',
+        params: [
+          jwt,
+          extendedEphemeralPublicKey,
+          session.randomness,
+          session.maxEpoch,
+          userSalt,
+          'sub'
+        ],
+        id: 1,
+      }),
+    });
+
+    if (!response.ok) {
+      const errText = await response.text();
+      throw new Error(`Shinami Prover failed (HTTP ${response.status}): ${errText}`);
+    }
+
+    const resJson = await response.json();
+    if (resJson.error) {
+      throw new Error(`Shinami Prover error: ${resJson.error.message || JSON.stringify(resJson.error)}`);
+    }
+
+    return resJson.result;
+  }
+
+  // Fallback to Mysten Labs Prover
   const proverUrl = network === 'mainnet' 
     ? 'https://prover.mystenlabs.com/v1' 
     : 'https://prover-dev.mystenlabs.com/v1';
