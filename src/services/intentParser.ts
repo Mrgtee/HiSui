@@ -130,13 +130,19 @@ ${contextPrompt}
 User Query:
 "${query}"`;
   
-  const result = await model.generateContent(prompt);
-  const responseText = result.response.text();
-  
   try {
-    return JSON.parse(responseText) as ParsedIntent;
-  } catch (err) {
-    console.error('Failed to parse Gemini response:', responseText, err);
-    throw new Error('AI returned an invalid JSON response structure. Please try again.', { cause: err });
+    const result = await model.generateContent(prompt, { timeout: 15000 });
+    const responseText = result.response.text();
+    try {
+      return JSON.parse(responseText) as ParsedIntent;
+    } catch (parseErr) {
+      console.error('Failed to parse Gemini JSON response:', responseText, parseErr);
+      throw new Error('AI returned an invalid JSON response structure. Please try again.');
+    }
+  } catch (err: any) {
+    if (err?.name === 'AbortError' || err?.message?.includes('aborted') || err?.message?.includes('timeout')) {
+      throw new Error('AI parsing request timed out. Please check your internet connection to the Gemini API and try again.');
+    }
+    throw err;
   }
 };
