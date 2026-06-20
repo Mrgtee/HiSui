@@ -58,6 +58,15 @@ export const buildPTB = async (
   tx.setSender(senderAddress);
 
   const client = getSuiClient(network);
+  
+  // Set the reference gas price dynamically based on network to prevent gas validation errors
+  try {
+    const rgp = await client.getReferenceGasPrice();
+    tx.setGasPrice(rgp);
+  } catch (err) {
+    console.warn('Failed to fetch reference gas price, using default:', err);
+  }
+
   const sdk = getCetusSdk(network);
   const config = NETWORK_CONFIG[network];
 

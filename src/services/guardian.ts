@@ -18,8 +18,17 @@ export interface GuardianReport {
   oracleAge?: number;
 }
 
-// SUI/USD Pyth price feed ID
-const PYTH_SUI_FEED_ID = 'e62dd6b59b08bc1680e57c33b4d96a01f64859a0fcf67f0f09b521037bd7117e';
+// SUI/USD Pyth configurations per network
+const PYTH_CONFIGS = {
+  mainnet: {
+    endpoint: 'https://hermes.pyth.network',
+    feedId: '23d7315113f5b1d3ba7a83604c44b94d79f4fd69af77f804fc7f920a6dc65744',
+  },
+  testnet: {
+    endpoint: 'https://hermes-beta.pyth.network',
+    feedId: '50c67b3fd225db8912a424dd4baed60ffdde625ed2feaaf283724f9608fea266',
+  },
+};
 
 export const runGuardianChecks = async (
   tx: Transaction,
@@ -60,8 +69,9 @@ export const runGuardianChecks = async (
     // 3. Fetch SUI/USD real-time price and timestamp from Pyth Hermes API
     let pythData;
     try {
+      const pythConfig = PYTH_CONFIGS[network];
       const response = await fetch(
-        `https://hermes.pyth.network/v2/updates/price/latest?ids[]=${PYTH_SUI_FEED_ID}`
+        `${pythConfig.endpoint}/v2/updates/price/latest?ids[]=${pythConfig.feedId}`
       );
       if (response.ok) {
         pythData = await response.json();
