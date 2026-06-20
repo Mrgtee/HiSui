@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ConnectButton, useCurrentAccount, useSignAndExecuteTransaction, useSuiClientContext } from '@mysten/dapp-kit';
 import { 
-  Bot, 
   Send, 
   Wallet, 
   ShieldCheck, 
@@ -627,8 +626,8 @@ function App() {
     }
   };
 
-        const renderSidebarContents = () => (
-    <div className="flex flex-col justify-between h-full">
+  const renderSidebarContents = () => (
+    <div className="flex flex-col justify-between h-full font-sans">
       <div className="flex flex-col gap-6 flex-1">
         {/* Logo and Network Selector */}
         <div className="flex items-center gap-2.5 select-none px-2 pt-2">
@@ -638,20 +637,23 @@ function App() {
             className="h-10 w-auto object-contain hover:scale-[1.06] active:scale-[0.98] transition-transform duration-300 cursor-pointer" 
           />
           <div>
-            <h1 className="text-lg font-outfit font-extrabold tracking-tight text-white flex items-center gap-2">
-              <span className="bg-gradient-to-r from-sui-blue via-white to-sui-pink bg-clip-text text-transparent">
+            <h1 className="text-lg font-outfit font-extrabold tracking-tight text-[#F5F9FF] flex items-center gap-2">
+              <span className="bg-gradient-to-r from-[#59C8FF] via-[#F5F9FF] to-[#A78BFA] bg-clip-text text-transparent">
                 HiSui
               </span>
-              <select
-                value={network}
-                onChange={(e) => selectNetwork(e.target.value as 'mainnet' | 'testnet')}
-                className="bg-sui-blue/10 text-sui-blue border border-sui-blue/20 text-[9px] font-bold px-1.5 py-0.5 rounded-full focus:outline-none cursor-pointer hover:bg-sui-blue/20 hover:border-sui-blue/40 transition-all font-sans"
-              >
-                <option value="mainnet" className="bg-[#030f1c] text-zinc-100">Mainnet</option>
-                <option value="testnet" className="bg-[#030f1c] text-zinc-100">Testnet</option>
-              </select>
+              <div className="relative flex items-center select-none">
+                <span className="absolute left-2.5 w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
+                <select
+                  value={network}
+                  onChange={(e) => selectNetwork(e.target.value as 'mainnet' | 'testnet')}
+                  className="bg-[rgba(89,200,255,0.10)] text-[#7EE7FF] border border-[rgba(89,200,255,0.28)] text-[9px] font-bold pl-5 pr-2.5 py-0.5 rounded-full focus:outline-none cursor-pointer hover:bg-[rgba(89,200,255,0.15)] transition-all font-sans appearance-none"
+                >
+                  <option value="mainnet" className="bg-[#030f1c] text-zinc-100">Mainnet</option>
+                  <option value="testnet" className="bg-[#030f1c] text-zinc-100">Testnet</option>
+                </select>
+              </div>
             </h1>
-            <p className="text-[8px] text-zinc-500 font-extrabold uppercase tracking-wider">AI INTENT ENGINE FOR SUI</p>
+            <p className="text-[8px] text-[#9CB2C9] font-extrabold uppercase tracking-wider">AI INTENT ENGINE FOR SUI</p>
           </div>
         </div>
 
@@ -661,26 +663,26 @@ function App() {
             handleNewChat();
             setMobileMenuOpen(false);
           }}
-          className="flex items-center justify-center gap-2.5 w-full bg-sui-blue/10 border border-sui-blue/20 hover:border-sui-blue/40 text-sui-blue hover:text-white px-4 py-3 rounded-xl transition-all text-xs font-bold cursor-pointer hover:bg-sui-blue/20"
+          className="flex items-center justify-center gap-2.5 w-full bg-gradient-to-b from-[#163A5A] to-[#10263D] border border-[rgba(89,200,255,0.10)] hover:border-[#2E6EA6] text-[#59C8FF] px-4 py-3 rounded-xl transition-all text-xs font-bold cursor-pointer shadow-md"
         >
-          <Sparkles className="h-4 w-4" />
+          <Sparkles className="h-4 w-4 text-[#59C8FF]" />
           New Chat Intent
         </button>
 
         {/* Balances & Tokens Panel */}
-        <div className="bg-gradient-to-b from-white/[0.03] to-white/[0.01] border border-white/[0.08] backdrop-blur-xl rounded-2xl p-4 flex flex-col gap-3.5 shadow-md">
-          <div className="flex items-center gap-2 text-[10px] text-zinc-400 font-extrabold uppercase tracking-wider pb-1 border-b border-white/[0.04]">
-            <Coins className="h-4 w-4 text-sui-blue" />
+        <div className="bg-[rgba(13,27,42,0.82)] border border-[rgba(89,200,255,0.12)] rounded-2xl p-4 flex flex-col gap-3.5 shadow-[0_12px_40px_rgba(0,0,0,0.28)]">
+          <div className="flex items-center gap-2 text-[10px] text-[#9CB2C9] font-extrabold uppercase tracking-wider pb-1 border-b border-[rgba(89,200,255,0.10)]">
+            <Coins className="h-4 w-4 text-[#59C8FF]" />
             <span>Balances & Tokens</span>
           </div>
           <div className="flex flex-col gap-1">
             {(['SUI', 'USDC', 'USDT', 'DEEP', 'CETUS'] as const).map((token) => (
               <div key={token} className="flex items-center justify-between p-1.5 rounded-xl hover:bg-white/[0.02] transition-colors">
                 <div className="flex items-center gap-2.5">
-                  <TokenLogo symbol={token} className="h-7 w-7 shrink-0" />
+                  <TokenLogo symbol={token} className="h-7 w-7 shrink-0 opacity-85" />
                   <div className="flex flex-col">
-                    <span className="text-xs font-bold text-zinc-200">{token}</span>
-                    <span className="text-[7px] text-zinc-500 font-extrabold uppercase tracking-tight leading-none mt-0.5">
+                    <span className="text-xs font-bold text-[#F5F9FF]">{token}</span>
+                    <span className="text-[7px] text-[#7C93A8] font-extrabold uppercase tracking-tight leading-none mt-0.5">
                       {token === 'SUI' 
                         ? 'SUI NETWORK' 
                         : token === 'CETUS' 
@@ -691,7 +693,7 @@ function App() {
                     </span>
                   </div>
                 </div>
-                <span className="text-xs font-mono font-bold text-zinc-300">{balance[token]}</span>
+                <span className="text-xs font-mono font-bold text-[#DFF4FF]">{balance[token]}</span>
               </div>
             ))}
           </div>
@@ -699,7 +701,7 @@ function App() {
       </div>
 
       {/* Bottom Profile / Connection */}
-      <div className="border-t border-border-dark pt-4 flex flex-col gap-3">
+      <div className="border-t border-[rgba(89,200,255,0.10)] pt-4 flex flex-col gap-3">
         {!activeWalletAddress ? (
           <div className="flex flex-col gap-2">
             <button
@@ -708,12 +710,12 @@ function App() {
                 setMobileMenuOpen(false);
               }}
               disabled={isZkLoading}
-              className="flex items-center justify-center gap-2 w-full bg-white text-sui-dark font-extrabold px-4 py-2.5 rounded-xl hover:bg-zinc-100 transition-all text-xs shadow-sm hover:shadow-[0_0_15px_rgba(77,162,255,0.35)] cursor-pointer disabled:opacity-50"
+              className="flex items-center justify-center gap-2 w-full bg-[#0D1B2A] border border-[#18324D] hover:border-[#2E6EA6] text-[#F5F9FF] font-extrabold px-4 py-2.5 rounded-xl hover:bg-[#122338] transition-all text-xs shadow-sm hover:shadow-[0_0_36px_rgba(89,200,255,0.14)] cursor-pointer disabled:opacity-50"
             >
               {isZkLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin text-sui-dark" />
+                <Loader2 className="h-4 w-4 animate-spin text-[#59C8FF]" />
               ) : (
-                <svg className="h-4 w-4" viewBox="0 0 24 24">
+                <svg className="h-4 w-4 text-[#59C8FF]" viewBox="0 0 24 24">
                   <path
                     fill="currentColor"
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -744,15 +746,15 @@ function App() {
               <>
                 <button
                   onClick={() => setShowZkDropdown(!showZkDropdown)}
-                  className="flex items-center justify-between w-full bg-sui-dark/50 border border-border-dark hover:border-sui-blue/50 px-4 py-3 rounded-xl transition-all cursor-pointer shadow-sm text-xs"
+                  className="flex items-center justify-between w-full bg-[#0D1B2A] border border-[#18324D] hover:border-[#2E6EA6] px-4 py-3 rounded-xl transition-all cursor-pointer shadow-sm text-xs"
                 >
                   <div className="flex flex-col text-left truncate pr-2">
-                    {userEmail && <span className="text-[10px] text-zinc-400 font-semibold truncate">{userEmail}</span>}
-                    <span className="text-[10px] text-zinc-500 font-mono">
+                    {userEmail && <span className="text-[10px] text-[#9CB2C9] font-semibold truncate">{userEmail}</span>}
+                    <span className="text-[10px] text-[#6E8298] font-mono">
                       {zkAddress.slice(0, 8)}...{zkAddress.slice(-6)}
                     </span>
                   </div>
-                  <ChevronDown className="h-3.5 w-3.5 text-zinc-500 shrink-0 transition-transform duration-200" style={{ transform: showZkDropdown ? 'rotate(180deg)' : 'none' }} />
+                  <ChevronDown className="h-3.5 w-3.5 text-[#6E8298] shrink-0 transition-transform duration-200" style={{ transform: showZkDropdown ? 'rotate(180deg)' : 'none' }} />
                 </button>
 
                 {showZkDropdown && (
@@ -761,52 +763,52 @@ function App() {
                       className="fixed inset-0 z-40" 
                       onClick={() => setShowZkDropdown(false)} 
                     />
-                    <div className="absolute bottom-14 left-0 right-0 bg-[#030f1c] border border-white/[0.08] backdrop-blur-2xl rounded-2xl shadow-xl p-4 flex flex-col gap-4 z-50 animate-in fade-in slide-in-from-bottom-2 duration-150">
+                    <div className="absolute bottom-14 left-0 right-0 bg-[#0D1B2A] border border-[#18324D] backdrop-blur-2xl rounded-2xl shadow-xl p-4 flex flex-col gap-4 z-50 animate-in fade-in slide-in-from-bottom-2 duration-150">
                       {userEmail && (
-                        <div className="flex flex-col border-b border-white/[0.04] pb-3">
-                          <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Google Session</span>
-                          <span className="text-xs font-semibold text-zinc-300 mt-1 truncate" title={userEmail}>
+                        <div className="flex flex-col border-b border-[rgba(89,200,255,0.10)] pb-3">
+                          <span className="text-[9px] font-bold text-[#9CB2C9] uppercase tracking-wider">Google Session</span>
+                          <span className="text-xs font-semibold text-[#F5F9FF] mt-1 truncate" title={userEmail}>
                             {userEmail}
                           </span>
                         </div>
                       )}
 
                       <div className="flex flex-col gap-1">
-                        <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Wallet Address</span>
-                        <div className="flex items-center justify-between bg-sui-dark/40 border border-white/[0.06] rounded-xl px-3 py-2 mt-1">
-                          <span className="text-[10px] font-mono text-zinc-400 truncate w-40">
+                        <span className="text-[9px] font-bold text-[#9CB2C9] uppercase tracking-wider">Wallet Address</span>
+                        <div className="flex items-center justify-between bg-[#122338]/50 border border-[#18324D] rounded-xl px-3 py-2 mt-1">
+                          <span className="text-[10px] font-mono text-[#D7E6F5] truncate w-40">
                             {zkAddress}
                           </span>
                           <button
                             onClick={handleCopyZkAddress}
-                            className="text-zinc-400 hover:text-sui-blue p-1.5 rounded-lg hover:bg-sui-dark/70 transition-colors flex items-center justify-center shrink-0"
+                            className="text-[#9CB2C9] hover:text-[#59C8FF] p-1.5 rounded-lg hover:bg-[#122338]/70 transition-colors flex items-center justify-center shrink-0"
                             title="Copy address"
                           >
-                            {copiedZk ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+                            {copiedZk ? <Check className="h-4 w-4 text-[#6FFFD2]" /> : <Copy className="h-4 w-4" />}
                           </button>
                         </div>
                       </div>
 
-                      <div className="flex flex-col gap-1 border-t border-white/[0.04] pt-3">
-                        <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">zkLogin Proof Status</span>
+                      <div className="flex flex-col gap-1 border-t border-[rgba(89,200,255,0.10)] pt-3">
+                        <span className="text-[9px] font-bold text-[#9CB2C9] uppercase tracking-wider">zkLogin Proof Status</span>
                         {isZkLoading ? (
-                          <div className="flex items-center gap-2 text-[10px] text-amber-400 mt-1">
-                            <Loader2 className="h-3 w-3 animate-spin" />
+                          <div className="flex items-center gap-2 text-[10px] text-[#F5B942] mt-1">
+                            <Loader2 className="h-3 w-3 animate-spin text-[#F5B942]" />
                             <span>Generating ZK Proof...</span>
                           </div>
                         ) : zkProof ? (
-                          <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 mt-1 font-bold">
-                            <Check className="h-3.5 w-3.5" />
+                          <div className="flex items-center gap-1.5 text-[10px] text-[#6FFFD2] mt-1 font-bold">
+                            <Check className="h-3.5 w-3.5 text-[#6FFFD2]" />
                             <span>Proof ready & synced</span>
                           </div>
                         ) : (
                           <div className="flex flex-col gap-1 mt-1">
-                            <div className="flex items-center gap-1.5 text-[10px] text-red-400 font-bold">
-                              <AlertTriangle className="h-3.5 w-3.5" />
+                            <div className="flex items-center gap-1.5 text-[10px] text-[#F25F5C] font-bold">
+                              <AlertTriangle className="h-3.5 w-3.5 text-[#F25F5C]" />
                               <span>Proof generation failed</span>
                             </div>
                             {zkProofError && (
-                              <p className="text-[9px] text-red-400/90 font-mono break-words max-h-16 overflow-y-auto leading-tight bg-red-950/20 border border-red-500/10 p-1.5 rounded-lg mt-0.5">
+                              <p className="text-[9px] text-[#FF8A88]/90 font-mono break-words max-h-16 overflow-y-auto leading-tight bg-[#F25F5C]/10 border border-[#F25F5C]/20 p-1.5 rounded-lg mt-0.5">
                                 {zkProofError}
                               </p>
                             )}
@@ -814,7 +816,7 @@ function App() {
                         )}
                       </div>
 
-                      <div className="flex flex-col gap-2 pt-1.5 border-t border-white/[0.04]">
+                      <div className="flex flex-col gap-2 pt-1.5 border-t border-[rgba(89,200,255,0.10)]">
                         <button
                           onClick={() => {
                             setShowZkDropdown(false);
@@ -856,10 +858,12 @@ function App() {
   const renderPreviewContents = () => {
     if (!activeIntent) {
       return (
-        <div className="flex-1 flex flex-col items-center justify-center text-center text-zinc-500 px-4 py-20 h-full">
-          <Bot className="h-12 w-12 text-zinc-700 mb-3 animate-pulse" />
-          <p className="text-xs font-bold text-zinc-400">No active intent compiled yet.</p>
-          <p className="text-[10px] text-zinc-600 mt-1 max-w-[280px]">Submit a plain English goal in the chat, and the compiled block will appear here for verification.</p>
+        <div className="flex-1 flex flex-col items-center justify-center text-center text-[#6E8298] px-4 py-20 h-full">
+          <div className="relative mb-4 h-16 w-16 rounded-full overflow-hidden border border-[rgba(89,200,255,0.10)] shadow-lg animate-pulse">
+            <img src="/mascot.jpg" alt="HiSui Mascot" className="h-full w-full object-cover" />
+          </div>
+          <p className="text-xs font-bold text-[#F5F9FF]">No active intent compiled yet.</p>
+          <p className="text-[10px] text-[#6E8298] mt-1 max-w-[280px]">Submit a plain English goal in the chat, and the compiled block will appear here for verification.</p>
         </div>
       );
     }
@@ -867,29 +871,29 @@ function App() {
     return (
       <div className="space-y-6">
         {/* Intent Summary Card */}
-        <div className="bg-gradient-to-b from-white/[0.03] to-white/[0.01] border border-white/[0.08] p-5 rounded-2xl flex flex-col gap-3 shadow-lg backdrop-blur-xl relative">
+        <div className="bg-[#0D1B2A] border border-[rgba(89,200,255,0.10)] p-5 rounded-2xl flex flex-col gap-3 shadow-[0_12px_40px_rgba(0,0,0,0.28)] relative animate-in fade-in duration-200">
           <div className="flex justify-between items-center">
-            <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">Proposed Flow</span>
-            <span className="text-[10px] bg-sui-blue/15 text-sui-blue border border-sui-blue/20 px-2.5 py-0.5 rounded-full font-bold">PTB Block</span>
+            <span className="text-[9px] font-bold text-[#9CB2C9] uppercase tracking-wider">Proposed Flow</span>
+            <span className="text-[10px] bg-[rgba(89,200,255,0.10)] text-[#7EE7FF] border border-[rgba(89,200,255,0.28)] px-2.5 py-0.5 rounded-full font-bold">PTB Block</span>
           </div>
-          <p className="text-xs font-bold text-white leading-tight">{activeIntent.summary}</p>
+          <p className="text-xs font-bold text-[#F5F9FF] leading-tight">{activeIntent.summary}</p>
 
           {/* Steps Visualizer */}
-          <div className="mt-2 space-y-3.5 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-[2px] before:bg-white/[0.06]">
+          <div className="mt-2 space-y-3.5 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-[2px] before:bg-[rgba(89,200,255,0.10)]">
             {activeIntent.actions.map((act, index) => (
               <div key={index} className="flex gap-4 items-start pl-6 relative">
-                <div className="absolute left-1.5 h-3.5 w-3.5 rounded-full bg-gradient-to-r from-sui-blue to-sui-pink border-4 border-[#030f1c] flex items-center justify-center shadow-[0_0_8px_rgba(77,162,255,0.6)]" />
-                <div className="flex-1 bg-white/[0.01] border border-white/[0.04] p-3 rounded-xl flex items-center justify-between hover:border-sui-blue/30 transition-all hover:scale-[1.01]">
+                <div className="absolute left-1.5 h-3.5 w-3.5 rounded-full bg-gradient-to-r from-[#59C8FF] to-[#3B82F6] border-4 border-[#030B14] flex items-center justify-center shadow-[0_0_8px_rgba(89,200,255,0.6)]" />
+                <div className="flex-1 bg-[#122338]/40 border border-[#18324D] p-3 rounded-xl flex items-center justify-between hover:border-[#2E6EA6] transition-all hover:scale-[1.01]">
                   <div>
-                    <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider">{act.type}</span>
-                    <p className="text-xs text-zinc-200 mt-0.5 font-medium">
+                    <span className="text-[9px] font-bold text-[#9CB2C9] uppercase tracking-wider">{act.type}</span>
+                    <p className="text-xs text-[#D7E6F5] mt-0.5 font-medium">
                       {act.type === 'swap' 
                         ? `Swap ${parseFloat(act.amount) / Math.pow(10, getTokenDecimals(act.fromToken || 'SUI'))} ${act.fromToken} for ${act.toToken}` 
                         : `Deposit ${act.amount === 'all_swapped' ? 'all swapped assets' : parseFloat(act.amount) / Math.pow(10, getTokenDecimals(act.tokenType || 'USDC'))} ${act.tokenType || 'USDC'} into NAVI`
                       }
                     </p>
                   </div>
-                  <ArrowRight className="h-4 w-4 text-zinc-600 shrink-0" />
+                  <ArrowRight className="h-4 w-4 text-[#6E8298] shrink-0" />
                 </div>
               </div>
             ))}
@@ -897,26 +901,26 @@ function App() {
         </div>
 
         {/* Guardian Checks Panel */}
-        <div className="bg-gradient-to-b from-white/[0.03] to-white/[0.01] border border-white/[0.08] p-5 rounded-2xl flex flex-col gap-4 shadow-lg backdrop-blur-xl">
-          <div className="flex items-center gap-2 border-b border-white/[0.06] pb-3">
-            <ShieldCheck className="h-4.5 w-4.5 text-sui-blue" />
-            <span className="text-[9px] font-bold text-white uppercase tracking-wider">Guardian Simulation</span>
+        <div className="bg-[#0D1B2A] border border-[rgba(89,200,255,0.10)] p-5 rounded-2xl flex flex-col gap-4 shadow-[0_12px_40px_rgba(0,0,0,0.28)]">
+          <div className="flex items-center gap-2 border-b border-[rgba(89,200,255,0.10)] pb-3">
+            <ShieldCheck className="h-4.5 w-4.5 text-[#59C8FF]" />
+            <span className="text-[9px] font-bold text-[#F5F9FF] uppercase tracking-wider">Guardian Simulation</span>
           </div>
 
           {isSimulating ? (
-            <div className="flex flex-col items-center justify-center py-6 gap-2">
-              <Loader2 className="h-5 w-5 animate-spin text-sui-blue" />
-              <span className="text-[10px] text-zinc-500 italic">Running on-chain dry-run...</span>
+            <div className="flex flex-col items-center justify-center py-6 gap-2 animate-pulse">
+              <Loader2 className="h-5 w-5 animate-spin text-[#59C8FF]" />
+              <span className="text-[10px] text-[#6E8298] italic font-sans">Running on-chain dry-run...</span>
             </div>
           ) : (
             <div className="space-y-4">
               {/* Simulation Status */}
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Dry-run Simulation:</span>
+                <span className="text-[10px] font-bold text-[#9CB2C9] uppercase tracking-wider">Dry-run Simulation:</span>
                 <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
                   activeReport?.success 
-                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
-                    : 'bg-red-500/10 text-red-400 border-red-500/20'
+                    ? 'bg-[rgba(111,255,210,0.10)] text-[#6FFFD2] border-[rgba(111,255,210,0.28)]' 
+                    : 'bg-[rgba(242,95,92,0.10)] text-[#FF8A88] border-[rgba(242,95,92,0.35)]'
                 }`}>
                   {activeReport?.success ? 'SUCCESS' : 'FAILED'}
                 </span>
@@ -924,15 +928,15 @@ function App() {
 
               {/* Dynamic Rates */}
               {activeReport?.oraclePrice && (
-                <div className="flex justify-between items-center text-xs border-b border-white/[0.04] pb-2">
-                  <span className="text-zinc-500 font-medium">Oracle SUI/USD Price:</span>
-                  <span className="font-bold text-zinc-200">${activeReport.oraclePrice.toFixed(4)}</span>
+                <div className="flex justify-between items-center text-xs border-b border-[rgba(89,200,255,0.10)] pb-2">
+                  <span className="text-[#9CB2C9] font-medium">Oracle SUI/USD Price:</span>
+                  <span className="font-bold text-[#F5F9FF] font-mono">${activeReport.oraclePrice.toFixed(4)}</span>
                 </div>
               )}
               {activeReport?.executionRate && (
-                <div className="flex justify-between items-center text-xs border-b border-white/[0.04] pb-2">
-                  <span className="text-zinc-500 font-medium">Cetus Execution Rate:</span>
-                  <span className="font-bold text-zinc-200">{activeReport.executionRate.toFixed(4)} {activeReport.executionSymbol || 'USDC'}/SUI</span>
+                <div className="flex justify-between items-center text-xs border-b border-[rgba(89,200,255,0.10)] pb-2">
+                  <span className="text-[#9CB2C9] font-medium">Cetus Execution Rate:</span>
+                  <span className="font-bold text-[#F5F9FF] font-mono">{activeReport.executionRate.toFixed(4)} {activeReport.executionSymbol || 'USDC'}/SUI</span>
                 </div>
               )}
 
@@ -942,15 +946,15 @@ function App() {
                   {activeReport.warnings.map((warn, i) => (
                     <div
                       key={i}
-                      className={`flex gap-2.5 p-3 rounded-xl border text-[11px] leading-relaxed ${
+                      className={`flex gap-2.5 p-3 rounded-xl border text-[11px] leading-relaxed backdrop-blur-sm ${
                         warn.level === 'danger'
-                          ? 'bg-red-500/[0.03] border border-red-500/10 text-red-300'
+                          ? 'bg-[rgba(242,95,92,0.10)] border-[rgba(242,95,92,0.35)] text-[#FF8A88]'
                           : warn.level === 'warning'
-                          ? 'bg-yellow-500/[0.03] border border-yellow-500/10 text-yellow-300'
-                          : 'bg-white/[0.02] border border-white/[0.04] text-zinc-400'
+                          ? 'bg-[rgba(245,185,66,0.10)] border-[rgba(245,185,66,0.25)] text-[#FFD47A]'
+                          : 'bg-[#0D1B2A] border-[rgba(89,200,255,0.10)] text-[#9CB2C9]'
                       }`}
                     >
-                      <AlertTriangle className={`h-4 w-4 shrink-0 mt-0.5 &{warn.level === 'danger' ? 'text-red-400' : warn.level === 'warning' ? 'text-yellow-400' : 'text-zinc-500'}`} />
+                      <AlertTriangle className={`h-4 w-4 shrink-0 mt-0.5 ${warn.level === 'danger' ? 'text-[#F25F5C]' : warn.level === 'warning' ? 'text-[#F5B942]' : 'text-[#6E8298]'}`} />
                       <div>{warn.message}</div>
                     </div>
                   ))}
@@ -964,16 +968,16 @@ function App() {
         <button
           onClick={handleExecute}
           disabled={isExecuting || !activeReport?.success}
-          className="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-sui-blue to-sui-pink text-sui-dark font-extrabold py-3.5 rounded-xl text-xs transition-all shadow-lg shadow-sui-blue/15 hover:shadow-sui-pink/25 hover:scale-[1.01] active:scale-[0.99] disabled:from-zinc-800 disabled:to-zinc-800 disabled:text-zinc-600 disabled:shadow-none cursor-pointer"
+          className="w-full flex items-center justify-center gap-2.5 bg-gradient-to-b from-[#163A5A] to-[#10263D] border border-[rgba(89,200,255,0.10)] disabled:border-transparent text-[#59C8FF] disabled:text-[#465A70] font-extrabold py-3.5 rounded-xl text-xs transition-all shadow-lg hover:border-[#2E6EA6] hover:scale-[1.01] active:scale-[0.99] disabled:from-[#0D1B2A] disabled:to-[#0D1B2A] disabled:shadow-none cursor-pointer"
         >
           {isExecuting ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-4 w-4 animate-spin text-[#59C8FF]" />
               Signing & Executing Block...
             </>
           ) : (
             <>
-              <ShieldCheck className="h-4.5 w-4.5" />
+              <ShieldCheck className="h-4.5 w-4.5 text-[#59C8FF]" />
               Approve & Sign Transaction
             </>
           )}
@@ -983,9 +987,8 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-sui-dark text-zinc-100 flex flex-col font-sans relative overflow-hidden select-none">
+    <div className="min-h-screen bg-[#030B14] text-zinc-100 flex flex-col font-sans relative overflow-hidden select-none">
       {/* Ambient Nebula Glows */}
-      <div className="absolute top-[-25%] left-[-20%] w-[65%] h-[65%] rounded-full bg-sui-blue/8 blur-[140px] animate-float-slow pointer-events-none z-0" />
       <div className="absolute bottom-[-25%] right-[-20%] w-[65%] h-[65%] rounded-full bg-sui-pink/6 blur-[140px] animate-float-delayed pointer-events-none z-0" />
 
       {/* Mobile Top Header (hidden on md and up) */}
@@ -1025,7 +1028,7 @@ function App() {
       <div className="flex-1 flex overflow-hidden h-screen z-10 relative">
         
         {/* Left Sidebar (Desktop: permanently visible, Mobile: hidden) */}
-        <aside className="hidden md:flex w-72 bg-gradient-to-b from-white/[0.03] to-white/[0.01] border border-white/[0.08] backdrop-blur-2xl rounded-3xl p-4 my-4 ml-4 h-[calc(100vh-2rem)] flex-col justify-between shrink-0 select-none shadow-[0_8px_32px_rgba(0,0,0,0.45)]">
+        <aside className="hidden md:flex w-72 bg-[#071321]/85 border border-[rgba(89,200,255,0.10)] backdrop-blur-2xl rounded-3xl p-4 my-4 ml-4 h-[calc(100vh-2rem)] flex-col justify-between shrink-0 select-none shadow-[0_24px_80px_rgba(0,0,0,0.36)]">
           {renderSidebarContents()}
         </aside>
 
@@ -1036,11 +1039,11 @@ function App() {
               className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden animate-in fade-in duration-200" 
               onClick={() => setMobileMenuOpen(false)} 
             />
-            <aside className="fixed inset-y-0 left-0 w-72 bg-gradient-to-b from-[#030f1c] to-[#030f1c]/95 border-r border-white/[0.08] p-4 z-50 flex flex-col justify-between md:hidden animate-in slide-in-from-left duration-250 select-none shadow-2xl backdrop-blur-2xl">
+            <aside className="fixed inset-y-0 left-0 w-72 bg-gradient-to-b from-[#071321] to-[#071321]/95 border-r border-[rgba(89,200,255,0.10)] p-4 z-50 flex flex-col justify-between md:hidden animate-in slide-in-from-left duration-250 select-none shadow-2xl backdrop-blur-2xl">
               <div className="flex justify-end mb-2">
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-zinc-400 hover:text-white p-1.5 rounded-lg hover:bg-white/[0.05] transition-all"
+                  className="text-[#9CB2C9] hover:text-white p-1.5 rounded-lg hover:bg-white/[0.05] transition-all"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -1053,54 +1056,65 @@ function App() {
         )}
 
         {/* Middle Column: Chat and Floating Input Box */}
-        <div className="flex-1 bg-gradient-to-b from-white/[0.03] to-white/[0.01] border border-white/[0.08] backdrop-blur-2xl rounded-3xl my-4 mx-4 h-[calc(100vh-2rem)] flex flex-col overflow-hidden relative shadow-[0_8px_32px_rgba(0,0,0,0.45)]">
+        <div className="flex-1 bg-gradient-to-b from-[#081423]/95 to-[#081423]/85 border border-[rgba(89,200,255,0.10)] backdrop-blur-2xl rounded-3xl my-4 mx-4 h-[calc(100vh-2rem)] flex flex-col overflow-hidden relative shadow-[0_24px_80px_rgba(0,0,0,0.36)]">
           
+          {/* Moving Mascot Background */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 select-none overflow-hidden">
+            <img 
+              src="/mascot.jpg" 
+              alt="Mascot Watermark" 
+              className="w-80 h-80 object-contain opacity-[0.03] mix-blend-screen animate-float-slow filter grayscale contrast-125"
+            />
+          </div>
+
           {/* Messages Log */}
-          <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-32 space-y-4">
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 pb-32 space-y-4 z-10 relative">
             {messages.map((msg, index) => (
               <div
                 key={index}
                 className={`flex gap-3 w-full ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}
               >
                 <div
-                  className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 shadow-md ${msg.sender === 'user' ? 'bg-sui-blue/15 border border-sui-blue/30' : 'bg-white/[0.04] border border-white/[0.08]'}`}
+                  className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 shadow-md overflow-hidden ${msg.sender === 'user' ? 'bg-gradient-to-b from-[#14304a] to-[#0d233a] border border-[rgba(89,200,255,0.24)]' : 'bg-[#0D1B2A] border border-[rgba(89,200,255,0.12)]'}`}
                 >
                   {msg.sender === 'user' ? (
-                    <Wallet className="h-4 w-4 text-sui-blue" />
+                    <Wallet className="h-4 w-4 text-[#59C8FF]" />
                   ) : (
-                    <Bot className="h-4 w-4 text-sui-pink" />
+                    <img src="/mascot.jpg" alt="HiSui Mascot" className="h-full w-full object-cover" />
                   )}
                 </div>
 
                 <div
-                  className={`p-4 text-xs leading-relaxed max-w-[85%] ${
+                  className={`p-4 text-xs leading-relaxed max-w-[85%] rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.28)] backdrop-blur-md ${
                     msg.sender === 'user' 
-                      ? 'bg-gradient-to-b from-sui-blue/[0.12] to-sui-blue/[0.04] border border-sui-blue/30 text-zinc-100 rounded-2xl rounded-tr-none shadow-md backdrop-blur-md' 
+                      ? 'bg-gradient-to-b from-[rgba(20,48,74,0.95)] to-[rgba(13,35,58,0.95)] border border-[rgba(89,200,255,0.24)] text-[#D7E6F5] rounded-tr-none' 
                       : msg.error 
-                      ? 'bg-gradient-to-b from-red-500/[0.08] to-red-500/[0.02] border border-red-500/20 text-red-300 rounded-2xl rounded-tl-none shadow-md backdrop-blur-md' 
-                      : 'bg-gradient-to-b from-white/[0.04] to-white/[0.01] border border-white/[0.08] text-zinc-200 rounded-2xl rounded-tl-none shadow-md backdrop-blur-md'
+                      ? 'bg-gradient-to-b from-[#F25F5C]/[0.12] to-[#F25F5C]/[0.03] border border-[#F25F5C]/0.35 text-[#FF8A88] rounded-tl-none' 
+                      : 'bg-[rgba(16,30,46,0.88)] border border-[rgba(89,200,255,0.12)] text-[#D7E6F5] rounded-tl-none'
                   }`}
                 >
                   <p className="font-medium whitespace-pre-wrap">{msg.text}</p>
 
                   {msg.intent && (
-                    <div className="mt-3 bg-white/[0.02] border border-white/[0.05] p-3 rounded-xl flex flex-col gap-2 shadow-inner">
-                      <div className="flex items-center gap-2 text-[10px] font-bold text-sui-blue uppercase tracking-wider">
-                        <Sparkles className="h-3.5 w-3.5 text-sui-pink animate-pulse" />
-                        AI Intent Compiled
+                    <div className="mt-3 bg-[#0D1B2A] border border-[#18324D] p-3.5 rounded-xl flex flex-col gap-2 shadow-md">
+                      <div className="flex items-center gap-2">
+                        <span className="bg-[rgba(167,139,250,0.10)] border border-[rgba(167,139,250,0.26)] text-[#C4B5FD] text-[8px] font-extrabold uppercase px-2 py-0.5 rounded-md tracking-wider flex items-center gap-1 select-none">
+                          <Sparkles className="h-2.5 w-2.5 text-[#A78BFA] animate-pulse" />
+                          AI Intent Compiled
+                        </span>
                       </div>
-                      <p className="text-[10px] text-zinc-400 font-semibold">{msg.intent.summary}</p>
+                      <p className="text-[10px] text-[#9CB2C9] font-semibold">{msg.intent.summary}</p>
                     </div>
                   )}
 
                   {msg.txDigest && (
-                    <div className="mt-3 bg-emerald-500/5 border border-emerald-500/20 p-3 rounded-xl flex flex-col gap-1.5 shadow-inner">
-                      <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Transaction Confirmed:</span>
+                    <div className="mt-3 bg-[rgba(6,36,29,0.72)] border border-[rgba(34,197,94,0.32)] p-3.5 rounded-xl flex flex-col gap-1.5 shadow-[0_0_32px_rgba(34,197,94,0.12)] animate-in fade-in duration-200">
+                      <span className="text-[10px] font-bold text-[#4ADE80] uppercase tracking-wider">Transaction Confirmed:</span>
                       <a
                         href={`https://suiscan.xyz/${network}/tx/${msg.txDigest}`}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-xs text-sui-blue hover:text-sui-pink underline break-all font-mono transition-colors"
+                        className="text-xs text-[#8FECC0] hover:text-[#59C8FF] underline break-all font-mono transition-colors"
                       >
                         {msg.txDigest}
                       </a>
@@ -1111,8 +1125,8 @@ function App() {
             ))}
 
             {isParsing && (
-              <div className="flex gap-3 items-center text-xs text-zinc-500 italic pl-11">
-                <Loader2 className="h-4 w-4 animate-spin text-sui-blue" />
+              <div className="flex gap-3 items-center text-xs text-[#9CB2C9] italic pl-11">
+                <Loader2 className="h-4 w-4 animate-spin text-[#59C8FF]" />
                 HiSui is parsing your intent...
               </div>
             )}
@@ -1120,13 +1134,13 @@ function App() {
             {/* Inline Intent & Guardian Preview (Mobile/Tablet Only: visible only on screens smaller than lg) */}
             {activeIntent && (
               <div className="block lg:hidden max-w-xl mr-auto ml-11 p-1 animate-in fade-in duration-200">
-                <div className="bg-gradient-to-b from-white/[0.03] to-white/[0.01] border border-white/[0.08] p-5 rounded-2xl flex flex-col gap-5 shadow-lg backdrop-blur-xl">
-                  <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
+                <div className="bg-[#06111C] border border-[rgba(89,200,255,0.10)] p-5 rounded-2xl flex flex-col gap-5 shadow-lg backdrop-blur-xl">
+                  <div className="flex items-center justify-between border-b border-[rgba(89,200,255,0.10)] pb-3">
                     <div className="flex items-center gap-2">
-                      <ShieldCheck className="h-4.5 w-4.5 text-sui-blue" />
-                      <span className="text-[9px] font-bold text-white uppercase tracking-wider">Intent & Guardian Preview</span>
+                      <ShieldCheck className="h-4.5 w-4.5 text-[#59C8FF]" />
+                      <span className="text-[9px] font-bold text-[#F5F9FF] uppercase tracking-wider">Intent & Guardian Preview</span>
                     </div>
-                    <span className="text-[9px] bg-sui-blue/15 text-sui-blue border border-sui-blue/20 px-2 py-0.5 rounded-full font-bold">PTB Block</span>
+                    <span className="text-[9px] bg-[rgba(89,200,255,0.10)] text-[#7EE7FF] border border-[rgba(89,200,255,0.28)] px-2 py-0.5 rounded-full font-bold">PTB Block</span>
                   </div>
                   {renderPreviewContents()}
                 </div>
@@ -1134,9 +1148,9 @@ function App() {
             )}
           </div>
 
-          {/* Floating Bottom Input Bar */}
+          {/* Intent Composer */}
           <div className="absolute bottom-4 left-4 right-4 z-20">
-            <div className="max-w-2xl mx-auto w-full relative flex items-center bg-gradient-to-b from-[#030f1c]/90 to-[#030f1c]/80 backdrop-blur-2xl border border-white/[0.1] rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.5)] focus-within:border-sui-blue/50 focus-within:shadow-[0_0_20px_rgba(77,162,255,0.25)] transition-all">
+            <div className="max-w-2xl mx-auto w-full relative flex items-center bg-[rgba(7,17,29,0.94)] backdrop-blur-2xl border border-[rgba(89,200,255,0.16)] rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.28)] focus-within:border-[rgba(89,200,255,0.55)] focus-within:shadow-[0_0_0_4px_rgba(89,200,255,0.08),0_0_42px_rgba(89,200,255,0.14)] transition-all">
               <input
                 type="text"
                 value={input}
@@ -1148,14 +1162,14 @@ function App() {
                     : 'Connect wallet or zkLogin to begin...'
                 }
                 disabled={!activeWalletAddress || isParsing}
-                className="w-full bg-transparent pl-4 pr-12 py-3.5 md:py-4 text-xs text-zinc-100 placeholder-zinc-700 focus:outline-none disabled:opacity-50"
+                className="w-full bg-transparent pl-4 pr-12 py-3.5 md:py-4 text-xs text-[#F5F9FF] placeholder-[#5F7388] focus:outline-none disabled:opacity-50 font-sans"
               />
               <button
                 onClick={handleSend}
                 disabled={!input.trim() || isParsing}
-                className="absolute right-2.5 p-2 md:p-2.5 bg-gradient-to-r from-sui-blue to-sui-pink disabled:from-zinc-800 disabled:to-zinc-800 disabled:text-zinc-600 text-sui-dark rounded-lg hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center cursor-pointer shadow-md"
+                className="absolute right-2.5 p-2 md:p-2.5 bg-gradient-to-b from-[#163A5A] to-[#10263D] disabled:from-[#0D1B2A] disabled:to-[#0D1B2A] disabled:text-[#465A70] text-[#59C8FF] rounded-lg hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center cursor-pointer shadow-md"
               >
-                <Send className="h-4 w-4" />
+                <Send className="h-4 w-4 text-[#59C8FF]" />
               </button>
             </div>
           </div>
@@ -1163,7 +1177,7 @@ function App() {
         </div>
 
         {/* Right Sidebar: Intent Preview & Guardian Risk Checklist (Desktop Only: hidden on screens smaller than lg) */}
-        <section className="hidden lg:flex w-[400px] xl:w-[430px] flex-col bg-gradient-to-b from-white/[0.03] to-white/[0.01] border border-white/[0.08] backdrop-blur-2xl rounded-3xl p-6 my-4 mr-4 h-[calc(100vh-2rem)] overflow-y-auto shrink-0 shadow-[0_8px_32px_rgba(0,0,0,0.45)] select-none">
+        <section className="hidden lg:flex w-[400px] xl:w-[430px] flex-col bg-[#06111C] border border-[rgba(89,200,255,0.10)] backdrop-blur-2xl rounded-3xl p-6 my-4 mr-4 h-[calc(100vh-2rem)] overflow-y-auto shrink-0 shadow-[0_24px_80px_rgba(0,0,0,0.36)] select-none">
           <div className="flex items-center gap-2 pb-4 border-b border-white/[0.06]">
             <ShieldCheck className="h-5 w-5 text-sui-blue" />
             <h2 className="font-outfit font-extrabold text-sm text-white uppercase tracking-wider">Intent & Guardian Preview</h2>

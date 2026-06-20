@@ -3,12 +3,36 @@
 @import "tailwindcss";
 
 @theme {
-  --color-sui-blue: #4da2ff;
-  --color-sui-pink: #fe8bc2;
-  --color-sui-dark: #030f1c;
-  --color-card-dark: rgba(3, 15, 28, 0.45);
-  --color-border-dark: rgba(77, 162, 255, 0.15);
-  
+  --color-brand-cyan: #59C8FF;
+  --color-brand-blue: #3B82F6;
+  --color-brand-glow: #7EE7FF;
+  --color-brand-violet: #A78BFA;
+  --color-brand-mint: #6FFFD2;
+
+  --color-sui-dark: #030B14;
+  --color-panel-dark: #071321;
+  --color-chat-dark: #081423;
+  --color-guardian-dark: #06111C;
+  --color-card-dark: #0D1B2A;
+  --color-elevated-dark: #122338;
+
+  --color-text-primary: #F5F9FF;
+  --color-text-body: #D7E6F5;
+  --color-text-secondary: #9CB2C9;
+  --color-text-muted: #6E8298;
+  --color-text-disabled: #465A70;
+
+  --color-border-soft: rgba(89, 200, 255, 0.10);
+  --color-border-default: #18324D;
+  --color-border-active: #2E6EA6;
+  --color-border-divider: rgba(89, 200, 255, 0.10);
+
+  --color-status-success: #22C55E;
+  --color-status-success-soft: #4ADE80;
+  --color-status-warning: #F5B942;
+  --color-status-error: #F25F5C;
+  --color-status-info: #38BDF8;
+
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-outfit: 'Outfit', sans-serif;
 
@@ -34,8 +58,11 @@
 }
 
 body {
-  background-color: #030f1c;
-  color: #f4f4f5;
+  background:
+    radial-gradient(circle at 65% 30%, rgba(89, 200, 255, 0.10), transparent 34%),
+    radial-gradient(circle at 85% 80%, rgba(167, 139, 250, 0.08), transparent 28%),
+    linear-gradient(180deg, #030B14 0%, #07111E 100%);
+  color: #D7E6F5;
   font-family: var(--font-sans);
   margin: 0;
   padding: 0;
@@ -49,15 +76,15 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(3, 15, 28, 0.5);
+  background: rgba(7, 19, 33, 0.5);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(77, 162, 255, 0.2);
+  background: rgba(89, 200, 255, 0.2);
   border-radius: 99px;
   transition: background 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(254, 139, 194, 0.35);
+  background: rgba(89, 200, 255, 0.35);
 }
