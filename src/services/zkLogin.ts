@@ -1,5 +1,14 @@
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
 import { generateNonce, generateRandomness, computeZkLoginAddress, getExtendedEphemeralPublicKey } from '@mysten/sui/zklogin';
+import { toB64, fromHEX } from '@mysten/sui/utils';
+
+function bigIntToBase64(n: bigint): string {
+  let hex = n.toString(16);
+  if (hex.length % 2 !== 0) {
+    hex = '0' + hex;
+  }
+  return toB64(fromHEX(hex));
+}
 
 export interface ZkLoginSession {
   ephemeralPrivateKey: string;
@@ -127,10 +136,10 @@ export const getZkProof = async (
         method: 'shinami_zkp_createZkLoginProof',
         params: [
           jwt,
-          extendedEphemeralPublicKey,
-          session.randomness,
-          session.maxEpoch,
-          userSalt,
+          session.maxEpoch.toString(),
+          keypair.getPublicKey().toSuiPublicKey(),
+          bigIntToBase64(BigInt(session.randomness)),
+          bigIntToBase64(BigInt(userSalt)),
           'sub'
         ],
         id: 1,
