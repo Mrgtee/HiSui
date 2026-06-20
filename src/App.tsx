@@ -129,11 +129,16 @@ function App() {
   const [executionTx, setExecutionTx] = useState<Transaction | null>(null);
   const [isExecuting, setIsExecuting] = useState(false);
   const [isExecuted, setIsExecuted] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const chatContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Auto scroll to bottom of chat
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
   }, [messages, isParsing]);
 
   // ZkLogin custom UI states
@@ -1102,7 +1107,10 @@ function App() {
           <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#081423] via-[#081423]/80 to-transparent z-15 pointer-events-none rounded-b-3xl" />
 
           {/* Messages Log */}
-          <div className="flex-1 overflow-y-auto p-4 md:p-6 pt-10 pb-36 space-y-4 z-10 relative">
+          <div 
+            ref={chatContainerRef}
+            className="flex-1 overflow-y-auto p-4 md:p-6 pt-10 pb-36 space-y-4 z-10 relative"
+          >
             {messages.map((msg, index) => (
               <div
                 key={index}
@@ -1164,8 +1172,6 @@ function App() {
                 HiSui is parsing your intent...
               </div>
             )}
-
-            <div ref={messagesEndRef} />
 
             {/* Inline Intent & Guardian Preview (Mobile/Tablet Only: visible only on screens smaller than lg) */}
             {activeIntent && (
