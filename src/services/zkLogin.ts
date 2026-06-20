@@ -1,5 +1,5 @@
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
-import { generateNonce, generateRandomness, computeZkLoginAddress, getExtendedEphemeralPublicKey } from '@mysten/sui/zklogin';
+import { generateNonce, generateRandomness, computeZkLoginAddress, getExtendedEphemeralPublicKey, genAddressSeed } from '@mysten/sui/zklogin';
 import { toB64, fromHEX } from '@mysten/sui/utils';
 
 function bigIntToBase64(n: bigint): string {
@@ -156,7 +156,19 @@ export const getZkProof = async (
       throw new Error(`Shinami Prover error: ${resJson.error.message || JSON.stringify(resJson.error)}`);
     }
 
-    return resJson.result;
+    if (!resJson.result || !resJson.result.zkProof) {
+      throw new Error(`Shinami Prover returned invalid response structure: ${JSON.stringify(resJson.result)}`);
+    }
+
+    const decoded = decodeJwt(jwt);
+    const sub = decoded.sub;
+    const aud = Array.isArray(decoded.aud) ? decoded.aud[0] : decoded.aud;
+    const addressSeed = genAddressSeed(userSalt, 'sub', sub, aud).toString();
+
+    return {
+      ...resJson.result.zkProof,
+      addressSeed,
+    };
   }
 
   // Fallback to Mysten Labs Prover
