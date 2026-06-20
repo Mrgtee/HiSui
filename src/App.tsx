@@ -10,7 +10,12 @@ import {
   Loader2, 
   LogOut, 
   ArrowRight,
-  Coins
+  Coins,
+  ChevronDown,
+  Copy,
+  Check,
+  ExternalLink,
+  X
 } from 'lucide-react';
 import { getGoogleOAuthUrl, extractIdTokenFromUrl } from './services/oauth';
 import { 
@@ -19,12 +24,13 @@ import {
   getStoredSession, 
   deriveZkAddress, 
   getZkProof,
+  decodeJwt,
 } from './services/zkLogin';
 import type { ZkLoginSession } from './services/zkLogin';
 import { getCurrentEpoch, getSuiClient } from './services/suiClient';
 import { parseUserIntent } from './services/intentParser';
 import type { ParsedIntent } from './services/intentParser';
-import { buildPTB } from './services/ptbBuilder';
+import { buildPTB, getCoinOfAmount, NETWORK_CONFIG } from './services/ptbBuilder';
 import { runGuardianChecks } from './services/guardian';
 import type { GuardianReport } from './services/guardian';
 import { getZkLoginSignature } from '@mysten/sui/zklogin';
@@ -77,6 +83,20 @@ function App() {
   const [executionTx, setExecutionTx] = useState<Transaction | null>(null);
   const [isExecuting, setIsExecuting] = useState(false);
 
+  // ZkLogin custom UI states
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [showZkDropdown, setShowZkDropdown] = useState(false);
+  const [copiedZk, setCopiedZk] = useState(false);
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+
+  // Withdraw Form states
+  const [withdrawRecipient, setWithdrawRecipient] = useState('');
+  const [withdrawAsset, setWithdrawAsset] = useState<'SUI' | 'USDC' | 'USDT' | 'DEEP' | 'CETUS'>('SUI');
+  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [withdrawError, setWithdrawError] = useState<string | null>(null);
+  const [withdrawSuccessTx, setWithdrawSuccessTx] = useState<string | null>(null);
+
   const activeWalletAddress = currentAccount?.address || zkAddress;
 
   // Handle zkLogin redirect callback on mount
@@ -89,6 +109,16 @@ function App() {
         setJwt(idToken);
         sessionStorage.setItem('zklogin_jwt', idToken);
         
+        try {
+          const decoded = decodeJwt(idToken);
+          if (decoded.email && typeof decoded.email === 'string') {
+            setUserEmail(decoded.email);
+            sessionStorage.setItem('zklogin_email', decoded.email);
+          }
+        } catch (e) {
+          console.warn("Failed to decode JWT email:", e);
+        }
+
         setIsZkLoading(true);
         try {
           const salt = getOrGenerateSalt();
@@ -114,6 +144,22 @@ function App() {
         if (storedJwt && session) {
           setJwt(storedJwt);
           setZkSession(session);
+          
+          const storedEmail = sessionStorage.getItem('zklogin_email');
+          if (storedEmail) {
+            setUserEmail(storedEmail);
+          } else {
+            try {
+              const decoded = decodeJwt(storedJwt);
+              if (decoded.email && typeof decoded.email === 'string') {
+                setUserEmail(decoded.email);
+                sessionStorage.setItem('zklogin_email', decoded.email);
+              }
+            } catch (e) {
+              console.warn("Failed to decode stored JWT email:", e);
+            }
+          }
+
           setIsZkLoading(true);
           try {
             const salt = getOrGenerateSalt();
@@ -217,6 +263,8 @@ function App() {
     setZkAddress(null);
     setZkProof(null);
     setZkSession(null);
+    setUserEmail(null);
+    setShowZkDropdown(false);
     setBalance({ SUI: '0', USDC: '0', USDT: '0', DEEP: '0', CETUS: '0' });
   };
 
@@ -371,6 +419,115 @@ function App() {
     }
   };
 
+  const handleCopyZkAddress = () => {
+    if (!zkAddress) return;
+    navigator.clipboard.writeText(zkAddress);
+    setCopiedZk(true);
+    setTimeout(() => setCopiedZk(false), 2000);
+  };
+
+  const handleWithdrawSubmit = async () => {
+    if (!zkAddress || !zkProof || !zkSession || !jwt) return;
+    if (!withdrawRecipient.trim() || !withdrawAmount.trim()) {
+      setWithdrawError('Recipient address and amount are required.');
+      return;
+    }
+    
+    setIsWithdrawing(true);
+    setWithdrawError(null);
+    setWithdrawSuccessTx(null);
+    
+    try {
+      const recipient = withdrawRecipient.trim();
+      if (!recipient.startsWith('0x') || recipient.length !== 66) {
+        throw new Error('Invalid recipient address format. It must be a 66-character hex string starting with 0x.');
+      }
+      
+      const client = getSuiClient(network);
+      const tx = new Transaction();
+      tx.setSender(zkAddress);
+      
+      // Set reference gas price dynamically
+      try {
+        const rgp = await client.getReferenceGasPrice();
+        tx.setGasPrice(rgp);
+      } catch (err) {
+        console.warn('Failed to fetch reference gas price, using default:', err);
+      }
+      
+      const config = NETWORK_CONFIG[network];
+      const isSui = withdrawAsset === 'SUI';
+      
+      if (isSui) {
+        const balanceNum = parseFloat(balance.SUI);
+        const amountNum = parseFloat(withdrawAmount);
+        
+        // Check if user is withdrawing MAX SUI or custom amount
+        if (withdrawAmount.toUpperCase() === 'MAX' || amountNum >= balanceNum - 0.01) {
+          // Sweep: transfer gas object directly to transfer 100% of remaining SUI after gas fee deduction
+          tx.transferObjects([tx.gas], tx.pure.address(recipient));
+        } else {
+          // Convert amount to MIST
+          const amountMist = Math.floor(amountNum * 1e9).toString();
+          const [splitCoin] = tx.splitCoins(tx.gas, [tx.pure.u64(amountMist)]);
+          tx.transferObjects([splitCoin], tx.pure.address(recipient));
+        }
+      } else {
+        // Non-SUI Token withdrawal
+        const tokenAddress = config.TOKENS[withdrawAsset];
+        if (!tokenAddress) {
+          throw new Error(`Token address for ${withdrawAsset} not configured on ${network}.`);
+        }
+        
+        const decimals = withdrawAsset === 'CETUS' ? 9 : 6;
+        const amountNum = parseFloat(withdrawAmount);
+        const amountRaw = Math.floor(amountNum * Math.pow(10, decimals)).toString();
+        
+        // Retrieve and split/merge user's token coins
+        const coinObj = await getCoinOfAmount(client, zkAddress, tokenAddress, amountRaw, tx);
+        tx.transferObjects([coinObj as any], tx.pure.address(recipient));
+      }
+      
+      // Build transaction bytes
+      const txBytes = await tx.build({ client });
+      
+      // Sign with ephemeral key
+      const keypair = Ed25519Keypair.fromSecretKey(zkSession.ephemeralPrivateKey);
+      const { signature: userSignature } = await tx.sign({
+        client,
+        signer: keypair,
+      });
+      
+      // Assemble zkLogin signature
+      const zkSignature = getZkLoginSignature({
+        inputs: {
+          ...zkProof,
+          addressSeed: zkProof.addressSeed,
+        },
+        maxEpoch: zkSession.maxEpoch,
+        userSignature,
+      });
+      
+      // Execute the transaction
+      const response = await client.executeTransactionBlock({
+        transactionBlock: txBytes,
+        signature: zkSignature,
+      });
+      
+      setWithdrawSuccessTx(response.digest);
+      setWithdrawAmount('');
+      
+      // Update balances immediately
+      setTimeout(fetchBalances, 3000);
+      
+    } catch (err: any) {
+      console.error('Withdrawal failed:', err);
+      setWithdrawError(err.message || 'Transaction failed or rejected.');
+    } finally {
+      setIsWithdrawing(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-bg-dark text-zinc-100 flex flex-col font-sans">
       {/* Top Navbar */}
@@ -457,17 +614,72 @@ function App() {
             ) : (
               <div className="flex items-center gap-2">
                 {zkAddress ? (
-                  <div className="flex items-center gap-2 bg-zinc-900 border border-border-dark pl-4 pr-2 py-1.5 rounded-xl">
-                    <span className="text-xs text-zinc-400 font-mono">
-                      {zkAddress.slice(0, 6)}...{zkAddress.slice(-4)}
-                    </span>
+                  <div className="relative">
                     <button
-                      onClick={handleLogout}
-                      className="text-zinc-400 hover:text-red-400 p-1.5 rounded-lg hover:bg-zinc-800 transition-colors"
-                      title="Log Out zkLogin"
+                      onClick={() => setShowZkDropdown(!showZkDropdown)}
+                      className="flex items-center gap-2 bg-zinc-900 border border-border-dark hover:border-purple-500/50 px-4 py-2 rounded-xl transition-all cursor-pointer shadow-sm text-sm"
                     >
-                      <LogOut className="h-4 w-4" />
+                      <span className="text-xs text-zinc-300 font-mono font-semibold">
+                        {zkAddress.slice(0, 6)}...{zkAddress.slice(-4)}
+                      </span>
+                      <ChevronDown className="h-3.5 w-3.5 text-zinc-500 transition-transform duration-200" style={{ transform: showZkDropdown ? 'rotate(180deg)' : 'none' }} />
                     </button>
+
+                    {showZkDropdown && (
+                      <>
+                        <div 
+                          className="fixed inset-0 z-40" 
+                          onClick={() => setShowZkDropdown(false)} 
+                        />
+                        <div className="absolute right-0 mt-2 w-72 bg-zinc-950 border border-border-dark rounded-2xl shadow-xl p-4 flex flex-col gap-4 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                          {userEmail && (
+                            <div className="flex flex-col border-b border-border-dark pb-3">
+                              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Google Session</span>
+                              <span className="text-sm font-semibold text-zinc-300 mt-1 truncate" title={userEmail}>
+                                {userEmail}
+                              </span>
+                            </div>
+                          )}
+
+                          <div className="flex flex-col gap-1.5">
+                            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Wallet Address</span>
+                            <div className="flex items-center justify-between bg-zinc-900 border border-border-dark rounded-xl px-3 py-2 mt-1">
+                              <span className="text-xs font-mono text-zinc-400 truncate w-48">
+                                {zkAddress}
+                              </span>
+                              <button
+                                onClick={handleCopyZkAddress}
+                                className="text-zinc-400 hover:text-purple-400 p-1.5 rounded-lg hover:bg-zinc-800 transition-colors flex items-center justify-center shrink-0"
+                                title="Copy full address"
+                              >
+                                {copiedZk ? <Check className="h-4 w-4 text-emerald-400" /> : <Copy className="h-4 w-4" />}
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col gap-2 pt-1 border-t border-border-dark">
+                            <button
+                              onClick={() => {
+                                setShowZkDropdown(false);
+                                setShowWithdrawModal(true);
+                              }}
+                              className="flex items-center gap-2.5 w-full text-left text-sm font-semibold text-zinc-300 hover:text-white px-3 py-2.5 rounded-xl hover:bg-zinc-900 transition-colors"
+                            >
+                              <ArrowRight className="h-4 w-4 text-purple-400 -rotate-45" />
+                              Withdraw Assets
+                            </button>
+
+                            <button
+                              onClick={handleLogout}
+                              className="flex items-center gap-2.5 w-full text-left text-sm font-semibold text-red-400 hover:text-red-300 px-3 py-2.5 rounded-xl hover:bg-red-500/10 transition-colors"
+                            >
+                              <LogOut className="h-4 w-4 text-red-400" />
+                              Disconnect Wallet
+                            </button>
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 ) : (
                   <div className="theme-dapp-kit-connect">
@@ -710,6 +922,176 @@ function App() {
           )}
         </section>
       </main>
+
+      {/* Withdraw Modal Overlay */}
+      {showWithdrawModal && (
+        <div className="fixed inset-0 bg-black/65 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-zinc-950 border border-border-dark rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col animate-in scale-in duration-200">
+            {/* Modal Header */}
+            <div className="flex justify-between items-center px-6 py-5 border-b border-border-dark bg-card-dark/20">
+              <div className="flex items-center gap-2.5">
+                <div className="bg-purple-600/20 p-2 rounded-xl text-purple-400">
+                  <ArrowRight className="h-5 w-5 -rotate-45" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white tracking-tight">Withdraw Wallet Assets</h3>
+                  <p className="text-xs text-zinc-500">Send assets from your zkLogin wallet to another address</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowWithdrawModal(false);
+                  setWithdrawError(null);
+                  setWithdrawSuccessTx(null);
+                }}
+                className="text-zinc-500 hover:text-white p-1.5 rounded-xl hover:bg-zinc-900 transition-colors"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-5 flex-1 overflow-y-auto">
+              {withdrawSuccessTx ? (
+                <div className="bg-emerald-500/5 border border-emerald-500/20 p-5 rounded-2xl flex flex-col items-center text-center gap-3 animate-in fade-in duration-150">
+                  <div className="h-12 w-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                    <Check className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-emerald-400">Withdrawal Successful!</h4>
+                    <p className="text-xs text-zinc-500 mt-1">Your transaction has been broadcast and executed on the blockchain.</p>
+                  </div>
+                  <div className="bg-zinc-900 border border-border-dark p-3.5 rounded-xl w-full flex flex-col gap-2 mt-2">
+                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Transaction Digest</span>
+                    <a
+                      href={`https://suiscan.xyz/${network}/tx/${withdrawSuccessTx}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs text-purple-400 hover:text-purple-300 underline font-mono break-all flex items-center justify-center gap-1.5"
+                    >
+                      {withdrawSuccessTx.slice(0, 16)}...{withdrawSuccessTx.slice(-16)}
+                      <ExternalLink className="h-3 w-3 shrink-0" />
+                    </a>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setShowWithdrawModal(false);
+                      setWithdrawSuccessTx(null);
+                    }}
+                    className="w-full bg-purple-600 hover:bg-purple-500 font-bold py-3 rounded-xl text-sm transition-colors mt-4 cursor-pointer"
+                  >
+                    Close Modal
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Asset Selection */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Select Token</label>
+                    <div className="grid grid-cols-5 gap-2 mt-1">
+                      {(['SUI', 'USDC', 'USDT', 'DEEP', 'CETUS'] as const).map((token) => (
+                        <button
+                          key={token}
+                          onClick={() => {
+                            setWithdrawAsset(token);
+                            setWithdrawError(null);
+                          }}
+                          className={`flex flex-col items-center p-3 rounded-xl border text-center transition-all cursor-pointer ${
+                            withdrawAsset === token
+                              ? 'bg-purple-600/10 border-purple-500/50 text-white font-bold ring-1 ring-purple-500/20'
+                              : 'bg-zinc-900 border-border-dark hover:border-zinc-800 text-zinc-400'
+                          }`}
+                        >
+                          <span className="text-xs font-bold">{token}</span>
+                          <span className={`text-[10px] mt-1 font-semibold ${
+                            withdrawAsset === token ? 'text-purple-400' : 'text-zinc-500'
+                          }`}>
+                            {balance[token]}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Recipient Address */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Recipient SUI Address</label>
+                    <input
+                      type="text"
+                      placeholder="Enter 66-character destination address (0x...)"
+                      value={withdrawRecipient}
+                      onChange={(e) => {
+                        setWithdrawRecipient(e.target.value);
+                        setWithdrawError(null);
+                      }}
+                      className="w-full bg-zinc-900 border border-border-dark rounded-xl px-4 py-3 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-purple-500 transition-colors"
+                    />
+                  </div>
+
+                  {/* Amount Input */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Amount</label>
+                    <div className="relative flex items-center mt-1">
+                      <input
+                        type="number"
+                        step="any"
+                        placeholder="0.00"
+                        value={withdrawAmount}
+                        onChange={(e) => {
+                          setWithdrawAmount(e.target.value);
+                          setWithdrawError(null);
+                        }}
+                        className="w-full bg-zinc-900 border border-border-dark rounded-xl pl-4 pr-16 py-3 text-sm text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-purple-500 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                      />
+                      <button
+                        onClick={() => {
+                          setWithdrawAmount('MAX');
+                          setWithdrawError(null);
+                        }}
+                        className="absolute right-2 px-3 py-1.5 bg-purple-600/20 hover:bg-purple-600/30 text-purple-400 hover:text-purple-300 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                      >
+                        MAX
+                      </button>
+                    </div>
+                    {withdrawAsset === 'SUI' && (
+                      <span className="text-[10px] text-zinc-500 mt-1 italic">
+                        Note: Selecting MAX SUI will transfer all SUI in the wallet minus the required blockchain gas execution fee.
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Error Notification */}
+                  {withdrawError && (
+                    <div className="bg-red-500/10 border border-red-500/20 p-3.5 rounded-xl flex gap-2 text-xs text-red-300 leading-relaxed items-start animate-in fade-in duration-150">
+                      <AlertTriangle className="h-4 w-4 shrink-0 text-red-400 mt-0.5" />
+                      <div>{withdrawError}</div>
+                    </div>
+                  )}
+
+                  {/* Withdraw Submit Action */}
+                  <button
+                    onClick={handleWithdrawSubmit}
+                    disabled={isWithdrawing || !withdrawRecipient.trim() || !withdrawAmount.trim()}
+                    className="w-full flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-500 disabled:bg-zinc-800 disabled:text-zinc-600 font-bold py-3.5 rounded-xl text-sm transition-all shadow-lg shadow-purple-600/10 disabled:shadow-none cursor-pointer mt-4"
+                  >
+                    {isWithdrawing ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Signing & Executing Withdrawal...
+                      </>
+                    ) : (
+                      <>
+                        <ArrowRight className="h-4 w-4 -rotate-45" />
+                        Send Asset Withdrawal
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

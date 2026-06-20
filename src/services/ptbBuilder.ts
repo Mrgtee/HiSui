@@ -17,7 +17,7 @@ export const normalizeSuiAddress = (address: string): string => {
   parts[0] = '0x' + padded;
   return parts.join('::');
 };
-const getCoinOfAmount = async (
+export const getCoinOfAmount = async (
   client: SuiClient,
   sender: string,
   coinType: string,
