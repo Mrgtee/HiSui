@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ConnectButton, useCurrentAccount, useSignAndExecuteTransaction } from '@mysten/dapp-kit';
+import { ConnectButton, useCurrentAccount, useSignAndExecuteTransaction, useSuiClientContext } from '@mysten/dapp-kit';
 import { 
   Bot, 
   Send, 
@@ -44,8 +44,9 @@ function App() {
   const currentAccount = useCurrentAccount();
   const { mutateAsync: signAndExecuteTxb } = useSignAndExecuteTransaction();
 
-  // Network Switcher State
-  const [network, setNetwork] = useState<'mainnet' | 'testnet'>('mainnet');
+  // Network Switcher State from dApp Kit context
+  const { network: activeNetwork, selectNetwork } = useSuiClientContext();
+  const network = activeNetwork as 'mainnet' | 'testnet';
 
   // zkLogin States
   const [jwt, setJwt] = useState<string | null>(null);
@@ -359,7 +360,7 @@ function App() {
               HiSui
               <select
                 value={network}
-                onChange={(e) => setNetwork(e.target.value as 'mainnet' | 'testnet')}
+                onChange={(e) => selectNetwork(e.target.value as 'mainnet' | 'testnet')}
                 className="bg-purple-600/20 text-purple-400 border border-purple-600/30 text-[10px] font-semibold px-2 py-0.5 rounded-full focus:outline-none cursor-pointer hover:bg-purple-600/30 transition-colors"
               >
                 <option value="mainnet" className="bg-zinc-950 text-zinc-100">Mainnet</option>
