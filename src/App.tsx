@@ -652,7 +652,7 @@ function App() {
                     {activeReport?.executionRate && (
                       <div className="flex justify-between items-center text-xs border-b border-border-dark pb-2">
                         <span className="text-zinc-400">Cetus Execution Rate:</span>
-                        <span className="font-semibold text-white">{activeReport.executionRate.toFixed(4)} USDC/SUI</span>
+                        <span className="font-semibold text-white">{activeReport.executionRate.toFixed(4)} {activeReport.executionSymbol || 'USDC'}/SUI</span>
                       </div>
                     )}
 

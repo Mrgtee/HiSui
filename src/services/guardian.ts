@@ -1,5 +1,6 @@
 import { Transaction } from '@mysten/sui/transactions';
 import { getSuiClient } from './suiClient';
+import { NETWORK_CONFIG } from './ptbBuilder';
 
 export interface GuardianReport {
   success: boolean;
@@ -14,9 +15,34 @@ export interface GuardianReport {
     level: 'info' | 'warning' | 'danger';
   }[];
   executionRate?: number;
+  executionSymbol?: string;
   oraclePrice?: number;
   oracleAge?: number;
 }
+
+const getSymbolFromCoinType = (coinType: string, network: 'mainnet' | 'testnet'): string => {
+  const config = NETWORK_CONFIG[network];
+  for (const [symbol, address] of Object.entries(config.TOKENS)) {
+    if (address.toLowerCase() === coinType.toLowerCase()) {
+      if (symbol === 'NAVI_USDC') return 'USDC';
+      return symbol;
+    }
+  }
+  if (coinType.endsWith('::sui::SUI')) return 'SUI';
+  if (coinType.toLowerCase().includes('usdc')) return 'USDC';
+  if (coinType.toLowerCase().includes('usdt')) return 'USDT';
+  if (coinType.toLowerCase().includes('deep')) return 'DEEP';
+  if (coinType.toLowerCase().includes('cetus')) return 'CETUS';
+  
+  const parts = coinType.split('::');
+  return parts[parts.length - 1] || 'UNKNOWN';
+};
+
+const getDecimalsFromSymbol = (symbol: string): number => {
+  const clean = symbol.toUpperCase();
+  if (clean === 'SUI' || clean === 'CETUS') return 9;
+  return 6; // USDC, USDT, DEEP
+};
 
 // SUI/USD Pyth configurations per network
 const PYTH_CONFIGS = {
@@ -40,6 +66,7 @@ export const runGuardianChecks = async (
   let errorMsg: string | undefined;
   let balanceChangesParsed: GuardianReport['balanceChanges'] = [];
   let executionRate: number | undefined;
+  let executionSymbol: string | undefined;
   let oraclePrice: number | undefined;
   let oracleAge: number | undefined;
 
@@ -113,35 +140,69 @@ export const runGuardianChecks = async (
     }
 
     // 4. Calculate actual execution slippage (Risk Class 2)
-    if (success && oraclePrice) {
-      // Find SUI and USDC balance changes (using resilient endsWith and includes match)
+    if (success) {
+      // Find SUI and non-SUI balance changes
       const suiChange = dryRunResult.balanceChanges.find(
-        (change: { coinType: string; amount: string }) => change.coinType.endsWith('::sui::SUI')
+        (change: { coinType: string; amount: string }) => change.coinType.toLowerCase().endsWith('::sui::sui')
       );
-      const usdcChange = dryRunResult.balanceChanges.find(
-        (change: { coinType: string; amount: string }) => change.coinType.toLowerCase().includes('usdc')
+      
+      const knownAddresses = new Set([
+        ...Object.values(NETWORK_CONFIG.mainnet.TOKENS),
+        ...Object.values(NETWORK_CONFIG.testnet.TOKENS)
+      ].map(addr => addr.toLowerCase()));
+
+      const otherChange = dryRunResult.balanceChanges.find(
+        (change: { coinType: string; amount: string }) => {
+          const lowerType = change.coinType.toLowerCase();
+          return !lowerType.endsWith('::sui::sui') && knownAddresses.has(lowerType);
+        }
+      ) || dryRunResult.balanceChanges.find(
+        (change: { coinType: string; amount: string }) => !change.coinType.toLowerCase().endsWith('::sui::sui')
       );
 
-      if (suiChange && usdcChange) {
+      if (suiChange && otherChange) {
+        const otherSymbol = getSymbolFromCoinType(otherChange.coinType, network);
+        const otherDecimals = getDecimalsFromSymbol(otherSymbol);
+        
+        executionSymbol = otherSymbol;
+
         const suiAmount = Math.abs(parseFloat(suiChange.amount)) / 1e9; // 9 decimals
-        const usdcAmount = Math.abs(parseFloat(usdcChange.amount)) / 1e6; // 6 decimals
+        const otherAmount = Math.abs(parseFloat(otherChange.amount)) / Math.pow(10, otherDecimals);
 
         if (suiAmount > 0) {
-          executionRate = usdcAmount / suiAmount;
+          executionRate = otherAmount / suiAmount;
           
-          // Slippage ratio: compare execution rate with oracle price
-          const priceImpact = ((oraclePrice - executionRate) / oraclePrice) * 100;
+          const isStable = otherSymbol === 'USDC' || otherSymbol === 'USDT';
+          
+          if (isStable) {
+            if (oraclePrice) {
+              // Slippage ratio: compare execution rate with oracle price
+              const priceImpact = ((oraclePrice - executionRate) / oraclePrice) * 100;
 
-          if (priceImpact > slippageTolerancePercent) {
-            warnings.push({
-              type: 'slippage',
-              message: `High Slippage Detected: Price impact is ${priceImpact.toFixed(2)}% (threshold: ${slippageTolerancePercent}%). You will lose $${(suiAmount * priceImpact * oraclePrice / 100).toFixed(2)} USD in output value.`,
-              level: 'danger',
-            });
+              if (priceImpact > slippageTolerancePercent) {
+                warnings.push({
+                  type: 'slippage',
+                  message: `High Slippage Detected: Price impact is ${priceImpact.toFixed(2)}% (threshold: ${slippageTolerancePercent}%). You will lose $${(suiAmount * priceImpact * oraclePrice / 100).toFixed(2)} USD in output value.`,
+                  level: 'danger',
+                });
+              } else {
+                warnings.push({
+                  type: 'slippage',
+                  message: `Slippage is low (${priceImpact.toFixed(2)}% price impact).`,
+                  level: 'info',
+                });
+              }
+            } else {
+              warnings.push({
+                type: 'slippage',
+                message: `Unable to verify slippage for stablecoin (${otherSymbol}) because SUI/USD oracle price is unavailable.`,
+                level: 'warning',
+              });
+            }
           } else {
             warnings.push({
               type: 'slippage',
-              message: `Slippage is low (${priceImpact.toFixed(2)}% price impact).`,
+              message: `Slippage validation against SUI/USD oracle skipped for non-stablecoin (${otherSymbol}). Cetus execution rate: ${executionRate.toFixed(4)} ${otherSymbol}/SUI.`,
               level: 'info',
             });
           }
@@ -164,6 +225,7 @@ export const runGuardianChecks = async (
     balanceChanges: balanceChangesParsed,
     warnings,
     executionRate,
+    executionSymbol,
     oraclePrice,
     oracleAge,
   };
