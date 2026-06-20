@@ -9,17 +9,31 @@ export interface ZkLoginSession {
 
 export const getOrGenerateSalt = (): string => {
   let salt = localStorage.getItem('zklogin_user_salt');
-  if (!salt) {
-    const array = new Uint32Array(8);
+  const MAX_SALT = 1n << 128n; // Salt must be < 2^128 (16 bytes)
+  
+  let isValid = false;
+  if (salt) {
+    try {
+      const val = BigInt(salt);
+      if (val > 0n && val < MAX_SALT) {
+        isValid = true;
+      }
+    } catch (e) {
+      isValid = false;
+    }
+  }
+
+  if (!isValid) {
+    const array = new Uint32Array(4); // 4 * 32 bits = 128 bits = 16 bytes
     window.crypto.getRandomValues(array);
     let saltVal = 0n;
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 4; i++) {
       saltVal = (saltVal << 32n) | BigInt(array[i]);
     }
     salt = saltVal.toString();
     localStorage.setItem('zklogin_user_salt', salt);
   }
-  return salt;
+  return salt!;
 };
 
 export const setupZkLoginSession = (currentEpoch: number): { nonce: string; session: ZkLoginSession } => {
