@@ -1090,7 +1090,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-sui-dark text-text-primary flex flex-col font-sans relative overflow-hidden select-none">
+    <div className="h-[100dvh] bg-sui-dark text-text-primary flex flex-col font-sans relative overflow-hidden select-none">
       {/* Tactile background grain overlay */}
       <div className="grain-overlay" />
 
@@ -1130,7 +1130,7 @@ function App() {
       </header>
 
       {/* Main Layout Containing Left Sidebar + Main Content Column + Right Sidebar */}
-      <div className="flex-1 flex overflow-hidden z-10 relative md:h-[calc(100vh-2rem)] h-[calc(100vh-3.5rem)]">
+      <div className="flex-1 flex overflow-hidden z-10 relative md:h-[calc(100vh-2rem)] h-[calc(100dvh-3.5rem)]">
         
         {/* Left Sidebar (Desktop: permanently visible, Mobile: hidden) */}
         <aside className="hidden md:flex w-72 bg-panel-dark/85 border border-border-soft backdrop-blur-2xl rounded-3xl p-4 my-4 ml-4 h-[calc(100vh-2rem)] flex-col justify-between shrink-0 select-none shadow-[0_24px_80px_rgba(0,0,0,0.36)]">
