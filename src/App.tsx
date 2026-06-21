@@ -1113,7 +1113,7 @@ function App() {
             <img 
               src="/mascot.png" 
               alt="Mascot Watermark" 
-              className="w-80 h-80 object-contain opacity-[0.08] animate-float-slow"
+              className="w-80 h-80 object-contain opacity-[0.15] animate-float-slow"
             />
           </div>
 
