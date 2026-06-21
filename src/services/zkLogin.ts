@@ -1,14 +1,5 @@
 import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
-import { generateNonce, generateRandomness, computeZkLoginAddress, getExtendedEphemeralPublicKey, genAddressSeed } from '@mysten/sui/zklogin';
-import { toB64, fromHEX } from '@mysten/sui/utils';
-
-function bigIntToBase64(n: bigint): string {
-  let hex = n.toString(16);
-  if (hex.length % 2 !== 0) {
-    hex = '0' + hex;
-  }
-  return toB64(fromHEX(hex));
-}
+import { generateNonce, generateRandomness, computeZkLoginAddress, getExtendedEphemeralPublicKey } from '@mysten/sui/zklogin';
 
 export interface ZkLoginSession {
   ephemeralPrivateKey: string;
@@ -107,6 +98,16 @@ export const deriveZkAddress = (jwt: string, userSalt: string): string => {
   });
 };
 
+const getBackendUrl = (): string => {
+  if (typeof import.meta.env !== 'undefined' && import.meta.env.VITE_BACKEND_URL) {
+    return import.meta.env.VITE_BACKEND_URL;
+  }
+  if (typeof process !== 'undefined' && process.env && process.env.VITE_BACKEND_URL) {
+    return process.env.VITE_BACKEND_URL;
+  }
+  return 'http://localhost:3001';
+};
+
 export const getZkProof = async (
   jwt: string,
   session: ZkLoginSession,
@@ -114,87 +115,37 @@ export const getZkProof = async (
   network: 'mainnet' | 'testnet' = 'mainnet'
 ): Promise<unknown> => {
   const keypair = Ed25519Keypair.fromSecretKey(session.ephemeralPrivateKey);
+  const ephemeralPublicKey = keypair.getPublicKey().toSuiPublicKey();
   const extendedEphemeralPublicKey = getExtendedEphemeralPublicKey(keypair.getPublicKey());
-  
-  const shinamiKey = (typeof import.meta.env !== 'undefined' ? import.meta.env.VITE_SHINAMI_API_KEY : undefined) || process.env.VITE_SHINAMI_API_KEY;
 
-  if (shinamiKey) {
-    // If running locally in development (Vite), route through our configured dev proxy to bypass CORS.
-    // For production, developers typically add a proxy/rewrite rule (e.g. vercel.json) or serverless function.
-    const isDev = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-    const proverUrl = isDev 
-      ? `/api/zkprover/${shinamiKey}`
-      : `https://api.us1.shinami.com/sui/zkprover/v1/${shinamiKey}`;
+  const backendUrl = getBackendUrl();
+  const url = `${backendUrl}/api/prove`;
 
-    const response = await fetch(proverUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        jsonrpc: '2.0',
-        method: 'shinami_zkp_createZkLoginProof',
-        params: [
-          jwt,
-          session.maxEpoch.toString(),
-          keypair.getPublicKey().toSuiPublicKey(),
-          bigIntToBase64(BigInt(session.randomness)),
-          bigIntToBase64(BigInt(userSalt)),
-          'sub'
-        ],
-        id: 1,
-      }),
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      throw new Error(`Shinami Prover failed (HTTP ${response.status}): ${errText}`);
-    }
-
-    const resJson = await response.json();
-    if (resJson.error) {
-      throw new Error(`Shinami Prover error: ${resJson.error.message || JSON.stringify(resJson.error)}`);
-    }
-
-    if (!resJson.result || !resJson.result.zkProof) {
-      throw new Error(`Shinami Prover returned invalid response structure: ${JSON.stringify(resJson.result)}`);
-    }
-
-    const decoded = decodeJwt(jwt);
-    const sub = decoded.sub;
-    const aud = Array.isArray(decoded.aud) ? decoded.aud[0] : decoded.aud;
-    const addressSeed = genAddressSeed(userSalt, 'sub', sub, aud).toString();
-
-    return {
-      ...resJson.result.zkProof,
-      addressSeed,
-    };
-  }
-
-  // Fallback to Mysten Labs Prover
-  const proverUrl = network === 'mainnet' 
-    ? 'https://prover.mystenlabs.com/v1' 
-    : 'https://prover-dev.mystenlabs.com/v1';
-
-  const response = await fetch(proverUrl, {
+  const response = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
       jwt,
-      extendedEphemeralPublicKey,
       maxEpoch: session.maxEpoch,
+      ephemeralPublicKey,
+      extendedEphemeralPublicKey,
       jwtRandomness: session.randomness,
       salt: userSalt,
-      keyClaimName: 'sub',
+      network
     }),
   });
-  
+
   if (!response.ok) {
     const errText = await response.text();
-    throw new Error(`Failed to fetch ZK Proof: ${errText}`);
+    try {
+      const errJson = JSON.parse(errText);
+      throw new Error(errJson.error || errText);
+    } catch (e) {
+      throw new Error(`ZK proving failed (HTTP ${response.status}): ${errText}`);
+    }
   }
-  
+
   return await response.json();
 };
