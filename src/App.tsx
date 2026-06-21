@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { ConnectButton, useCurrentAccount, useSignAndExecuteTransaction, useSuiClientContext } from '@mysten/dapp-kit';
+import { ConnectButton, useCurrentAccount, useSignAndExecuteTransaction, useSuiClientContext, useDisconnectWallet } from '@mysten/dapp-kit';
 import { 
   Send, 
   Wallet, 
@@ -98,6 +98,7 @@ const TokenLogo = ({ symbol, className = "h-5 w-5" }: { symbol: string; classNam
 
 function App() {
   const currentAccount = useCurrentAccount();
+  const { mutate: disconnectWallet } = useDisconnectWallet();
   const { mutateAsync: signAndExecuteTxb } = useSignAndExecuteTransaction();
 
   // Network Switcher State from dApp Kit context
@@ -729,7 +730,7 @@ function App() {
       </div>
 
       {/* Bottom Profile / Connection */}
-      <div className="border-t border-[rgba(89,200,255,0.10)] pt-4 flex flex-col gap-3 shrink-0">
+      <div className="border-t border-border-default pt-4 flex flex-col gap-3 shrink-0">
         {!activeWalletAddress ? (
           <div className="flex flex-col gap-2">
             <button
@@ -738,12 +739,12 @@ function App() {
                 setMobileMenuOpen(false);
               }}
               disabled={isZkLoading}
-              className="flex items-center justify-center gap-2 w-full bg-[#0D1B2A] border border-[#18324D] hover:border-[#2E6EA6] text-[#F5F9FF] font-extrabold px-4 py-2.5 rounded-xl hover:bg-[#122338] transition-all text-xs shadow-sm hover:shadow-[0_0_36px_rgba(89,200,255,0.14)] cursor-pointer disabled:opacity-50"
+              className="flex items-center justify-center gap-2.5 w-full bg-card-dark border border-border-default hover:border-border-active text-text-primary font-extrabold px-4 py-2.5 rounded-xl hover:bg-elevated-dark transition-all text-xs shadow-sm hover:shadow-[0_0_36px_rgba(41,141,255,0.14)] cursor-pointer disabled:opacity-50"
             >
               {isZkLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin text-[#59C8FF]" />
+                <Loader2 className="h-4 w-4 animate-spin text-brand-blue" />
               ) : (
-                <svg className="h-4 w-4 text-[#59C8FF]" viewBox="0 0 24 24">
+                <svg className="h-4 w-4 text-brand-blue" viewBox="0 0 24 24">
                   <path
                     fill="currentColor"
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -770,73 +771,85 @@ function App() {
           </div>
         ) : (
           <div className="relative">
-            {zkAddress ? (
-              <>
-                <button
-                  onClick={() => setShowZkDropdown(!showZkDropdown)}
-                  className="flex items-center justify-between w-full bg-[#0D1B2A] border border-[#18324D] hover:border-[#2E6EA6] px-4 py-3 rounded-xl transition-all cursor-pointer shadow-sm text-xs"
-                >
-                  <div className="flex flex-col text-left truncate pr-2">
-                    {userEmail && <span className="text-[10px] text-[#9CB2C9] font-semibold truncate">{userEmail}</span>}
-                    <span className="text-[10px] text-[#6E8298] font-mono">
+            <button
+              onClick={() => setShowZkDropdown(!showZkDropdown)}
+              className="flex items-center justify-between w-full bg-card-dark border border-border-default hover:border-border-active px-4 py-3 rounded-xl transition-all cursor-pointer shadow-sm text-xs"
+            >
+              <div className="flex flex-col text-left truncate pr-2">
+                <span className="text-[10px] text-white font-extrabold uppercase tracking-wider">Connected Wallet</span>
+                {zkAddress ? (
+                  <>
+                    {userEmail && <span className="text-[9px] text-text-secondary font-semibold truncate mt-0.5">{userEmail}</span>}
+                    <span className="text-[9px] text-text-muted font-mono mt-0.5">
                       {zkAddress.slice(0, 8)}...{zkAddress.slice(-6)}
                     </span>
-                  </div>
-                  <ChevronDown className="h-3.5 w-3.5 text-[#6E8298] shrink-0 transition-transform duration-200" style={{ transform: showZkDropdown ? 'rotate(180deg)' : 'none' }} />
-                </button>
-
-                {showZkDropdown && (
+                  </>
+                ) : (
                   <>
-                    <div 
-                      className="fixed inset-0 z-40" 
-                      onClick={() => setShowZkDropdown(false)} 
-                    />
-                    <div className="absolute bottom-14 left-0 right-0 bg-[#0D1B2A] border border-[#18324D] backdrop-blur-2xl rounded-2xl shadow-xl p-4 flex flex-col gap-4 z-50 animate-in fade-in slide-in-from-bottom-2 duration-150">
+                    <span className="text-[9px] text-text-secondary font-semibold truncate mt-0.5">Browser Extension</span>
+                    <span className="text-[9px] text-text-muted font-mono mt-0.5">
+                      {currentAccount?.address.slice(0, 8)}...{currentAccount?.address.slice(-6)}
+                    </span>
+                  </>
+                )}
+              </div>
+              <ChevronDown className="h-3.5 w-3.5 text-text-muted shrink-0 transition-transform duration-200" style={{ transform: showZkDropdown ? 'rotate(180deg)' : 'none' }} />
+            </button>
+
+            {showZkDropdown && (
+              <>
+                <div 
+                  className="fixed inset-0 z-40" 
+                  onClick={() => setShowZkDropdown(false)} 
+                />
+                <div className="absolute bottom-14 left-0 right-0 bg-card-dark border border-border-default backdrop-blur-2xl rounded-2xl shadow-xl p-4 flex flex-col gap-4 z-50 animate-in fade-in slide-in-from-bottom-2 duration-150">
+                  {zkAddress ? (
+                    <>
                       {userEmail && (
-                        <div className="flex flex-col border-b border-[rgba(89,200,255,0.10)] pb-3">
-                          <span className="text-[9px] font-bold text-[#9CB2C9] uppercase tracking-wider">Google Session</span>
-                          <span className="text-xs font-semibold text-[#F5F9FF] mt-1 truncate" title={userEmail}>
+                        <div className="flex flex-col border-b border-border-default pb-3">
+                          <span className="text-[9px] font-bold text-text-secondary uppercase tracking-wider">Google Session</span>
+                          <span className="text-xs font-semibold text-text-primary mt-1 truncate" title={userEmail}>
                             {userEmail}
                           </span>
                         </div>
                       )}
 
                       <div className="flex flex-col gap-1">
-                        <span className="text-[9px] font-bold text-[#9CB2C9] uppercase tracking-wider">Wallet Address</span>
-                        <div className="flex items-center justify-between bg-[#122338]/50 border border-[#18324D] rounded-xl px-3 py-2 mt-1">
-                          <span className="text-[10px] font-mono text-[#D7E6F5] truncate w-40">
+                        <span className="text-[9px] font-bold text-text-secondary uppercase tracking-wider">Wallet Address</span>
+                        <div className="flex items-center justify-between bg-elevated-dark/50 border border-border-default rounded-xl px-3 py-2 mt-1">
+                          <span className="text-[10px] font-mono text-text-body truncate w-40">
                             {zkAddress}
                           </span>
                           <button
                             onClick={handleCopyZkAddress}
-                            className="text-[#9CB2C9] hover:text-[#59C8FF] p-1.5 rounded-lg hover:bg-[#122338]/70 transition-colors flex items-center justify-center shrink-0"
+                            className="text-text-secondary hover:text-brand-blue p-1.5 rounded-lg hover:bg-elevated-dark/70 transition-colors flex items-center justify-center shrink-0"
                             title="Copy address"
                           >
-                            {copiedZk ? <Check className="h-4 w-4 text-[#6FFFD2]" /> : <Copy className="h-4 w-4" />}
+                            {copiedZk ? <Check className="h-4 w-4 text-brand-mint" /> : <Copy className="h-4 w-4" />}
                           </button>
                         </div>
                       </div>
 
-                      <div className="flex flex-col gap-1 border-t border-[rgba(89,200,255,0.10)] pt-3">
-                        <span className="text-[9px] font-bold text-[#9CB2C9] uppercase tracking-wider">zkLogin Proof Status</span>
+                      <div className="flex flex-col gap-1 border-t border-border-default pt-3">
+                        <span className="text-[9px] font-bold text-text-secondary uppercase tracking-wider">zkLogin Proof Status</span>
                         {isZkLoading ? (
-                          <div className="flex items-center gap-2 text-[10px] text-[#F5B942] mt-1">
-                            <Loader2 className="h-3 w-3 animate-spin text-[#F5B942]" />
+                          <div className="flex items-center gap-2 text-[10px] text-status-warning mt-1">
+                            <Loader2 className="h-3 w-3 animate-spin text-status-warning" />
                             <span>Generating ZK Proof...</span>
                           </div>
                         ) : zkProof ? (
-                          <div className="flex items-center gap-1.5 text-[10px] text-[#6FFFD2] mt-1 font-bold">
-                            <Check className="h-3.5 w-3.5 text-[#6FFFD2]" />
+                          <div className="flex items-center gap-1.5 text-[10px] text-brand-mint mt-1 font-bold">
+                            <Check className="h-3.5 w-3.5 text-brand-mint" />
                             <span>Proof ready & synced</span>
                           </div>
                         ) : (
                           <div className="flex flex-col gap-1 mt-1">
-                            <div className="flex items-center gap-1.5 text-[10px] text-[#F25F5C] font-bold">
-                              <AlertTriangle className="h-3.5 w-3.5 text-[#F25F5C]" />
+                            <div className="flex items-center gap-1.5 text-[10px] text-status-error font-bold">
+                              <AlertTriangle className="h-3.5 w-3.5 text-status-error" />
                               <span>Proof generation failed</span>
                             </div>
                             {zkProofError && (
-                              <p className="text-[9px] text-[#FF8A88]/90 font-mono break-words max-h-16 overflow-y-auto leading-tight bg-[#F25F5C]/10 border border-[#F25F5C]/20 p-1.5 rounded-lg mt-0.5">
+                              <p className="text-[9px] text-[#FF8A88]/90 font-mono break-words max-h-16 overflow-y-auto leading-tight bg-status-error/10 border border-status-error/20 p-1.5 rounded-lg mt-0.5">
                                 {zkProofError}
                               </p>
                             )}
@@ -844,22 +857,66 @@ function App() {
                         )}
                       </div>
 
-                      <div className="flex flex-col gap-2 pt-1.5 border-t border-[rgba(89,200,255,0.10)]">
+                      <div className="flex flex-col gap-2 pt-1.5 border-t border-border-default">
                         <button
                           onClick={() => {
                             setShowZkDropdown(false);
                             setShowWithdrawModal(true);
                             setMobileMenuOpen(false);
                           }}
-                          className="flex items-center gap-2.5 w-full text-left text-xs font-bold text-zinc-300 hover:text-sui-blue px-3 py-2.5 rounded-xl hover:bg-sui-blue/10 transition-colors cursor-pointer"
+                          className="flex items-center gap-2.5 w-full text-left text-xs font-bold text-zinc-300 hover:text-brand-blue px-3 py-2.5 rounded-xl hover:bg-brand-blue/10 transition-colors cursor-pointer"
                         >
-                          <ArrowRight className="h-4 w-4 text-sui-blue -rotate-45" />
+                          <ArrowRight className="h-4 w-4 text-brand-blue -rotate-45" />
                           Withdraw Assets
                         </button>
 
                         <button
                           onClick={() => {
                             handleLogout();
+                            setShowZkDropdown(false);
+                            setMobileMenuOpen(false);
+                          }}
+                          className="flex items-center gap-2.5 w-full text-left text-xs font-bold text-red-400 hover:text-red-300 px-3 py-2.5 rounded-xl hover:bg-red-500/10 transition-colors cursor-pointer"
+                        >
+                          <LogOut className="h-4 w-4 text-red-400" />
+                          Disconnect Wallet
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      <div className="flex flex-col border-b border-border-default pb-3">
+                        <span className="text-[9px] font-bold text-text-secondary uppercase tracking-wider">Browser Wallet</span>
+                        <span className="text-xs font-semibold text-text-primary mt-1 truncate" title={currentAccount?.address}>
+                          {currentAccount?.label || 'Active Wallet'}
+                        </span>
+                      </div>
+
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[9px] font-bold text-text-secondary uppercase tracking-wider">Wallet Address</span>
+                        <div className="flex items-center justify-between bg-elevated-dark/50 border border-border-default rounded-xl px-3 py-2 mt-1">
+                          <span className="text-[10px] font-mono text-text-body truncate w-40">
+                            {currentAccount?.address}
+                          </span>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(currentAccount?.address || '');
+                              setCopiedZk(true);
+                              setTimeout(() => setCopiedZk(false), 2000);
+                            }}
+                            className="text-text-secondary hover:text-brand-blue p-1.5 rounded-lg hover:bg-elevated-dark/70 transition-colors flex items-center justify-center shrink-0"
+                            title="Copy address"
+                          >
+                            {copiedZk ? <Check className="h-4 w-4 text-brand-mint" /> : <Copy className="h-4 w-4" />}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-2 pt-1.5 border-t border-border-default">
+                        <button
+                          onClick={() => {
+                            setShowZkDropdown(false);
+                            disconnectWallet();
                             setMobileMenuOpen(false);
                           }}
                           className="flex items-center gap-2.5 w-full text-left text-xs font-bold text-red-400 hover:text-red-300 px-3 py-2.5 rounded-xl hover:bg-red-500/10 transition-colors cursor-pointer"
@@ -869,13 +926,9 @@ function App() {
                         </button>
                       </div>
                     </div>
-                  </>
-                )}
+                  )}
+                </div>
               </>
-            ) : (
-              <div className="theme-dapp-kit-connect w-full">
-                <ConnectButton />
-              </div>
             )}
           </div>
         )}
@@ -1041,8 +1094,7 @@ function App() {
       {/* Tactile background grain overlay */}
       <div className="grain-overlay" />
 
-      {/* Ambient Nebula Glows */}
-      <div className="absolute bottom-[-25%] right-[-20%] w-[65%] h-[65%] rounded-full bg-brand-violet/5 blur-[140px] animate-float-delayed pointer-events-none z-0" />
+
 
       {/* Mobile Top Header (hidden on md and up) */}
       <header className="flex md:hidden items-center justify-between px-4 py-3 border-b border-border-default bg-sui-dark/30 backdrop-blur-xl sticky top-0 z-30 shrink-0">
@@ -1116,7 +1168,7 @@ function App() {
             <img 
               src="/mascot.png" 
               alt="Mascot Watermark" 
-              className="w-80 h-80 object-contain opacity-[0.15] animate-float-slow"
+              className="w-80 h-80 object-contain opacity-[0.26] animate-float-slow"
             />
           </div>
 
@@ -1131,91 +1183,93 @@ function App() {
             ref={chatContainerRef}
             className="flex-1 overflow-y-auto p-4 md:p-6 pt-10 pb-36 space-y-4 z-10 relative"
           >
-            {messages.map((msg, index) => (
-              <div
-                key={index}
-                className={`flex gap-3 w-full ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}
-              >
+            <div className="max-w-2xl mx-auto w-full space-y-4">
+              {messages.map((msg, index) => (
                 <div
-                  className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 shadow-md overflow-hidden ${msg.sender === 'user' ? 'bg-gradient-to-b from-elevated-dark to-card-dark border border-brand-blue/30' : 'bg-card-dark border border-border-soft'}`}
+                  key={index}
+                  className={`flex gap-3 w-full ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}
                 >
-                  {msg.sender === 'user' ? (
-                    <Wallet className="h-4 w-4 text-brand-blue" />
-                  ) : (
-                    <img src="/mascot.png" alt="HiSui Mascot" className="h-full w-full object-cover" />
-                  )}
-                </div>
-
-                <div
-                  className={`p-4 text-xs leading-relaxed max-w-[85%] rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.28)] backdrop-blur-md ${
-                    msg.sender === 'user' 
-                      ? 'bg-gradient-to-b from-[rgba(14,34,56,0.95)] to-[rgba(9,23,38,0.95)] border border-brand-blue/35 text-text-primary rounded-tr-none' 
-                      : msg.error 
-                      ? 'bg-gradient-to-b from-status-error/[0.12] to-status-error/[0.03] border border-status-error/0.35 text-[#FF8A88] rounded-tl-none' 
-                      : 'bg-panel-dark/88 border border-border-soft text-text-primary rounded-tl-none'
-                  }`}
-                >
-                  <p className="font-medium whitespace-pre-wrap">{msg.text}</p>
-
-                  {msg.intent && (
-                    <div className="mt-3 bg-card-dark border border-border-default p-3.5 rounded-xl flex flex-col gap-2 shadow-md">
-                      <div className="flex items-center gap-2">
-                        <span className="bg-brand-violet/10 border border-brand-violet/26 text-brand-violet text-[8px] font-extrabold uppercase px-2 py-0.5 rounded-md tracking-wider flex items-center gap-1 select-none">
-                          <Sparkles className="h-2.5 w-2.5 text-brand-violet animate-pulse" />
-                          AI Intent Compiled
-                        </span>
-                      </div>
-                      <p className="text-[10px] text-text-secondary font-semibold">{msg.intent.summary}</p>
-                    </div>
-                  )}
-
-                  {msg.txDigest && (
-                    <div className="mt-3 bg-status-success/5 border border-status-success/32 p-3.5 rounded-xl flex flex-col gap-1.5 shadow-[0_0_32px_rgba(34,197,94,0.12)] animate-in fade-in duration-200">
-                      <span className="text-[10px] font-bold text-status-success-soft uppercase tracking-wider">Transaction Confirmed:</span>
-                      <a
-                        href={`https://suiscan.xyz/${network}/tx/${msg.txDigest}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-xs text-[#8FECC0] hover:text-[#59C8FF] underline break-all font-mono transition-colors"
-                      >
-                        {msg.txDigest}
-                      </a>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-
-            {isParsing && (
-              <div className="flex gap-3 items-center text-xs text-text-secondary italic pl-11">
-                <Loader2 className="h-4 w-4 animate-spin text-brand-blue" />
-                HiSui is parsing your intent...
-              </div>
-            )}
-
-            {/* Inline Intent & Guardian Preview (Mobile/Tablet Only: visible only on screens smaller than xl) */}
-            {activeIntent && (
-              <div className="block xl:hidden max-w-xl mr-auto md:ml-11 ml-2 p-1 animate-in fade-in duration-200">
-                <div className="bg-guardian-dark border border-border-soft p-5 rounded-2xl flex flex-col gap-5 shadow-lg backdrop-blur-xl">
-                  <div className="flex items-center justify-between border-b border-border-soft pb-3">
-                    <div className="flex items-center gap-2">
-                      <ShieldCheck className="h-4.5 w-4.5 text-brand-blue" />
-                      <span className="text-[9px] font-bold text-text-primary uppercase tracking-wider">Intent & Guardian Preview</span>
-                    </div>
-                    <span className="text-[9px] bg-brand-blue/10 text-brand-glow border border-brand-blue/28 px-2 py-0.5 rounded-full font-bold">PTB Block</span>
+                  <div
+                    className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 shadow-md overflow-hidden ${msg.sender === 'user' ? 'bg-gradient-to-b from-elevated-dark to-card-dark border border-brand-blue/30' : 'bg-card-dark border border-border-soft'}`}
+                  >
+                    {msg.sender === 'user' ? (
+                      <Wallet className="h-4 w-4 text-brand-blue" />
+                    ) : (
+                      <img src="/mascot.png" alt="HiSui Mascot" className="h-full w-full object-cover" />
+                    )}
                   </div>
-                  {renderPreviewContents()}
-                </div>
-              </div>
-            )}
 
-            {/* Spacer to prevent overlapping with the floating composer */}
-            <div className="h-32 shrink-0 pointer-events-none" />
+                  <div
+                    className={`p-4 text-xs leading-relaxed max-w-[85%] rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.28)] backdrop-blur-md ${
+                      msg.sender === 'user' 
+                        ? 'bg-gradient-to-b from-[rgba(14,34,56,0.95)] to-[rgba(9,23,38,0.95)] border border-brand-blue/35 text-text-primary rounded-tr-none' 
+                        : msg.error 
+                        ? 'bg-gradient-to-b from-status-error/[0.12] to-status-error/[0.03] border border-status-error/0.35 text-[#FF8A88] rounded-tl-none' 
+                        : 'bg-panel-dark/88 border border-border-soft text-text-primary rounded-tl-none'
+                    }`}
+                  >
+                    <p className="font-medium whitespace-pre-wrap">{msg.text}</p>
+
+                    {msg.intent && (
+                      <div className="mt-3 bg-card-dark border border-border-default p-3.5 rounded-xl flex flex-col gap-2 shadow-md">
+                        <div className="flex items-center gap-2">
+                          <span className="bg-brand-violet/10 border border-brand-violet/26 text-brand-violet text-[8px] font-extrabold uppercase px-2 py-0.5 rounded-md tracking-wider flex items-center gap-1 select-none">
+                            <Sparkles className="h-2.5 w-2.5 text-brand-violet animate-pulse" />
+                            AI Intent Compiled
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-text-secondary font-semibold">{msg.intent.summary}</p>
+                      </div>
+                    )}
+
+                    {msg.txDigest && (
+                      <div className="mt-3 bg-status-success/5 border border-status-success/32 p-3.5 rounded-xl flex flex-col gap-1.5 shadow-[0_0_32px_rgba(34,197,94,0.12)] animate-in fade-in duration-200">
+                        <span className="text-[10px] font-bold text-status-success-soft uppercase tracking-wider">Transaction Confirmed:</span>
+                        <a
+                          href={`https://suiscan.xyz/${network}/tx/${msg.txDigest}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-xs text-[#8FECC0] hover:text-[#59C8FF] underline break-all font-mono transition-colors"
+                        >
+                          {msg.txDigest}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+
+              {isParsing && (
+                <div className="flex gap-3 items-center text-xs text-text-secondary italic pl-11">
+                  <Loader2 className="h-4 w-4 animate-spin text-brand-blue" />
+                  HiSui is parsing your intent...
+                </div>
+              )}
+
+              {/* Inline Intent & Guardian Preview (Mobile/Tablet Only: visible only on screens smaller than xl) */}
+              {activeIntent && (
+                <div className="block xl:hidden w-full md:pl-11 pl-0 p-1 animate-in fade-in duration-200">
+                  <div className="bg-guardian-dark border border-border-soft p-5 rounded-2xl flex flex-col gap-5 shadow-lg backdrop-blur-xl">
+                    <div className="flex items-center justify-between border-b border-border-soft pb-3">
+                      <div className="flex items-center gap-2">
+                        <ShieldCheck className="h-4.5 w-4.5 text-brand-blue" />
+                        <span className="text-[9px] font-bold text-text-primary uppercase tracking-wider">Intent & Guardian Preview</span>
+                      </div>
+                      <span className="text-[9px] bg-brand-blue/10 text-brand-glow border border-brand-blue/28 px-2 py-0.5 rounded-full font-bold">PTB Block</span>
+                    </div>
+                    {renderPreviewContents()}
+                  </div>
+                </div>
+              )}
+
+              {/* Spacer to prevent overlapping with the floating composer */}
+              <div className="h-32 shrink-0 pointer-events-none" />
+            </div>
           </div>
 
           {/* Intent Composer */}
           <div className="absolute bottom-4 left-4 right-4 z-20">
-            <div className="max-w-2xl mx-auto w-full relative flex items-center bg-panel-dark/95 backdrop-blur-2xl border border-border-default rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.28)] focus-within:border-border-active focus-within:shadow-[0_0_0_4px_rgba(56,152,255,0.08),0_0_42px_rgba(56,152,255,0.14)] transition-all">
+            <div className="max-w-2xl mx-auto w-full relative flex items-center bg-panel-dark/95 backdrop-blur-2xl border border-border-default rounded-2xl composer-live-glow transition-all">
               <input
                 type="text"
                 value={input}
