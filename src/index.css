@@ -3,35 +3,35 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-cyan: #59C8FF;
-  --color-brand-blue: #3B82F6;
-  --color-brand-glow: #7EE7FF;
-  --color-brand-violet: #A78BFA;
-  --color-brand-mint: #6FFFD2;
+  --color-brand-cyan: #3898FF;
+  --color-brand-blue: #3898FF;
+  --color-brand-glow: #7EC2FF;
+  --color-brand-violet: #8F6BFF;
+  --color-brand-mint: #38FFD2;
 
-  --color-sui-dark: #030B14;
-  --color-panel-dark: #071321;
-  --color-chat-dark: #081423;
-  --color-guardian-dark: #06111C;
-  --color-card-dark: #0D1B2A;
-  --color-elevated-dark: #122338;
+  --color-sui-dark: #020813;
+  --color-panel-dark: #06101D;
+  --color-chat-dark: #040B15;
+  --color-guardian-dark: #050E1A;
+  --color-card-dark: #091726;
+  --color-elevated-dark: #0E2238;
 
-  --color-text-primary: #F5F9FF;
-  --color-text-body: #D7E6F5;
-  --color-text-secondary: #9CB2C9;
-  --color-text-muted: #6E8298;
-  --color-text-disabled: #465A70;
+  --color-text-primary: #F4F8FC;
+  --color-text-body: #C5D6E8;
+  --color-text-secondary: #8EACCC;
+  --color-text-muted: #647B95;
+  --color-text-disabled: #405267;
 
-  --color-border-soft: rgba(89, 200, 255, 0.10);
-  --color-border-default: #18324D;
-  --color-border-active: #2E6EA6;
-  --color-border-divider: rgba(89, 200, 255, 0.10);
+  --color-border-soft: rgba(56, 152, 255, 0.08);
+  --color-border-default: #122135;
+  --color-border-active: #3898FF;
+  --color-border-divider: rgba(56, 152, 255, 0.08);
 
-  --color-status-success: #22C55E;
-  --color-status-success-soft: #4ADE80;
-  --color-status-warning: #F5B942;
-  --color-status-error: #F25F5C;
-  --color-status-info: #38BDF8;
+  --color-status-success: #10B981;
+  --color-status-success-soft: #34D399;
+  --color-status-warning: #F59E0B;
+  --color-status-error: #EF4444;
+  --color-status-info: #0EA5E9;
 
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-outfit: 'Outfit', sans-serif;
@@ -59,14 +59,27 @@
 
 body {
   background:
-    radial-gradient(circle at 65% 30%, rgba(89, 200, 255, 0.10), transparent 34%),
-    radial-gradient(circle at 85% 80%, rgba(167, 139, 250, 0.08), transparent 28%),
-    linear-gradient(180deg, #030B14 0%, #07111E 100%);
-  color: #D7E6F5;
+    radial-gradient(circle at 65% 30%, rgba(56, 152, 255, 0.07), transparent 34%),
+    radial-gradient(circle at 85% 80%, rgba(143, 107, 255, 0.05), transparent 28%),
+    linear-gradient(180deg, #020813 0%, #06101E 100%);
+  color: #C5D6E8;
   font-family: var(--font-sans);
   margin: 0;
   padding: 0;
   overflow: hidden;
+}
+
+/* Subtle, tactile background grain */
+.grain-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.016;
+  pointer-events: none;
+  z-index: 9999;
 }
 
 /* Custom scrollbar for premium look */

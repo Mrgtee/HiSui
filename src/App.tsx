@@ -1037,12 +1037,15 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#030B14] text-zinc-100 flex flex-col font-sans relative overflow-hidden select-none">
+    <div className="min-h-screen bg-sui-dark text-text-primary flex flex-col font-sans relative overflow-hidden select-none">
+      {/* Tactile background grain overlay */}
+      <div className="grain-overlay" />
+
       {/* Ambient Nebula Glows */}
-      <div className="absolute bottom-[-25%] right-[-20%] w-[65%] h-[65%] rounded-full bg-sui-pink/6 blur-[140px] animate-float-delayed pointer-events-none z-0" />
+      <div className="absolute bottom-[-25%] right-[-20%] w-[65%] h-[65%] rounded-full bg-brand-violet/5 blur-[140px] animate-float-delayed pointer-events-none z-0" />
 
       {/* Mobile Top Header (hidden on md and up) */}
-      <header className="flex md:hidden items-center justify-between px-4 py-3 border-b border-border-dark bg-sui-dark/30 backdrop-blur-xl sticky top-0 z-30 shrink-0">
+      <header className="flex md:hidden items-center justify-between px-4 py-3 border-b border-border-default bg-sui-dark/30 backdrop-blur-xl sticky top-0 z-30 shrink-0">
         <div className="flex items-center gap-2 select-none">
           <img 
             src="/logo.png" 
@@ -1051,16 +1054,16 @@ function App() {
           />
           <div>
             <h1 className="text-md font-outfit font-extrabold tracking-tight text-white flex items-center gap-1.5">
-              <span className="bg-gradient-to-r from-sui-blue via-white to-sui-pink bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-brand-blue via-white to-brand-glow bg-clip-text text-transparent">
                 HiSui
               </span>
               <select
                 value={network}
                 onChange={(e) => selectNetwork(e.target.value as 'mainnet' | 'testnet')}
-                className="bg-sui-blue/10 text-sui-blue border border-sui-blue/20 text-[8px] font-bold px-1.5 py-0.2 rounded-full focus:outline-none cursor-pointer hover:bg-sui-blue/20 hover:border-sui-blue/40 transition-all font-sans"
+                className="bg-brand-blue/10 text-brand-blue border border-brand-blue/20 text-[8px] font-bold px-1.5 py-0.2 rounded-full focus:outline-none cursor-pointer hover:bg-brand-blue/20 hover:border-brand-blue/40 transition-all font-sans"
               >
-                <option value="mainnet" className="bg-[#030f1c] text-zinc-100">Mainnet</option>
-                <option value="testnet" className="bg-[#030f1c] text-zinc-100">Testnet</option>
+                <option value="mainnet" className="bg-[#020813] text-zinc-100">Mainnet</option>
+                <option value="testnet" className="bg-[#020813] text-zinc-100">Testnet</option>
               </select>
             </h1>
           </div>
@@ -1075,10 +1078,10 @@ function App() {
       </header>
 
       {/* Main Layout Containing Left Sidebar + Main Content Column + Right Sidebar */}
-      <div className="flex-1 flex overflow-hidden h-screen z-10 relative">
+      <div className="flex-1 flex overflow-hidden z-10 relative md:h-[calc(100vh-2rem)] h-[calc(100vh-3.5rem)]">
         
         {/* Left Sidebar (Desktop: permanently visible, Mobile: hidden) */}
-        <aside className="hidden md:flex w-72 bg-[#071321]/85 border border-[rgba(89,200,255,0.10)] backdrop-blur-2xl rounded-3xl p-4 my-4 ml-4 h-[calc(100vh-2rem)] flex-col justify-between shrink-0 select-none shadow-[0_24px_80px_rgba(0,0,0,0.36)]">
+        <aside className="hidden md:flex w-72 bg-panel-dark/85 border border-border-soft backdrop-blur-2xl rounded-3xl p-4 my-4 ml-4 h-[calc(100vh-2rem)] flex-col justify-between shrink-0 select-none shadow-[0_24px_80px_rgba(0,0,0,0.36)]">
           {renderSidebarContents()}
         </aside>
 
@@ -1089,11 +1092,11 @@ function App() {
               className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden animate-in fade-in duration-200" 
               onClick={() => setMobileMenuOpen(false)} 
             />
-            <aside className="fixed inset-y-0 left-0 w-72 bg-gradient-to-b from-[#071321] to-[#071321]/95 border-r border-[rgba(89,200,255,0.10)] p-4 z-50 flex flex-col justify-between md:hidden animate-in slide-in-from-left duration-250 select-none shadow-2xl backdrop-blur-2xl">
+            <aside className="fixed inset-y-0 left-0 w-72 bg-gradient-to-b from-panel-dark to-panel-dark/95 border-r border-border-soft p-4 z-50 flex flex-col justify-between md:hidden animate-in slide-in-from-left duration-250 select-none shadow-2xl backdrop-blur-2xl">
               <div className="flex justify-end mb-2">
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-[#9CB2C9] hover:text-white p-1.5 rounded-lg hover:bg-white/[0.05] transition-all"
+                  className="text-text-secondary hover:text-white p-1.5 rounded-lg hover:bg-white/[0.05] transition-all"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -1106,7 +1109,7 @@ function App() {
         )}
 
         {/* Middle Column: Chat and Floating Input Box */}
-        <div className="flex-1 bg-gradient-to-b from-[#081423]/95 to-[#081423]/85 border border-[rgba(89,200,255,0.10)] backdrop-blur-2xl rounded-3xl my-4 mx-4 h-[calc(100vh-2rem)] flex flex-col overflow-hidden relative shadow-[0_24px_80px_rgba(0,0,0,0.36)]">
+        <div className="flex-1 bg-gradient-to-b from-chat-dark/95 to-chat-dark/85 border-t md:border border-border-soft backdrop-blur-2xl md:rounded-3xl md:my-4 md:mx-4 md:h-[calc(100vh-2rem)] h-full flex flex-col overflow-hidden relative md:shadow-[0_24px_80px_rgba(0,0,0,0.36)] shadow-none">
           
           {/* Moving Mascot Background */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 select-none overflow-hidden">
@@ -1118,10 +1121,10 @@ function App() {
           </div>
 
           {/* Top Gradient Fade to prevent hard cut-off */}
-          <div className="absolute top-0 left-0 right-0 h-10 bg-gradient-to-b from-[#081423] via-[#081423]/80 to-transparent z-20 pointer-events-none rounded-t-3xl" />
+          <div className="absolute top-0 left-0 right-0 h-10 bg-gradient-to-b from-chat-dark via-chat-dark/80 to-transparent z-20 pointer-events-none md:rounded-t-3xl" />
 
           {/* Bottom Gradient Fade to prevent text clashing with input */}
-          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#081423] via-[#081423]/80 to-transparent z-15 pointer-events-none rounded-b-3xl" />
+          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-chat-dark via-chat-dark/80 to-transparent z-15 pointer-events-none md:rounded-b-3xl" />
 
           {/* Messages Log */}
           <div 
@@ -1134,10 +1137,10 @@ function App() {
                 className={`flex gap-3 w-full ${msg.sender === 'user' ? 'flex-row-reverse' : ''}`}
               >
                 <div
-                  className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 shadow-md overflow-hidden ${msg.sender === 'user' ? 'bg-gradient-to-b from-[#14304a] to-[#0d233a] border border-[rgba(89,200,255,0.24)]' : 'bg-[#0D1B2A] border border-[rgba(89,200,255,0.12)]'}`}
+                  className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 shadow-md overflow-hidden ${msg.sender === 'user' ? 'bg-gradient-to-b from-elevated-dark to-card-dark border border-brand-blue/30' : 'bg-card-dark border border-border-soft'}`}
                 >
                   {msg.sender === 'user' ? (
-                    <Wallet className="h-4 w-4 text-[#59C8FF]" />
+                    <Wallet className="h-4 w-4 text-brand-blue" />
                   ) : (
                     <img src="/mascot.png" alt="HiSui Mascot" className="h-full w-full object-cover" />
                   )}
@@ -1146,29 +1149,29 @@ function App() {
                 <div
                   className={`p-4 text-xs leading-relaxed max-w-[85%] rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.28)] backdrop-blur-md ${
                     msg.sender === 'user' 
-                      ? 'bg-gradient-to-b from-[rgba(20,48,74,0.95)] to-[rgba(13,35,58,0.95)] border border-[rgba(89,200,255,0.24)] text-[#D7E6F5] rounded-tr-none' 
+                      ? 'bg-gradient-to-b from-[rgba(14,34,56,0.95)] to-[rgba(9,23,38,0.95)] border border-brand-blue/35 text-text-primary rounded-tr-none' 
                       : msg.error 
-                      ? 'bg-gradient-to-b from-[#F25F5C]/[0.12] to-[#F25F5C]/[0.03] border border-[#F25F5C]/0.35 text-[#FF8A88] rounded-tl-none' 
-                      : 'bg-[rgba(16,30,46,0.88)] border border-[rgba(89,200,255,0.12)] text-[#D7E6F5] rounded-tl-none'
+                      ? 'bg-gradient-to-b from-status-error/[0.12] to-status-error/[0.03] border border-status-error/0.35 text-[#FF8A88] rounded-tl-none' 
+                      : 'bg-panel-dark/88 border border-border-soft text-text-primary rounded-tl-none'
                   }`}
                 >
                   <p className="font-medium whitespace-pre-wrap">{msg.text}</p>
 
                   {msg.intent && (
-                    <div className="mt-3 bg-[#0D1B2A] border border-[#18324D] p-3.5 rounded-xl flex flex-col gap-2 shadow-md">
+                    <div className="mt-3 bg-card-dark border border-border-default p-3.5 rounded-xl flex flex-col gap-2 shadow-md">
                       <div className="flex items-center gap-2">
-                        <span className="bg-[rgba(167,139,250,0.10)] border border-[rgba(167,139,250,0.26)] text-[#C4B5FD] text-[8px] font-extrabold uppercase px-2 py-0.5 rounded-md tracking-wider flex items-center gap-1 select-none">
-                          <Sparkles className="h-2.5 w-2.5 text-[#A78BFA] animate-pulse" />
+                        <span className="bg-brand-violet/10 border border-brand-violet/26 text-brand-violet text-[8px] font-extrabold uppercase px-2 py-0.5 rounded-md tracking-wider flex items-center gap-1 select-none">
+                          <Sparkles className="h-2.5 w-2.5 text-brand-violet animate-pulse" />
                           AI Intent Compiled
                         </span>
                       </div>
-                      <p className="text-[10px] text-[#9CB2C9] font-semibold">{msg.intent.summary}</p>
+                      <p className="text-[10px] text-text-secondary font-semibold">{msg.intent.summary}</p>
                     </div>
                   )}
 
                   {msg.txDigest && (
-                    <div className="mt-3 bg-[rgba(6,36,29,0.72)] border border-[rgba(34,197,94,0.32)] p-3.5 rounded-xl flex flex-col gap-1.5 shadow-[0_0_32px_rgba(34,197,94,0.12)] animate-in fade-in duration-200">
-                      <span className="text-[10px] font-bold text-[#4ADE80] uppercase tracking-wider">Transaction Confirmed:</span>
+                    <div className="mt-3 bg-status-success/5 border border-status-success/32 p-3.5 rounded-xl flex flex-col gap-1.5 shadow-[0_0_32px_rgba(34,197,94,0.12)] animate-in fade-in duration-200">
+                      <span className="text-[10px] font-bold text-status-success-soft uppercase tracking-wider">Transaction Confirmed:</span>
                       <a
                         href={`https://suiscan.xyz/${network}/tx/${msg.txDigest}`}
                         target="_blank"
@@ -1184,22 +1187,22 @@ function App() {
             ))}
 
             {isParsing && (
-              <div className="flex gap-3 items-center text-xs text-[#9CB2C9] italic pl-11">
-                <Loader2 className="h-4 w-4 animate-spin text-[#59C8FF]" />
+              <div className="flex gap-3 items-center text-xs text-text-secondary italic pl-11">
+                <Loader2 className="h-4 w-4 animate-spin text-brand-blue" />
                 HiSui is parsing your intent...
               </div>
             )}
 
-            {/* Inline Intent & Guardian Preview (Mobile/Tablet Only: visible only on screens smaller than lg) */}
+            {/* Inline Intent & Guardian Preview (Mobile/Tablet Only: visible only on screens smaller than xl) */}
             {activeIntent && (
-              <div className="block lg:hidden max-w-xl mr-auto ml-11 p-1 animate-in fade-in duration-200">
-                <div className="bg-[#06111C] border border-[rgba(89,200,255,0.10)] p-5 rounded-2xl flex flex-col gap-5 shadow-lg backdrop-blur-xl">
-                  <div className="flex items-center justify-between border-b border-[rgba(89,200,255,0.10)] pb-3">
+              <div className="block xl:hidden max-w-xl mr-auto md:ml-11 ml-2 p-1 animate-in fade-in duration-200">
+                <div className="bg-guardian-dark border border-border-soft p-5 rounded-2xl flex flex-col gap-5 shadow-lg backdrop-blur-xl">
+                  <div className="flex items-center justify-between border-b border-border-soft pb-3">
                     <div className="flex items-center gap-2">
-                      <ShieldCheck className="h-4.5 w-4.5 text-[#59C8FF]" />
-                      <span className="text-[9px] font-bold text-[#F5F9FF] uppercase tracking-wider">Intent & Guardian Preview</span>
+                      <ShieldCheck className="h-4.5 w-4.5 text-brand-blue" />
+                      <span className="text-[9px] font-bold text-text-primary uppercase tracking-wider">Intent & Guardian Preview</span>
                     </div>
-                    <span className="text-[9px] bg-[rgba(89,200,255,0.10)] text-[#7EE7FF] border border-[rgba(89,200,255,0.28)] px-2 py-0.5 rounded-full font-bold">PTB Block</span>
+                    <span className="text-[9px] bg-brand-blue/10 text-brand-glow border border-brand-blue/28 px-2 py-0.5 rounded-full font-bold">PTB Block</span>
                   </div>
                   {renderPreviewContents()}
                 </div>
@@ -1212,7 +1215,7 @@ function App() {
 
           {/* Intent Composer */}
           <div className="absolute bottom-4 left-4 right-4 z-20">
-            <div className="max-w-2xl mx-auto w-full relative flex items-center bg-[rgba(7,17,29,0.94)] backdrop-blur-2xl border border-[rgba(89,200,255,0.16)] rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.28)] focus-within:border-[rgba(89,200,255,0.55)] focus-within:shadow-[0_0_0_4px_rgba(89,200,255,0.08),0_0_42px_rgba(89,200,255,0.14)] transition-all">
+            <div className="max-w-2xl mx-auto w-full relative flex items-center bg-panel-dark/95 backdrop-blur-2xl border border-border-default rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.28)] focus-within:border-border-active focus-within:shadow-[0_0_0_4px_rgba(56,152,255,0.08),0_0_42px_rgba(56,152,255,0.14)] transition-all">
               <input
                 type="text"
                 value={input}
@@ -1224,24 +1227,24 @@ function App() {
                     : 'Connect wallet or zkLogin to begin...'
                 }
                 disabled={!activeWalletAddress || isParsing}
-                className="w-full bg-transparent pl-4 pr-12 py-3.5 md:py-4 text-xs text-[#F5F9FF] placeholder-[#5F7388] focus:outline-none disabled:opacity-50 font-sans"
+                className="w-full bg-transparent pl-4 pr-12 py-3.5 md:py-4 text-xs text-text-primary placeholder-text-muted focus:outline-none disabled:opacity-50 font-sans"
               />
               <button
                 onClick={handleSend}
                 disabled={!input.trim() || isParsing}
-                className="absolute right-2.5 p-2 md:p-2.5 bg-gradient-to-b from-[#163A5A] to-[#10263D] disabled:from-[#0D1B2A] disabled:to-[#0D1B2A] disabled:text-[#465A70] text-[#59C8FF] rounded-lg hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center cursor-pointer shadow-md"
+                className="absolute right-2.5 p-2 md:p-2.5 bg-gradient-to-b from-elevated-dark to-card-dark disabled:from-card-dark disabled:to-card-dark disabled:text-text-disabled text-brand-blue rounded-lg hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center cursor-pointer shadow-md"
               >
-                <Send className="h-4 w-4 text-[#59C8FF]" />
+                <Send className="h-4 w-4 text-brand-blue" />
               </button>
             </div>
           </div>
 
         </div>
 
-        {/* Right Sidebar: Intent Preview & Guardian Risk Checklist (Desktop Only: hidden on screens smaller than lg) */}
-        <section className="hidden lg:flex w-[400px] xl:w-[430px] flex-col bg-[#06111C] border border-[rgba(89,200,255,0.10)] backdrop-blur-2xl rounded-3xl p-6 my-4 mr-4 h-[calc(100vh-2rem)] overflow-y-auto shrink-0 shadow-[0_24px_80px_rgba(0,0,0,0.36)] select-none">
+        {/* Right Sidebar: Intent Preview & Guardian Risk Checklist (Desktop Only: hidden on screens smaller than xl) */}
+        <section className="hidden xl:flex w-[400px] xl:w-[430px] flex-col bg-guardian-dark border border-border-soft backdrop-blur-2xl rounded-3xl p-6 my-4 mr-4 h-[calc(100vh-2rem)] overflow-y-auto shrink-0 shadow-[0_24px_80px_rgba(0,0,0,0.36)] select-none">
           <div className="flex items-center gap-2 pb-4 border-b border-white/[0.06]">
-            <ShieldCheck className="h-5 w-5 text-sui-blue" />
+            <ShieldCheck className="h-5 w-5 text-brand-blue" />
             <h2 className="font-outfit font-extrabold text-sm text-white uppercase tracking-wider">Intent & Guardian Preview</h2>
           </div>
           {renderPreviewContents()}
