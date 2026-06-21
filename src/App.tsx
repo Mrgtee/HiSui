@@ -1161,7 +1161,7 @@ function App() {
         )}
 
         {/* Middle Column: Chat and Floating Input Box */}
-        <div className="flex-1 bg-gradient-to-b from-chat-dark/95 to-chat-dark/85 border-t md:border border-border-soft backdrop-blur-2xl md:rounded-3xl md:my-4 md:mx-4 md:h-[calc(100vh-2rem)] h-full flex flex-col overflow-hidden relative md:shadow-[0_24px_80px_rgba(0,0,0,0.36)] shadow-none">
+        <div className="flex-1 bg-gradient-to-b from-chat-dark/95 to-chat-dark/85 border-t md:border border-[#16253b] backdrop-blur-2xl md:rounded-3xl md:my-4 md:mx-4 md:h-[calc(100vh-2rem)] h-full flex flex-col overflow-hidden relative md:shadow-[0_24px_80px_rgba(0,0,0,0.6),0_0_50px_rgba(41,141,255,0.03)] shadow-none">
           
           {/* Moving Mascot Background */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 select-none overflow-hidden">
