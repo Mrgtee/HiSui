@@ -899,7 +899,7 @@ function App() {
       return (
         <div className="flex-1 flex flex-col items-center justify-center text-center text-[#6E8298] px-4 py-20 h-full">
           <div className="relative mb-4 h-16 w-16 rounded-full overflow-hidden border border-[rgba(89,200,255,0.10)] shadow-lg animate-pulse">
-            <img src="/mascot.jpg" alt="HiSui Mascot" className="h-full w-full object-cover" />
+            <img src="/mascot.png" alt="HiSui Mascot" className="h-full w-full object-cover" />
           </div>
           <p className="text-xs font-bold text-[#F5F9FF]">No active intent compiled yet.</p>
           <p className="text-[10px] text-[#6E8298] mt-1 max-w-[280px]">Submit a plain English goal in the chat, and the compiled block will appear here for verification.</p>
@@ -1111,9 +1111,9 @@ function App() {
           {/* Moving Mascot Background */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 select-none overflow-hidden">
             <img 
-              src="/mascot.jpg" 
+              src="/mascot.png" 
               alt="Mascot Watermark" 
-              className="w-80 h-80 object-contain opacity-[0.03] mix-blend-screen animate-float-slow filter grayscale contrast-125"
+              className="w-80 h-80 object-contain opacity-[0.08] animate-float-slow"
             />
           </div>
 
@@ -1139,7 +1139,7 @@ function App() {
                   {msg.sender === 'user' ? (
                     <Wallet className="h-4 w-4 text-[#59C8FF]" />
                   ) : (
-                    <img src="/mascot.jpg" alt="HiSui Mascot" className="h-full w-full object-cover" />
+                    <img src="/mascot.png" alt="HiSui Mascot" className="h-full w-full object-cover" />
                   )}
                 </div>
 
