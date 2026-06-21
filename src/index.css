@@ -3,33 +3,33 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-cyan: #3898FF;
-  --color-brand-blue: #3898FF;
-  --color-brand-glow: #7EC2FF;
-  --color-brand-violet: #8F6BFF;
-  --color-brand-mint: #38FFD2;
+  --color-brand-cyan: #298dff;
+  --color-brand-blue: #298dff;
+  --color-brand-glow: #4da2ff;
+  --color-brand-violet: #ff6c3d;
+  --color-brand-mint: #38ffd2;
 
-  --color-sui-dark: #020813;
-  --color-panel-dark: #06101D;
-  --color-chat-dark: #040B15;
-  --color-guardian-dark: #050E1A;
-  --color-card-dark: #091726;
-  --color-elevated-dark: #0E2238;
+  --color-sui-dark: #030f1c;
+  --color-panel-dark: #131518;
+  --color-chat-dark: #121315;
+  --color-guardian-dark: #131518;
+  --color-card-dark: #222529;
+  --color-elevated-dark: #343940;
 
-  --color-text-primary: #F4F8FC;
-  --color-text-body: #C5D6E8;
-  --color-text-secondary: #8EACCC;
-  --color-text-muted: #647B95;
-  --color-text-disabled: #405267;
+  --color-text-primary: #ffffff;
+  --color-text-body: #e0e2e6;
+  --color-text-secondary: #c2c6cd;
+  --color-text-muted: #6c7584;
+  --color-text-disabled: #4b515b;
 
-  --color-border-soft: rgba(56, 152, 255, 0.08);
-  --color-border-default: #122135;
-  --color-border-active: #3898FF;
-  --color-border-divider: rgba(56, 152, 255, 0.08);
+  --color-border-soft: rgba(41, 141, 255, 0.08);
+  --color-border-default: #222529;
+  --color-border-active: #298dff;
+  --color-border-divider: rgba(41, 141, 255, 0.08);
 
   --color-status-success: #10B981;
   --color-status-success-soft: #34D399;
-  --color-status-warning: #F59E0B;
+  --color-status-warning: #ff6c3d;
   --color-status-error: #EF4444;
   --color-status-info: #0EA5E9;
 
@@ -59,10 +59,10 @@
 
 body {
   background:
-    radial-gradient(circle at 65% 30%, rgba(56, 152, 255, 0.07), transparent 34%),
-    radial-gradient(circle at 85% 80%, rgba(143, 107, 255, 0.05), transparent 28%),
-    linear-gradient(180deg, #020813 0%, #06101E 100%);
-  color: #C5D6E8;
+    radial-gradient(circle at 65% 30%, rgba(41, 141, 255, 0.07), transparent 34%),
+    radial-gradient(circle at 85% 80%, rgba(255, 108, 61, 0.03), transparent 28%),
+    linear-gradient(180deg, #030f1c 0%, #131518 100%);
+  color: #e0e2e6;
   font-family: var(--font-sans);
   margin: 0;
   padding: 0;
@@ -93,28 +93,28 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(89, 200, 255, 0.2);
+  background: rgba(41, 141, 255, 0.2);
   border-radius: 99px;
   transition: background 0.2s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(89, 200, 255, 0.35);
+  background: rgba(41, 141, 255, 0.35);
 }
 
 /* Premium Button Click Feedback: turn blue and shrink */
 button:active {
-  background: #3B82F6 !important;
+  background: #298dff !important;
   background-image: none !important;
-  color: #F5F9FF !important;
-  border-color: #3B82F6 !important;
+  color: #ffffff !important;
+  border-color: #298dff !important;
   transform: scale(0.95) !important;
   transition: transform 0.1s ease !important;
 }
 
 button:active * {
-  color: #F5F9FF !important;
-  stroke: #F5F9FF !important;
+  color: #ffffff !important;
+  stroke: #ffffff !important;
 }
 
 /* SUI dApp Kit ConnectButton Premium Override */
@@ -126,9 +126,9 @@ button:active * {
   align-items: center !important;
   justify-content: center !important;
   gap: 10px !important;
-  background: #0D1B2A !important;
-  color: #F5F9FF !important;
-  border: 1px solid #18324D !important;
+  background: #222529 !important;
+  color: #ffffff !important;
+  border: 1px solid #343940 !important;
   border-radius: 12px !important;
   padding: 10px 16px !important;
   font-size: 12px !important;
@@ -141,9 +141,9 @@ button:active * {
 
 .theme-dapp-kit-connect button:hover,
 .sui-connect-button:hover {
-  border-color: #2E6EA6 !important;
-  background: #122338 !important;
-  box-shadow: 0 0 36px rgba(89, 200, 255, 0.14) !important;
+  border-color: #298dff !important;
+  background: #343940 !important;
+  box-shadow: 0 0 36px rgba(41, 141, 255, 0.14) !important;
 }
 
 
