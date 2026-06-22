@@ -142,8 +142,25 @@ export const runGuardianChecks = async (
 
     // 4. Calculate actual execution slippage (Risk Class 2)
     if (success) {
+      const sender = tx.getData().sender;
+      const senderNormalized = sender ? normalizeSuiAddress(sender).toLowerCase() : null;
+
+      const getOwnerAddress = (owner: any): string | null => {
+        if (owner && typeof owner === 'object' && 'AddressOwner' in owner) {
+          return owner.AddressOwner;
+        }
+        return null;
+      };
+
+      const senderChanges = dryRunResult.balanceChanges.filter((change: any) => {
+        const ownerAddr = getOwnerAddress(change.owner);
+        return ownerAddr && senderNormalized && normalizeSuiAddress(ownerAddr).toLowerCase() === senderNormalized;
+      });
+
+      const changesToSearch = senderChanges.length > 0 ? senderChanges : dryRunResult.balanceChanges;
+
       // Find SUI and non-SUI balance changes
-      const suiChange = dryRunResult.balanceChanges.find(
+      const suiChange = changesToSearch.find(
         (change: { coinType: string; amount: string }) => normalizeSuiAddress(change.coinType).toLowerCase().endsWith('::sui::sui')
       );
       
@@ -152,12 +169,12 @@ export const runGuardianChecks = async (
         ...Object.values(NETWORK_CONFIG.testnet.TOKENS)
       ].map(addr => normalizeSuiAddress(addr).toLowerCase()));
 
-      const otherChange = dryRunResult.balanceChanges.find(
+      const otherChange = changesToSearch.find(
         (change: { coinType: string; amount: string }) => {
           const normType = normalizeSuiAddress(change.coinType).toLowerCase();
           return !normType.endsWith('::sui::sui') && knownAddresses.has(normType);
         }
-      ) || dryRunResult.balanceChanges.find(
+      ) || changesToSearch.find(
         (change: { coinType: string; amount: string }) => !normalizeSuiAddress(change.coinType).toLowerCase().endsWith('::sui::sui')
       );
 
