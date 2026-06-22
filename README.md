@@ -10,7 +10,7 @@
 
 ---
 
-## 💡 The Problem
+## The Problem
 
 DeFi on modern blockchains is incredibly powerful but highly fragmented. To execute a simple yield strategy—such as swapping a token on an AMM and depositing it into a lending protocol—a user must:
 1. Navigate to a decentralized exchange (DEX), connect a wallet, calculate slippage, and execute a swap.
@@ -18,7 +18,7 @@ DeFi on modern blockchains is incredibly powerful but highly fragmented. To exec
 3. Pay multiple gas fees, sign multiple transactions, and navigate confusing UI layouts.
 4. Keep track of seed phrases and manage private keys, which creates a high barrier of entry for Web2 users.
 
-## 🚀 The Solution: HiSui
+## The Solution: HiSui
 
 **HiSui** is a premium, conversational **AI Intent Engine** that simplifies blockchain interaction. Users input their goal in plain English, and HiSui does the heavy lifting:
 
@@ -29,7 +29,7 @@ DeFi on modern blockchains is incredibly powerful but highly fragmented. To exec
 
 ---
 
-## ✨ Core Features
+## Core Features
 
 *   **Google zkLogin Integration**: On-chain wallets created instantly using Web2 Google Auth, featuring dynamic ZK proof generation and salt cache management.
 *   **AI Intent Compiler**: Integrated with **Google Gemini AI** to dynamically map text prompts into structured blockchain execution schemas.
@@ -42,7 +42,7 @@ DeFi on modern blockchains is incredibly powerful but highly fragmented. To exec
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 *   **Frontend**: React (Vite), TypeScript, Tailwind CSS (v4).
 *   **Sui SDKs**: `@mysten/sui` (TypeScript SDK), `@mysten/dapp-kit` (Sui dApp Kit).
@@ -56,7 +56,7 @@ DeFi on modern blockchains is incredibly powerful but highly fragmented. To exec
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```bash
 HiSui/
@@ -79,7 +79,7 @@ HiSui/
 
 ---
 
-## 🚀 Setup & Installation
+## Setup & Installation
 
 ### Prerequisites
 *   Node.js (v18+)
@@ -121,7 +121,7 @@ npm run dev
 
 ---
 
-## 💡 Example Intents
+## Example Intents
 
 Try entering the following commands in the chat box:
 *   `"Swap 1 SUI for USDC"`
@@ -131,7 +131,7 @@ Try entering the following commands in the chat box:
 
 ---
 
-## 🗺️ Project Roadmap
+## Project Roadmap
 
 ```mermaid
 timeline
@@ -142,18 +142,18 @@ timeline
     Phase 4 : HiSui Intent SDK : Institutional Portal : Yield Optimization Agents
 ```
 
-### 📍 Phase 1: MVP Core Foundation (Current)
+### Phase 1: MVP Core Foundation (Current)
 *   Integrate Gemini NLP, zkLogin Google session, and dry-run Guardian checker.
 *   Implement multi-step atomic PTBs linking Cetus and NAVI protocol actions.
 
-### 📍 Phase 2: Conversational Voice & Ecosystem Integrations (Q3 2026)
+### Phase 2: Conversational Voice & Ecosystem Integrations (Q3 2026)
 *   **Voice-to-Intent Command Parsing**: Integrate the Web Speech API to allow users to dictate transactions directly (e.g., clicking a microphone icon and speaking their intent).
 *   **Expand Integrations**: Support **DeepBook v3** (limit orders) and **Scallop** (lending pools).
 *   **Chatbots**: Release HiSui Telegram and Discord bots for conversational wallet interactions.
 
-### 📍 Phase 3: Condition-Based Automation (Q4 2026)
+### Phase 3: Condition-Based Automation (Q4 2026)
 *   Enable automated triggers (e.g., *"If SUI price hits $1.80, swap 100 USDC for SUI"*).
 *   Implement zero-gas transaction sponsorship via Sui gas stations.
 
-### 📍 Phase 4: B2B SDK Layer (Q1 2027)
+### Phase 4: B2B SDK Layer (Q1 2027)
 *   Package the NLP-to-PTB engine as an open-source Developer SDK for other dApps.
