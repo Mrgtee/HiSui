@@ -972,25 +972,78 @@ function App() {
 
           {/* Steps Visualizer */}
           <div className="mt-2 space-y-3.5 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-[2px] before:bg-[rgba(89,200,255,0.10)]">
-            {activeIntent.actions.map((act, index) => (
-              <div key={index} className="flex gap-4 items-start pl-6 relative">
-                <div className="absolute left-1.5 h-3.5 w-3.5 rounded-full bg-gradient-to-r from-[#59C8FF] to-[#3B82F6] border-4 border-[#030B14] flex items-center justify-center shadow-[0_0_8px_rgba(89,200,255,0.6)]" />
-                <div className="flex-1 bg-[#122338]/40 border border-[#18324D] p-3 rounded-xl flex items-center justify-between hover:border-[#2E6EA6] transition-all hover:scale-[1.01]">
-                  <div>
-                    <span className="text-[9px] font-bold text-[#9CB2C9] uppercase tracking-wider">{act.type}</span>
-                    <p className="text-xs text-[#D7E6F5] mt-0.5 font-medium">
-                      {act.type === 'swap' 
-                        ? `Swap ${parseFloat(act.amount) / Math.pow(10, getTokenDecimals(act.fromToken || 'SUI'))} ${act.fromToken} for ${act.toToken}` 
-                        : act.type === 'transfer'
-                        ? `Transfer ${parseFloat(act.amount) / Math.pow(10, getTokenDecimals(act.tokenType || 'SUI'))} ${act.tokenType || 'SUI'} to ${act.recipient ? act.recipient.slice(0, 6) + '...' + act.recipient.slice(-4) : 'recipient'}`
-                        : `Deposit ${act.amount === 'all_swapped' ? 'all swapped assets' : parseFloat(act.amount) / Math.pow(10, getTokenDecimals(act.tokenType || 'USDC'))} ${act.tokenType || 'USDC'} into NAVI`
-                      }
-                    </p>
+            {activeIntent.actions.map((act, index) => {
+              // Calculate convenience fee if applicable
+              let feeLabel = '';
+              if (act.type === 'swap') {
+                const amountVal = parseFloat(act.amount);
+                const fromToken = act.fromToken || 'SUI';
+                const decimals = getTokenDecimals(fromToken);
+                const isSuiToken = fromToken.toUpperCase() === 'SUI';
+                const threshold = isSuiToken ? 500000000 : 500000;
+                if (amountVal >= threshold) {
+                  const feeAmount = amountVal * 0.001;
+                  const feeFormatted = feeAmount / Math.pow(10, decimals);
+                  const feeStr = feeFormatted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: decimals });
+                  feeLabel = `Fee: 0.1% (${feeStr} ${fromToken})`;
+                } else {
+                  feeLabel = 'Fee: Exempt (<0.5)';
+                }
+              } else if (act.type === 'deposit') {
+                const tokenType = act.tokenType || 'USDC';
+                const isSuiToken = tokenType.toUpperCase() === 'SUI';
+                const threshold = isSuiToken ? 500000000 : 500000;
+                const hasPriorSwap = activeIntent.actions.slice(0, index).some(a => a.type === 'swap');
+                
+                if (act.amount === 'all_swapped' || hasPriorSwap) {
+                  feeLabel = 'Fee: Chained (Exempt)';
+                } else {
+                  const amountVal = parseFloat(act.amount);
+                  if (amountVal >= threshold) {
+                    const decimals = getTokenDecimals(tokenType);
+                    const feeAmount = amountVal * 0.001;
+                    const feeFormatted = feeAmount / Math.pow(10, decimals);
+                    const feeStr = feeFormatted.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: decimals });
+                    feeLabel = `Fee: 0.1% (${feeStr} ${tokenType})`;
+                  } else {
+                    feeLabel = 'Fee: Exempt (<0.5)';
+                  }
+                }
+              } else if (act.type === 'transfer') {
+                feeLabel = 'Fee: Exempt';
+              }
+
+              return (
+                <div key={index} className="flex gap-4 items-start pl-6 relative">
+                  <div className="absolute left-1.5 h-3.5 w-3.5 rounded-full bg-gradient-to-r from-[#59C8FF] to-[#3B82F6] border-4 border-[#030B14] flex items-center justify-center shadow-[0_0_8px_rgba(89,200,255,0.6)]" />
+                  <div className="flex-1 bg-[#122338]/40 border border-[#18324D] p-3 rounded-xl flex items-center justify-between hover:border-[#2E6EA6] transition-all hover:scale-[1.01]">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[9px] font-bold text-[#9CB2C9] uppercase tracking-wider">{act.type}</span>
+                        {feeLabel && (
+                          <span className={`text-[8px] font-bold px-1.5 py-0.2 rounded ${
+                            feeLabel.includes('Exempt') 
+                              ? 'bg-[#1C2C3F]/50 text-[#8EA6C0]/90 border border-[#2B3F55]/40' 
+                              : 'bg-[rgba(89,200,255,0.08)] text-[#7EE7FF] border border-[rgba(89,200,255,0.18)]'
+                          }`}>
+                            {feeLabel}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-[#D7E6F5] mt-1 font-medium font-sans">
+                        {act.type === 'swap' 
+                          ? `Swap ${parseFloat(act.amount) / Math.pow(10, getTokenDecimals(act.fromToken || 'SUI'))} ${act.fromToken} for ${act.toToken}` 
+                          : act.type === 'transfer'
+                          ? `Transfer ${parseFloat(act.amount) / Math.pow(10, getTokenDecimals(act.tokenType || 'SUI'))} ${act.tokenType || 'SUI'} to ${act.recipient ? act.recipient.slice(0, 6) + '...' + act.recipient.slice(-4) : 'recipient'}`
+                          : `Deposit ${act.amount === 'all_swapped' ? 'all swapped assets' : parseFloat(act.amount) / Math.pow(10, getTokenDecimals(act.tokenType || 'USDC'))} ${act.tokenType || 'USDC'} into NAVI`
+                        }
+                      </p>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-[#6E8298] shrink-0" />
                   </div>
-                  <ArrowRight className="h-4 w-4 text-[#6E8298] shrink-0" />
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 

@@ -183,6 +183,19 @@ export const NETWORK_CONFIG = {
 // Keep deprecated TOKENS export for backward compatibility if referenced elsewhere
 export const TOKENS = NETWORK_CONFIG.testnet.TOKENS;
 
+const getEnvVar = (key: string): string | undefined => {
+  if (typeof import.meta.env !== 'undefined' && import.meta.env[key]) {
+    return import.meta.env[key];
+  }
+  if (typeof process !== 'undefined' && process.env && process.env[key]) {
+    return process.env[key];
+  }
+  return undefined;
+};
+
+export const FEE_PERCENTAGE = 0.001; // 0.1% or 10 bps
+export const HISUI_TREASURY_ADDRESS = getEnvVar('VITE_TREASURY_ADDRESS') || '0xa4d207567788ba5c1e04a2ea2e88a44d82cb123456789abcdef123456789abcd';
+
 const MIN_SQRT_PRICE = '4295048016';
 const MAX_SQRT_PRICE = '79226673515401279992447579055'; 
 
@@ -271,6 +284,20 @@ export const buildPTB = async (
         inputCoinObj = await getCoinOfAmount(client, senderAddress, from, amountVal, tx);
       }
 
+      // Calculate 0.1% convenience fee
+      const rawAmount = BigInt(amountVal);
+      // Fee threshold: 0.5 SUI (500M Mist) or 0.5 USDC/USDT (500k units) to prevent dust transactions
+      const isSuiToken = normalizeSuiAddress(from) === normalizeSuiAddress(config.TOKENS.SUI);
+      const threshold = isSuiToken ? 500000000n : 500000n;
+      
+      const feeAmount = rawAmount >= threshold ? BigInt(Math.floor(Number(amountVal) * FEE_PERCENTAGE)) : 0n;
+      const swapAmount = rawAmount - feeAmount;
+
+      if (feeAmount > 0n) {
+        const [feeCoin] = tx.splitCoins(inputCoinObj as any, [tx.pure.u64(feeAmount.toString())]);
+        tx.transferObjects([feeCoin], tx.pure.address(HISUI_TREASURY_ADDRESS));
+      }
+
       // 4. Construct direct moveCall to avoid full payload overrides and keep composability.
       const packageId = sdk.sdkOptions.integrate?.published_at || '0x19dd42e05fa6c9988a60d30686ee3feb776672b5547e328d6dab16563da65293';
       const globalConfigId = poolAny.globalConfigId || sdk.sdkOptions.clmm_pool?.config?.global_config_id || '0x9774e359588ead122af1c7e7f64e14ade261cfeecdb5d0eb4a5b3b4c8ab8bd3e';
@@ -307,7 +334,7 @@ export const buildPTB = async (
           coinB,
           tx.pure.bool(a2b),
           tx.pure.bool(true), // by_amount_in
-          tx.pure.u64(amountVal),
+          tx.pure.u64(swapAmount.toString()), // Use remaining amount after fee deduction
           tx.pure.u128(sqrtPriceLimit),
           tx.pure.bool(false), // is_exact_out
           tx.object('0x6'), // Clock
@@ -354,13 +381,27 @@ export const buildPTB = async (
         }
       }
 
+      // Calculate 0.1% convenience fee for deposit (unless chained from a swap that already paid the fee)
+      const rawAmount = amountVal === 'all_swapped' ? 0n : BigInt(amountVal);
+      const isSuiToken = normalizeSuiAddress(naviToken) === normalizeSuiAddress(config.TOKENS.SUI);
+      const threshold = isSuiToken ? 500000000n : 500000n; // 0.5 SUI or 0.5 USDC/USDT
+      
+      const shouldChargeFee = amountVal !== 'all_swapped' && !lastSwappedCoin && rawAmount >= threshold;
+      const feeAmount = shouldChargeFee ? BigInt(Math.floor(Number(amountVal) * FEE_PERCENTAGE)) : 0n;
+      const depositAmount = rawAmount - feeAmount;
+
+      if (feeAmount > 0n) {
+        const [feeCoin] = tx.splitCoins(depositCoinObj as any, [tx.pure.u64(feeAmount.toString())]);
+        tx.transferObjects([feeCoin], tx.pure.address(HISUI_TREASURY_ADDRESS));
+      }
+
       // Add NAVI Deposit command to the PTB
       // If amountVal is 'all_swapped' and we are on Mainnet, we can omit amount so NAVI SDK deposits the full coin balance
       const depositOptions: any = {
         env: config.NAVI_ENV,
       };
       if (amountVal !== 'all_swapped') {
-        depositOptions.amount = parseInt(amountVal, 10);
+        depositOptions.amount = shouldChargeFee ? Number(depositAmount) : parseInt(amountVal, 10);
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
